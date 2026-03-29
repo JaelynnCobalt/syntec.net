@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CLINICAL MODULE - J13</title>
+    <title>CLINICAL PRACTICE - J13</title>
     <style>
         body {
             background-color: #000; color: #33ff33;
@@ -25,9 +25,11 @@
         }
         .menu-btn:hover:not(:disabled) { background: #33ff33; color: #000; }
         .menu-btn:disabled { color: #1a551a; border-color: #1a551a; cursor: not-allowed; opacity: 0.6; }
-        .patient-file { background: rgba(51, 255, 51, 0.05); padding: 15px; border-left: 4px solid #33ff33; margin-bottom: 20px; line-height: 1.4; font-size: 0.9rem;}
         
-        /* Input styling */
+        /* The "Scribble" File look */
+        .patient-file { background: rgba(51, 255, 51, 0.05); padding: 15px; border-left: 4px solid #33ff33; margin-bottom: 20px; line-height: 1.6; font-size: 0.9rem; border-style: dashed;}
+        .scribble-title { color: #fff; text-decoration: underline; margin-bottom: 10px; display: block; }
+        
         input[type="text"], textarea {
             background: rgba(51, 255, 51, 0.1); border: 1px solid #33ff33;
             color: #33ff33; font-family: inherit; font-size: 1rem; width: 100%; outline: none; padding: 10px; box-sizing: border-box;
@@ -57,16 +59,15 @@
 
     <div id="menu-view" class="module-box">
         <p>SELECT TRAINING TRACK:</p>
-        <button class="menu-btn" id="btn-general" onclick="startModule('general')">01. GENERAL MEDICINE [INCOMPLETE]</button>
-        <button class="menu-btn" id="btn-psychiatry" onclick="startModule('psychiatry')">02. PSYCHIATRY [INCOMPLETE]</button>
-        <button class="menu-btn" id="btn-emergency" onclick="startModule('emergency')">03. EMERGENCY DEPARTMENT [INCOMPLETE]</button>
-        <button class="menu-btn" id="btn-charting" onclick="startModule('charting')">04. CHARTING & OBSERVATIONS [INCOMPLETE]</button>
+        <button class="menu-btn" id="btn-general" onclick="startModule('general')">01. GENERAL MEDICINE</button>
+        <button class="menu-btn" id="btn-psychiatry" onclick="startModule('psychiatry')">02. PSYCHIATRY</button>
+        <button class="menu-btn" id="btn-emergency" onclick="startModule('emergency')">03. EMERGENCY DEPARTMENT</button>
+        <button class="menu-btn" id="btn-charting" onclick="startModule('charting')">04. CHARTING & OBSERVATIONS</button>
     </div>
 
     <div id="work-view" class="module-box hidden">
         <div id="case-display"></div>
-        <div class="input-area" id="input-container">
-            </div>
+        <div class="input-area" id="input-container"></div>
         <div class="progress-container" id="prog-cont"><div class="progress-bar" id="prog-bar"></div></div>
         <p id="feedback"></p>
     </div>
@@ -82,32 +83,69 @@
     const CHEAT_CODE = "SYNTEC_OVERRIDE";
 
     const database = {
-        general: [
-            { data: "AGE: 45 | SEX: M | HISTORY: ASBESTOS EXPOSURE. | SYMPTOMS: PERSISTENT COUGH, WEIGHT LOSS.", answer: "LUNG CANCER", hint: "NEOPLASM." },
-            { data: "AGE: 30 | SEX: M | BLOOD: WBC 18,000 | SYMPTOMS: RLQ PAIN.", answer: "APPENDICITIS", hint: "VESTIGIAL ORGAN." }
-            // ... (rest of your previous cases here)
-        ],
+        // ... (Keep your previous General, Psych, and ER modules here)
         charting: [
             { 
-                data: "OBSERVATION: Patient presents with yellowing of the skin and eyes. They report heavy alcohol use for 20 years. Abdomen is distended and firm to the touch.", 
-                prompt: "WRITE CLINICAL NOTE (MUST INCLUDE 3 KEYWORDS):", 
+                name: "SAMUEL_W", age: "54", sex: "M",
+                scribbles: "Eyes looking yellow. Heavy drinker—20 years. Belly is hard and big. Looks like liver failure.", 
                 keywords: ["JAUNDICE", "CIRRHOSIS", "ALCOHOL"],
                 hint: "Keywords: J_______, C_______, A______"
             },
             { 
-                data: "OBSERVATION: 8-year-old child was given aspirin for a flu. Now showing signs of sudden confusion and uncontrollable vomiting.", 
-                prompt: "WRITE CLINICAL NOTE (MUST INCLUDE 3 KEYWORDS):", 
+                name: "EMILY_R", age: "08", sex: "F",
+                scribbles: "Kid had the flu. Parents gave aspirin. Now she's puking and acting crazy/confused. Brain swelling?", 
                 keywords: ["REYE", "ASPIRIN", "ENCEPHALOPATHY"],
                 hint: "Keywords: R___, A______, E_____________"
             },
             { 
-                data: "OBSERVATION: Patient is sweating profusely and clutching their chest. Pain is described as a 'heavy elephant' sitting on them. EKG shows ST-segment elevation.", 
-                prompt: "WRITE CLINICAL NOTE (MUST INCLUDE 3 KEYWORDS):", 
+                name: "ARTHUR_B", age: "62", sex: "M",
+                scribbles: "Chest pain—says it feels like an elephant. Sweating like crazy. EKG shows weird spikes in ST segment.", 
                 keywords: ["INFARCTION", "MYOCARDIAL", "EKG"],
                 hint: "Keywords: I________, M________, E__"
+            },
+            { 
+                name: "SARAH_K", age: "29", sex: "F",
+                scribbles: "Leg is huge and red. Just got off a plane from London. Pain when she walks. Need to check for a clot.", 
+                keywords: ["THROMBOSIS", "ULTRASOUND", "DVT"],
+                hint: "Keywords: T________, U________, D__"
+            },
+            { 
+                name: "UNKNOWN_SUBJ", age: "19", sex: "M",
+                scribbles: "Found talking to walls. Says he hears 'The Absolute'. No emotion on face. Rambling nonsense.", 
+                keywords: ["SCHIZOPHRENIA", "HALLUCINATIONS", "PSYCHOSIS"],
+                hint: "Keywords: S____________, H____________, P________"
+            },
+            { 
+                name: "HENRY_V", age: "41", sex: "M",
+                scribbles: "Stiff neck. Can't look at the lights. High fever. Spinal tap needed ASAP.", 
+                keywords: ["MENINGITIS", "LUMBAR", "FEVER"],
+                hint: "Keywords: M_________, L_____, F____"
+            },
+            { 
+                name: "CLARA_D", age: "33", sex: "F",
+                scribbles: "Can't breathe. Wheezing. Used her inhaler but it didn't help. Chest feels tight.", 
+                keywords: ["ASTHMA", "WHEEZING", "RESPIRATORY"],
+                hint: "Keywords: A_____, W_______, R__________"
+            },
+            { 
+                name: "PETER_G", age: "70", sex: "M",
+                scribbles: "Can't remember his wife's name. Getting lost in his own house. Brain is going.", 
+                keywords: ["ALZHEIMERS", "DEMENTIA", "MEMORY"],
+                hint: "Keywords: A_________, D_______, M_____"
+            },
+            { 
+                name: "LISA_M", age: "25", sex: "F",
+                scribbles: "Ate peanuts by mistake. Throat closing up. Hives everywhere. Get the epi-pen.", 
+                keywords: ["ANAPHYLAXIS", "ALLERGIC", "EPINEPHRINE"],
+                hint: "Keywords: A__________, A_______, E__________"
+            },
+            { 
+                name: "VICTOR_S", age: "50", sex: "M",
+                scribbles: "Passed out at dinner. Smells like fruit? Sugar is probably through the roof.", 
+                keywords: ["DIABETIC", "KETOACIDOSIS", "GLUCOSE"],
+                hint: "Keywords: D_______, K___________, G______"
             }
         ]
-        // ... (psychiatry and emergency cases from previous code)
     };
 
     function startModule(mod) {
@@ -127,22 +165,37 @@
         currentKeywords = c.keywords || [];
         currentHint = c.hint;
 
-        document.getElementById('case-display').innerHTML = `<div class="patient-file"><strong>[OFFICIAL_OBSERVATION_LOG]</strong><br><br>${c.data}</div>`;
+        if (currentModule === 'charting') {
+            document.getElementById('case-display').innerHTML = `
+                <div class="patient-file">
+                    <span class="scribble-title">[PHYSICIAN_SCRIBBLED_NOTES]</span>
+                    * NAME: ${c.name}<br>
+                    * AGE/SEX: ${c.age} / ${c.sex}<br>
+                    * NOTES: ${c.scribbles}
+                </div>
+            `;
+        } else {
+            document.getElementById('case-display').innerHTML = `<div class="patient-file"><strong>[DATA_FILE]</strong><br><br>${c.data}</div>`;
+        }
         
+        renderInput(c);
+    }
+
+    function renderInput(c) {
         const inputArea = document.getElementById('input-container');
         if (currentModule === 'charting') {
             inputArea.innerHTML = `
-                <p>${c.prompt}</p>
-                <textarea id="user-text" placeholder="ENTER CLINICAL NOTES..."></textarea>
-                <button class="submit-btn" onclick="checkCharting()">SUBMIT TO ARCHIVE</button>
-                <button class="hint-btn" onclick="showHint()">[ HINT ]</button>
+                <p>TRANSCRIBE PROFESSIONAL CLINICAL NOTE:</p>
+                <textarea id="user-text" placeholder="Patient ${c.name} presents with..."></textarea>
+                <button class="submit-btn" onclick="checkCharting()">UPLINK TO MAINFRAME</button>
+                <button class="hint-btn" onclick="showHint()">[ NEED HELP? ]</button>
             `;
             document.getElementById('user-text').focus();
         } else {
             inputArea.innerHTML = `
-                <p id="prompt-text">${c.prompt || "TYPE DIAGNOSIS AND PRESS ENTER:"}</p>
+                <p id="prompt-text">${c.prompt || "TYPE DIAGNOSIS:"}</p>
                 <input type="text" id="user-input" autocomplete="off">
-                <button class="hint-btn" onclick="showHint()">[ HINT ]</button>
+                <button class="hint-btn" onclick="showHint()">[ NEED HELP? ]</button>
             `;
             const input = document.getElementById('user-input');
             input.focus();
@@ -166,7 +219,7 @@
 
         if (matches >= 3) { runProgressBar(true); } 
         else { 
-            document.getElementById('feedback').innerText = `INCOMPLETE NOTE. MISSING ${3 - matches} CRITICAL KEYWORD(S).`;
+            document.getElementById('feedback').innerText = `INSUFFICIENT DATA. NOTE REQUIRES MORE CLINICAL PRECISION. (MATCHED: ${matches}/3)`;
         }
     }
 
@@ -178,8 +231,8 @@
         let width = 0;
         const interval = setInterval(() => {
             if (width >= 100) { clearInterval(interval); finalize(isCorrect); } 
-            else { width += 5; document.getElementById('prog-bar').style.width = width + '%'; }
-        }, 30);
+            else { width += 10; document.getElementById('prog-bar').style.width = width + '%'; }
+        }, 50);
     }
 
     function finalize(isCorrect) {
@@ -193,9 +246,9 @@
             if (score >= 10) { completedModules[currentModule] = true; checkTotalProgression(); } 
             else { loadNewCase(); }
         } else {
-            document.getElementById('feedback').innerText = "DATA REJECTED. RE-EVALUATE CASE.";
+            document.getElementById('feedback').innerText = "ERROR: DIAGNOSIS NOT RECOGNIZED.";
             const input = document.getElementById('user-input') || document.getElementById('user-text');
-            input.disabled = false; input.focus();
+            if(input) { input.disabled = false; input.focus(); }
         }
     }
 
@@ -206,7 +259,7 @@
         if (btn) { btn.innerText = currentModule.toUpperCase() + " [COMPLETE]"; btn.disabled = true; }
 
         if (Object.values(completedModules).every(v => v === true)) {
-            document.getElementById('feedback').innerText = "ALL MODULES VALIDATED. RETURNING...";
+            document.getElementById('feedback').innerText = "CURRICULUM VALIDATED. ACCESSING ARCHIVES...";
             setTimeout(() => window.location.href = "index.html", 3000);
         } else {
             document.getElementById('work-view').classList.add('hidden');
