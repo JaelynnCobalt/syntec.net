@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Syntec Hub - Employee Portal</title>
+    <title>Syntec(TM)- Employee Portal</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --neon: #33ff33; --bg: #0a0a0a; --panel: #0d0d0d; }
@@ -72,9 +72,30 @@ const S_KEY = "sb_publishable_zI-xgDNT8kQciUQ-j_EFsw_89a_CyGM";
 const _supabase = supabase.createClient(S_URL, S_KEY);
 
 const myID = localStorage.getItem('syntec_id') || "GUEST";
+let myName = "UNKNOWN"; 
 
-// Update the code to match your lowercase table name
 const MSG_TABLE = 'internal_messages'; 
+
+// --- AUDIO SYSTEM ---
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playPing() {
+    // Basic synth "blip"
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+    
+    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.1);
+}
 
 function switchToChat(id) {
     document.getElementById('contact-select').value = id;
@@ -84,7 +105,8 @@ function switchToChat(id) {
 async function loadProfile() {
     const { data } = await _supabase.from('profiles').select('*').eq('employee_id', myID).maybeSingle();
     if (data) {
-        document.getElementById('user-name').textContent = data.first_name;
+        myName = data.first_name; 
+        document.getElementById('user-name').textContent = myName;
         document.getElementById('user-id').textContent = data.employee_id;
     }
 }
@@ -128,24 +150,33 @@ async function sendMessage() {
 
     const { error } = await _supabase.from(MSG_TABLE).insert([{ 
         sender_name: myID, 
+        sender_display_name: myName,
         content: content,
         receiver_id: receiver 
     }]);
 
     if (error) {
         alert("CRITICAL ERROR: " + error.message);
-        console.error(error);
     }
     input.value = "";
 }
 
-function displayMessage(msg) {
+function displayMessage(msg, isNew = false) {
     const mBox = document.getElementById('messages');
     const div = document.createElement('p');
     div.style.margin = "4px 0";
-    div.innerHTML = `<span style="color:#88ff88">[${msg.sender_name}]</span>: ${msg.content}`;
+    
+    const displayName = msg.sender_display_name || msg.sender_name;
+    
+    div.innerHTML = `<span style="color:#88ff88">[${displayName.toUpperCase()}]</span>: ${msg.content}`;
     mBox.appendChild(div);
     mBox.scrollTop = mBox.scrollHeight;
+
+    // Only play sound if it's a new message (not loading history)
+    // and if the message wasn't sent by me (optional)
+    if (isNew) {
+        playPing();
+    }
 }
 
 async function loadInitialMessages() {
@@ -160,24 +191,28 @@ async function loadInitialMessages() {
         query = query.or(`and(sender_name.eq.${myID},receiver_id.eq.${target}),and(sender_name.eq.${target},receiver_id.eq.${myID})`);
     }
 
-    const { data, error } = await query.order('created_at', { ascending: true });
+    const { data } = await query.order('created_at', { ascending: true });
     mBox.innerHTML = "";
-    if (data) data.forEach(displayMessage);
-    if (error) console.error("Load error:", error);
+    if (data) data.forEach(msg => displayMessage(msg, false));
 }
 
-// Subscribe to REALTIME
 _supabase.channel('hub-chat')
 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: MSG_TABLE }, payload => {
     const msg = payload.new;
     const currentTarget = document.getElementById('contact-select').value;
+    
+    let shouldShow = false;
     if (currentTarget === "GLOBAL" && msg.receiver_id === "GLOBAL") {
-        displayMessage(msg);
+        shouldShow = true;
     } else if (
         (msg.sender_name === myID && msg.receiver_id === currentTarget) || 
         (msg.sender_name === currentTarget && msg.receiver_id === myID)
     ) {
-        displayMessage(msg);
+        shouldShow = true;
+    }
+
+    if (shouldShow) {
+        displayMessage(msg, true); // true = trigger sound
     }
 }).subscribe();
 
