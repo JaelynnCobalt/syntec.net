@@ -30,12 +30,14 @@
         /* Message Viewer */
         .content-area { flex: 1; display: flex; flex-direction: column; padding: 40px; background: #080808; overflow-y: auto; border-left: 1px solid var(--border); }
         .email-header { border-bottom: 1px solid var(--border); margin-bottom: 20px; padding-bottom: 20px; }
+        .email-header div { margin-bottom: 4px; font-size: 0.85rem; }
         .email-body { line-height: 1.6; font-size: 0.9rem; white-space: pre-wrap; color: #ccc; }
 
         /* Compose Modal */
         #compose-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; }
-        .modal-content { background: var(--panel); border: 2px solid var(--neon); padding: 30px; width: 550px; }
-        .modal-content input, .modal-content textarea { width: 100%; background: #000; border: 1px solid var(--dim); color: var(--neon); padding: 10px; font-family: inherit; margin-bottom: 15px; outline: none; box-sizing: border-box; }
+        .modal-content { background: var(--panel); border: 2px solid var(--neon); padding: 30px; width: 600px; max-height: 90vh; overflow-y: auto; }
+        .modal-content label { font-size:0.6rem; display:block; margin-bottom:5px; color: var(--dim); }
+        .modal-content input, .modal-content textarea { width: 100%; background: #000; border: 1px solid var(--dim); color: var(--neon); padding: 8px; font-family: inherit; margin-bottom: 12px; outline: none; box-sizing: border-box; }
         
         #terminal-notify { position: fixed; bottom: 20px; right: 20px; background: #000; border: 1px solid var(--neon); padding: 15px 25px; color: var(--neon); font-size: 0.8rem; z-index: 1000; display: none; box-shadow: 0 0 15px rgba(51, 255, 51, 0.3); text-transform: uppercase; letter-spacing: 1px; }
 
@@ -51,12 +53,27 @@
 <div id="compose-modal">
     <div class="modal-content">
         <h3 style="margin-top:0; letter-spacing: 2px;">SECURE UPLINK: COMPOSE</h3>
-        <label style="font-size:0.6rem; display:block; margin-bottom:5px;">TO: (EMPLOYEE_ID)</label>
-        <input type="text" id="mail-to">
-        <label style="font-size:0.6rem; display:block; margin-bottom:5px;">SUBJECT</label>
+        
+        <label>RECIPIENT (TO)</label>
+        <input type="text" id="mail-to" placeholder="ID (e.g. B27)">
+        
+        <div style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+                <label>CC (CARBON COPY)</label>
+                <input type="text" id="mail-cc" placeholder="ID, ID...">
+            </div>
+            <div style="flex: 1;">
+                <label>BCC (BLIND CC)</label>
+                <input type="text" id="mail-bcc" placeholder="IDs hidden from others">
+            </div>
+        </div>
+
+        <label>SUBJECT</label>
         <input type="text" id="mail-subject" placeholder="SECURE TRANSMISSION">
-        <label style="font-size:0.6rem; display:block; margin-bottom:5px;">TRANSMISSION CONTENT</label>
-        <textarea id="mail-body"></textarea>
+        
+        <label>TRANSMISSION CONTENT</label>
+        <textarea id="mail-body" style="height: 150px;"></textarea>
+        
         <div style="display:flex; gap:10px;">
             <button class="btn-ghost" style="flex:1" onclick="sendMail()">TRANSMIT</button>
             <button class="btn-ghost" style="flex:1; border-color: #555; color: #555;" onclick="closeCompose()">ABORT</button>
@@ -96,7 +113,6 @@ const myID = localStorage.getItem('syntec_id') || "GUEST";
 let myName = "UNKNOWN";
 let currentFolder = 'inbox';
 
-// Forces any modern date into 1982 for the UI
 function formatRetroDate(timestamp) {
     const d = new Date(timestamp);
     const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
@@ -104,8 +120,7 @@ function formatRetroDate(timestamp) {
 }
 
 const boringMails = [
-    { id: 999, sender_display_name: "HR-BOT", sender_name: "SYS", subject: "PROTOCOL UPDATE", content: "REMINDER: Wipe Level-3 disinfectant on all surfaces.", created_at: "1982-10-12", is_starred: false, is_deleted: false },
-    { id: 998, sender_display_name: "Facilities", sender_name: "FAC-01", subject: "REPAIR SCHEDULE", content: "Coffee machine Sector 4 repair in 48h.", created_at: "1982-10-10", is_starred: false, is_deleted: false }
+    { id: 999, sender_display_name: "HR-BOT", sender_name: "SYS", subject: "PROTOCOL UPDATE", content: "REMINDER: Wipe Level-3 disinfectant on all surfaces.", created_at: "1982-10-12", is_starred: false, is_deleted: false, cc_list: "" }
 ];
 
 function showTerminalNotify(text, isError = false) {
@@ -124,6 +139,8 @@ async function getProfile() {
 
 function openCompose(target = "") {
     document.getElementById('mail-to').value = target;
+    document.getElementById('mail-cc').value = "";
+    document.getElementById('mail-bcc').value = "";
     document.getElementById('mail-subject').value = "";
     document.getElementById('mail-body').value = "";
     document.getElementById('compose-modal').style.display = 'flex';
@@ -132,17 +149,37 @@ function openCompose(target = "") {
 function closeCompose() { document.getElementById('compose-modal').style.display = 'none'; }
 
 async function sendMail() {
-    const to = document.getElementById('mail-to').value.toUpperCase().trim();
+    const toRaw = document.getElementById('mail-to').value.toUpperCase();
+    const ccRaw = document.getElementById('mail-cc').value.toUpperCase();
+    const bccRaw = document.getElementById('mail-bcc').value.toUpperCase();
     const sub = document.getElementById('mail-subject').value.trim() || "SECURE TRANSMISSION";
     const body = document.getElementById('mail-body').value.trim();
-    if (!to || !body) { showTerminalNotify("ERR: FIELDS CANNOT BE EMPTY", true); return; }
 
-    const { error } = await _supabase.from('internal_messages').insert([{
-        sender_name: myID, sender_display_name: myName, subject: sub, content: body, receiver_id: to
-    }]);
+    if (!toRaw || !body) { showTerminalNotify("ERR: PRIMARY RECIPIENT REQUIRED", true); return; }
+
+    // Parse IDs (supports comma separated)
+    const toList = toRaw.split(',').map(s => s.trim()).filter(s => s);
+    const ccList = ccRaw.split(',').map(s => s.trim()).filter(s => s);
+    const bccList = bccRaw.split(',').map(s => s.trim()).filter(s => s);
+
+    // Combine all unique recipients for insertion
+    const allRecipients = [...new Set([...toList, ...ccList, ...bccList])];
+    
+    // In our simplified table, we store one row per recipient so they each see it in their inbox.
+    // We store the 'cc_list' so recipients know who else was on the thread.
+    const entries = allRecipients.map(recipientID => ({
+        sender_name: myID,
+        sender_display_name: myName,
+        receiver_id: recipientID,
+        subject: sub,
+        content: body,
+        cc_list: ccRaw // Recipients see the CC list, but NOT the BCC list
+    }));
+
+    const { error } = await _supabase.from('internal_messages').insert(entries);
 
     if (!error) {
-        showTerminalNotify("TRANSMISSION SUCCESSFUL");
+        showTerminalNotify("TRANSMISSION BROADCAST SUCCESSFUL");
         closeCompose();
         loadMail();
     } else {
@@ -152,13 +189,8 @@ async function sendMail() {
 
 async function updateStatus(msgId, field, value) {
     if (msgId >= 998) { showTerminalNotify("ERR: ACCESS DENIED", true); return; }
-    const updateObj = {};
-    updateObj[field] = value;
-    const { error } = await _supabase.from('internal_messages').update(updateObj).eq('id', msgId);
-    if (!error) {
-        showTerminalNotify("RECORD UPDATED");
-        loadMail();
-    }
+    const { error } = await _supabase.from('internal_messages').update({ [field]: value }).eq('id', msgId);
+    if (!error) { showTerminalNotify("RECORD UPDATED"); loadMail(); }
 }
 
 function setFolder(folder, el) {
@@ -189,7 +221,7 @@ async function loadMail() {
         div.onclick = () => viewMail(msg, div);
         div.innerHTML = `
             <span class="mail-date-label">${formatRetroDate(msg.created_at)}</span>
-            <span class="mail-sender">${msg.sender_display_name || msg.sender_name}</span>
+            <span class="mail-sender">${msg.sender_display_name}</span>
             <span class="mail-subject">${msg.subject || 'SECURE TRANSMISSION'}</span>
             <div class="mail-preview">${msg.content}</div>
         `;
@@ -205,6 +237,8 @@ function viewMail(msg, element) {
     viewer.innerHTML = `
         <div class="email-header">
             <div><strong>FROM:</strong> ${msg.sender_display_name} (${msg.sender_name})</div>
+            <div><strong>TO:</strong> ${msg.receiver_id}</div>
+            ${msg.cc_list ? `<div><strong>CC:</strong> ${msg.cc_list}</div>` : ''}
             <div><strong>SUBJECT:</strong> ${msg.subject || 'SECURE TRANSMISSION'}</div>
             <div><strong>DATE:</strong> ${formatRetroDate(msg.created_at)}</div>
         </div>
