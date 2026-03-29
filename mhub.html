@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Syntec Hub - Employee Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --neon: #33ff33; --bg: #0a0a0a; --panel: #0d0d0d; }
+        body { background-color: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; text-shadow: 0 0 5px var(--neon); overflow: hidden; }
+        
+        .header { padding: 10px; border-bottom: 2px solid var(--neon); text-align: center; font-weight: bold; letter-spacing: 2px; }
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+
+        /* Panels */
+        .side-panel { width: 280px; border-right: 2px solid var(--neon); padding: 15px; display: flex; flex-direction: column; background: var(--panel); overflow-y: auto; }
+        .right-panel { width: 300px; border-left: 2px solid var(--neon); padding: 15px; background: var(--panel); }
+        
+        .section-title { border-bottom: 1px solid var(--neon); margin-bottom: 10px; font-size: 0.9rem; padding-bottom: 3px; display: block; }
+        .data-point { margin-bottom: 15px; font-size: 0.85rem; line-height: 1.4; }
+        .data-label { color: #88ff88; font-size: 0.7rem; display: block; }
+
+        /* Chat */
+        .chat-area { flex: 1; display: flex; flex-direction: column; padding: 10px; background: #050505; }
+        #messages { flex: 1; overflow-y: auto; border: 1px solid var(--neon); padding: 10px; margin-bottom: 10px; font-size: 0.9rem; }
+        
+        /* Inputs & Buttons */
+        input { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px; font-family: inherit; outline: none; width: calc(100% - 18px); margin-bottom: 5px; }
+        button { background: var(--neon); color: #000; border: none; padding: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; }
+        button:hover { background: #22cc22; }
+
+        .friend-item { padding: 4px; font-size: 0.85rem; cursor: pointer; border: 1px solid transparent; }
+        .friend-item:hover { border: 1px solid var(--neon); }
+        .task-item { font-size: 0.85rem; margin-bottom: 8px; color: #ffff33; }
+    </style>
+</head>
+<body>
+
+<div class="header">SYSTEM OVERSEER: PEGASUS NETWORK HUB</div>
+
+<div class="main-container">
+    <div class="side-panel">
+        <span class="section-title">PERSONNEL DOSSIER</span>
+        <div class="data-point">
+            <span class="data-label">NAME</span>
+            <span id="user-name">LOADING...</span>
+        </div>
+        <div class="data-point">
+            <span class="data-label">EMPLOYEE ID</span>
+            <span id="user-id">---</span>
+        </div>
+        <div class="data-point">
+            <span class="data-label">CLEARANCE LEVEL</span>
+            <span id="user-clearance" style="color:red">REDACTED</span>
+        </div>
+        <div class="data-point">
+            <span class="data-label">CURRENT ASSIGNMENT</span>
+            <span id="user-project">UNASSIGNED</span>
+        </div>
+
+        <span class="section-title">SECURE CONTACTS</span>
+        <div id="friends-list" style="margin-bottom: 15px;"></div>
+        <input type="text" id="search-id" placeholder="LINK ID...">
+        <button onclick="addFriend()">LINK PERSONNEL</button>
+    </div>
+
+    <div class="chat-area">
+        <span class="section-title">SECURE CHANNEL: #GENERAL</span>
+        <div id="messages"></div>
+        <div style="display:flex; gap: 5px;">
+            <input type="text" id="msg-input" placeholder="ENCRYPT MESSAGE...">
+            <button onclick="sendMessage()" style="width: 80px;">SEND</button>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <span class="section-title">ACTIVE DIRECTIVES</span>
+        <div id="task-list">
+            <div class="task-item">[!] COMPLETE BIO-SYNC PROTOCOL</div>
+            <div class="task-item">[!] UPDATE CLEARANCE LOGS</div>
+        </div>
+        <br>
+        <span class="section-title">SYSTEM STATUS</span>
+        <div class="data-point" style="font-size: 0.75rem;">
+            UPLINK: STABLE<br>
+            ENCRYPTION: AES-256<br>
+            LOCATION: [S-LABS-V8]
+        </div>
+        <button onclick="location.href='index.html'" style="background:transparent; color:var(--neon); border: 1px solid var(--neon);">LOGOUT</button>
+    </div>
+</div>
+
+<script>
+const S_URL = "https://zefaapnmutxgnabpxoog.supabase.co";
+const S_KEY = "sb_publishable_zI-xgDNT8kQciUQ-j_EFsw_89a_CyGM";
+const _supabase = supabase.createClient(S_URL, S_KEY);
+
+const myID = localStorage.getItem('syntec_id') || "UNKNOWN";
+
+// 1. FETCH PROFILE DATA
+async function loadProfile() {
+    const { data, error } = await _supabase
+        .from('profiles')
+        .select('*')
+        .eq('employee_id', myID)
+        .single();
+
+    if (data) {
+        document.getElementById('user-name').textContent = data.first_name;
+        document.getElementById('user-id').textContent = data.employee_id;
+        document.getElementById('user-clearance').textContent = data.clearance_level || "LEVEL 1 - INTERN";
+        document.getElementById('user-project').textContent = data.project_assignment || "PENDING EVALUATION";
+    }
+}
+
+// 2. LOAD CONNECTIONS
+async function loadFriends() {
+    const { data } = await _supabase.from('friends').select('*').eq('user_id', myID);
+    const list = document.getElementById('friends-list');
+    list.innerHTML = "";
+    if (data) {
+        data.forEach(f => {
+            const div = document.createElement('div');
+            div.className = "friend-item";
+            div.textContent = `> ${f.friend_name}`;
+            list.appendChild(div);
+        });
+    }
+}
+
+// 3. ADD CONNECTION
+async function addFriend() {
+    const targetID = document.getElementById('search-id').value.toUpperCase().trim();
+    const { data: profile } = await _supabase.from('profiles').select('first_name').eq('employee_id', targetID).single();
+
+    if (profile) {
+        await _supabase.from('friends').insert([{ user_id: myID, friend_id: targetID, friend_name: profile.first_name }]);
+        document.getElementById('search-id').value = "";
+        loadFriends();
+    } else {
+        alert("ID NOT FOUND IN SYNTEC DATABASE");
+    }
+}
+
+// 4. CHAT
+async function sendMessage() {
+    const content = document.getElementById('msg-input').value;
+    if (!content) return;
+    await _supabase.from('Syn_Internal_Messages').insert([{ sender_name: myID, content: content }]);
+    document.getElementById('msg-input').value = "";
+}
+
+_supabase.channel('any').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'Syn_Internal_Messages' }, payload => {
+    const msg = payload.new;
+    const div = document.createElement('p');
+    div.innerHTML = `<span style="color:#88ff88">[${msg.sender_name}]</span>: ${msg.content}`;
+    const mBox = document.getElementById('messages');
+    mBox.appendChild(div);
+    mBox.scrollTop = mBox.scrollHeight;
+}).subscribe();
+
+// INIT
+loadProfile();
+loadFriends();
+</script>
+</body>
+</html>
