@@ -1,1 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CLINICAL PRACTICE - MOBILE</title>
+    <style>
+        :root {
+            --neon-green: #33ff33;
+            --dark-green: #1a551a;
+            --bg-black: #050505;
+        }
 
+        body {
+            background-color: #000; color: var(--neon-green);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex; justify-content: center; align-items: flex-start;
+            height: 100vh; margin: 0; text-transform: uppercase; overflow: hidden;
+        }
+
+        .crt-monitor {
+            position: relative; width: 100vw; height: 100vh;
+            padding: 15px; border: 4px solid #2a2a2a; border-radius: 10px;
+            background: var(--bg-black); box-shadow: inset 0 0 50px #000;
+            display: flex; flex-direction: column; box-sizing: border-box;
+        }
+
+        /* Scanline effect simplified for mobile performance */
+        .crt-monitor::after {
+            content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 3px; z-index: 10; pointer-events: none;
+        }
+
+        .header { border-bottom: 2px solid var(--neon-green); padding-bottom: 8px; margin-bottom: 12px; flex-shrink: 0; }
+        .header h1 { font-size: 1.1rem; margin: 0 0 5px 0; }
+        
+        .module-box { 
+            border: 1px solid var(--neon-green); padding: 12px; 
+            flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; 
+            background: rgba(51, 255, 51, 0.02);
+        }
+
+        .hidden { display: none !important; }
+        
+        /* Buttons - Optimized for Thumbs */
+        .menu-btn { 
+            background: transparent; color: var(--neon-green); border: 1px solid var(--neon-green); 
+            padding: 18px 12px; margin: 8px 0; cursor: pointer; text-align: left; 
+            font-family: inherit; width: 100%; font-size: 0.85rem;
+        }
+        .menu-btn:active { background: var(--neon-green); color: #000; }
+        .menu-btn:disabled { color: var(--dark-green); border-color: var(--dark-green); opacity: 0.5; }
+        
+        .patient-file { 
+            background: rgba(51, 255, 51, 0.05); padding: 12px; 
+            border-left: 3px solid var(--neon-green); margin-bottom: 15px; 
+            line-height: 1.4; font-size: 0.85rem; border-style: dashed;
+            word-wrap: break-word;
+        }
+        
+        .scribble-title { color: #fff; text-decoration: underline; margin-bottom: 8px; display: block; font-weight: bold; }
+        
+        /* Input area fixes for iOS Zoom */
+        input[type="text"], textarea {
+            background: rgba(51, 255, 51, 0.1); border: 1px solid var(--neon-green);
+            color: var(--neon-green); font-family: inherit; 
+            font-size: 16px; /* Prevents auto-zoom on iPhone */
+            width: 100%; outline: none; padding: 12px; box-sizing: border-box;
+            border-radius: 0; -webkit-appearance: none;
+        }
+        textarea { height: 100px; resize: none; text-transform: uppercase; }
+        
+        .progress-container { width: 100%; height: 10px; border: 1px solid var(--neon-green); margin: 15px 0; display: none; }
+        .progress-bar { width: 0%; height: 100%; background: var(--neon-green); }
+        
+        .score-board { display: flex; flex-direction: column; font-size: 0.75rem; color: var(--dark-green); gap: 2px; }
+        
+        .action-row { display: flex; gap: 8px; margin-top: 10px; }
+        .hint-btn, .back-btn { 
+            background: var(--dark-green); color: var(--neon-green); border: none; 
+            padding: 12px; cursor: pointer; font-family: inherit; font-size: 0.8rem; flex: 1;
+        }
+        .submit-btn { 
+            background: var(--neon-green); color: #000; font-weight: bold; 
+            width: 100%; margin-top: 10px; cursor: pointer; border: none; 
+            padding: 15px; font-family: inherit; font-size: 0.9rem;
+        }
+
+        #feedback { font-size: 0.8rem; min-height: 1.2rem; color: #fff; text-shadow: 0 0 5px var(--neon-green); }
+    </style>
+</head>
+<body>
+
+<div class="crt-monitor">
+    <div class="header">
+        <h1 id="module-title">SYSTEM SELECTION</h1>
+        <div class="score-board">
+            <span>USER: INTERN_J13</span>
+            <span id="progress-text">PROGRESS: 0 / 10</span>
+        </div>
+    </div>
+
+    <div id="menu-view" class="module-box">
+        <p style="font-size: 0.8rem; margin-bottom: 10px;">SELECT TRAINING TRACK:</p>
+        <button class="menu-btn" id="btn-general" onclick="startModule('general')">01. GENERAL MEDICINE</button>
+        <button class="menu-btn" id="btn-psychiatry" onclick="startModule('psychiatry')">02. PSYCHIATRY</button>
+        <button class="menu-btn" id="btn-emergency" onclick="startModule('emergency')">03. EMERGENCY DEPT</button>
+        <button class="menu-btn" id="btn-charting" onclick="startModule('charting')">04. CHARTING / OBS</button>
+    </div>
+
+    <div id="work-view" class="module-box hidden">
+        <div id="case-display"></div>
+        <div id="input-container"></div>
+        <div class="progress-container" id="prog-cont"><div class="progress-bar" id="prog-bar"></div></div>
+        <p id="feedback"></p>
+        <div class="action-row">
+            <button class="back-btn" onclick="returnToMenu()">[ EXIT ]</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Database and logic remain identical to ensure compatibility
+    let currentModule = "";
+    let score = 0;
+    let currentKeywords = []; 
+    let currentAnswer = "";
+    let currentHint = "";
+    let completedModules = { general: false, psychiatry: false, emergency: false, charting: false };
+    const CHEAT_CODE = "SYNTEC_OVERRIDE";
+
+    const database = {
+        general: [
+            { data: "AGE: 45 | SEX: M | HISTORY: ASBESTOS EXPOSURE. | SYMPTOMS: PERSISTENT COUGH, WEIGHT LOSS.", answer: "LUNG CANCER", hint: "MALIGNANT PULMONARY NEOPLASM." },
+            { data: "AGE: 30 | SEX: M | BLOOD: WBC 18,000 | SYMPTOMS: RLQ PAIN, REBOUND TENDERNESS.", answer: "APPENDICITIS", hint: "INFLAMMATION OF THE APPENDIX." },
+            { data: "AGE: 52 | SEX: F | HISTORY: SEDENTARY. | SYMPTOMS: POLYDIPSIA, POLYURIA, FRUITY BREATH.", answer: "DIABETES", hint: "HYPERGLYCEMIC INSULIN DEFICIENCY." },
+            { data: "AGE: 68 | SEX: M | HISTORY: CHRONIC SMOKER. | SYMPTOMS: BARREL CHEST, PURSED-LIP BREATHING.", answer: "EMPHYSEMA", hint: "A FORM OF COPD." },
+            { data: "AGE: 24 | SEX: F | HISTORY: RECENT TRP TO TROPICS. | SYMPTOMS: HIGH FEVER, RASH, SEVERE JOINT PAIN.", answer: "DENGUE FEVER", hint: "ALSO KNOWN AS BREAKBONE FEVER." },
+            { data: "AGE: 41 | SEX: M | HISTORY: OBESE. | SYMPTOMS: SNORING, DAYTIME SOMNOLENCE, HEADACHES.", answer: "SLEEP APNEA", hint: "UPPER AIRWAY OBSTRUCTION DURING SLEEP." },
+            { data: "AGE: 35 | SEX: F | HISTORY: AUTOIMMUNE. | SYMPTOMS: BUTTERFLY RASH ON FACE, MALAR ERUPTION.", answer: "LUPUS", hint: "SYSTEMIC ERYTHEMATOSUS CONDITION." },
+            { data: "AGE: 14 | SEX: M | HISTORY: RECENT SORE THROAT. | SYMPTOMS: HEART MURMUR,
