@@ -27,16 +27,37 @@
         .email-body { line-height: 1.6; font-size: 0.95rem; white-space: pre-wrap; }
 
         /* Compose Modal */
+        #compose-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background: var(--panel); border: 2px solid var(--neon); padding: 30px; width: 500px; box-shadow: 0 0 20px var(--neon); }
+        .modal-content label { display: block; font-size: 0.7rem; margin-bottom: 5px; color: #88ff88; }
+        .modal-content input, .modal-content textarea { width: 100%; background: #000; border: 1px solid var(--neon); color: var(--neon); padding: 10px; font-family: inherit; margin-bottom: 15px; outline: none; box-sizing: border-box; }
+        .modal-content textarea { height: 150px; resize: none; }
+
         #compose-btn { background: var(--neon); color: #000; border: none; padding: 10px 20px; font-family: inherit; font-weight: bold; cursor: pointer; margin-right: 20px; }
-        .btn-ghost { background: transparent; color: var(--neon); border: 1px solid var(--neon); padding: 5px 15px; cursor: pointer; font-family: inherit; }
+        .btn-ghost { background: transparent; color: var(--neon); border: 1px solid var(--neon); padding: 5px 15px; cursor: pointer; font-family: inherit; transition: 0.2s; }
+        .btn-ghost:hover { background: var(--neon); color: #000; }
     </style>
 </head>
 <body>
 
+<div id="compose-modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0;">NEW ENCRYPTED TRANSMISSION</h3>
+        <label>RECIPIENT ID</label>
+        <input type="text" id="mail-to" placeholder="e.g. B27">
+        <label>MESSAGE BODY</label>
+        <textarea id="mail-body" placeholder="Enter encrypted text..."></textarea>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-ghost" style="flex:1" onclick="sendMail()">TRANSMIT</button>
+            <button class="btn-ghost" style="flex:1; border-color: #ff3333; color: #ff3333;" onclick="closeCompose()">ABORT</button>
+        </div>
+    </div>
+</div>
+
 <div class="top-bar">
     <span>SYNTEC ENCRYPTED MAIL v4.0</span>
     <div>
-        <button id="compose-btn" onclick="alert('System restriction: Direct outbound mail disabled for Interns.')">NEW MESSAGE</button>
+        <button id="compose-btn" onclick="openCompose()">NEW MESSAGE</button>
         <button class="btn-ghost" onclick="location.href='mhub.html'">RETURN TO HUB</button>
     </div>
 </div>
@@ -60,6 +81,44 @@ const S_KEY = "sb_publishable_zI-xgDNT8kQciUQ-j_EFsw_89a_CyGM";
 const _supabase = supabase.createClient(S_URL, S_KEY);
 
 const myID = localStorage.getItem('syntec_id') || "GUEST";
+let myName = "UNKNOWN";
+
+// Load user name for the sender field
+async function getProfile() {
+    const { data } = await _supabase.from('profiles').select('first_name').eq('employee_id', myID).maybeSingle();
+    if (data) myName = data.first_name;
+}
+
+function openCompose(targetID = "") {
+    document.getElementById('mail-to').value = targetID;
+    document.getElementById('mail-body').value = "";
+    document.getElementById('compose-modal').style.display = 'flex';
+}
+
+function closeCompose() {
+    document.getElementById('compose-modal').style.display = 'none';
+}
+
+async function sendMail() {
+    const to = document.getElementById('mail-to').value.toUpperCase().trim();
+    const body = document.getElementById('mail-body').value.trim();
+
+    if (!to || !body) return alert("FIELDS CANNOT BE EMPTY");
+
+    const { error } = await _supabase.from('internal_messages').insert([{
+        sender_name: myID,
+        sender_display_name: myName,
+        content: body,
+        receiver_id: to
+    }]);
+
+    if (error) {
+        alert("TRANSMISSION FAILED: " + error.message);
+    } else {
+        alert("TRANSMISSION SUCCESSFUL");
+        closeCompose();
+    }
+}
 
 async function loadInbox() {
     const { data, error } = await _supabase
@@ -90,7 +149,6 @@ async function loadInbox() {
 }
 
 function viewMail(msg, element) {
-    // UI Update
     document.querySelectorAll('.mail-item').forEach(i => i.classList.remove('active'));
     element.classList.add('active');
 
@@ -106,13 +164,14 @@ function viewMail(msg, element) {
         </div>
         <div class="email-body">${msg.content}</div>
         <div style="margin-top: 50px; border-top: 1px solid #222; padding-top: 20px;">
-            <button class="btn-ghost" style="font-size: 0.7rem;" onclick="alert('Error: Forwarding restricted by Overseer.')">FORWARD</button>
-            <button class="btn-ghost" style="font-size: 0.7rem; margin-left: 10px;" onclick="alert('Reply function disabled for security level 1.')">REPLY</button>
+            <button class="btn-ghost" style="font-size: 0.7rem;" onclick="alert('Encryption restricted: Forwarding disabled.')">FORWARD</button>
+            <button class="btn-ghost" style="font-size: 0.7rem; margin-left: 10px;" onclick="openCompose('${msg.sender_name}')">REPLY</button>
         </div>
     `;
 }
 
 // Initialize
+getProfile();
 loadInbox();
 </script>
 </body>
