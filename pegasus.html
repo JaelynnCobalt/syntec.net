@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SYNTEC PEGASUS SYSTEM</title>
+    <title>PEGASUS DATABASE</title>
     <style>
-        /* Apple II Phosphor Green & Scanlines */
         body {
             background-color: #000;
             color: #33ff33;
@@ -72,23 +71,17 @@
             color: #000;
         }
 
-        .menu-item.disabled {
-            color: #0b440b;
-            cursor: default;
-        }
-
+        .menu-item.disabled { color: #0b440b; cursor: default; }
         .hidden { display: none; }
 
         .mail-row {
             border-bottom: 1px solid #1a551a;
             padding: 12px 5px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
-        .mail-row:hover {
-            background: rgba(51, 255, 51, 0.1);
-        }
+        .mail-row:hover { background: rgba(51, 255, 51, 0.1); }
 
         .back-btn {
             margin-top: 20px;
@@ -116,16 +109,16 @@
             <h1>SYNTEC PEGASUS OS V.2.0.1 (C) 1986</h1>
             <p>LOGGED IN AS: USER_J13 [LEVEL 1 ACCESS]</p>
             <p>--------------------------------------------------</p>
-            <button class="menu-item" onclick="showMail()">1. S-MAIL INBOX (12)</button>
-            <button class="menu-item disabled">2. DOCUMENTS / LOGS [LOCKED]</button>
-            <button class="menu-item disabled">3. DIRECTORY LISTING [DRIVE A:]</button>
-            <button class="menu-item disabled">4. SYSTEM DIAGNOSTICS</button>
-            <button class="menu-item disabled">5. SECURITY OVERRIDE</button>
-            <p style="margin-top: 50px;">MEM: 64K RAM FREE</p>
+            <button class="menu-item disabled">1. LAB LOGS [ENCRYPTED]</button>
+            <button class="menu-item disabled">2. PERSONNEL RECORDS [LOCKED]</button>
+            <button class="menu-item" onclick="showMail()">3. S-MAIL INBOX (18)</button>
+            <button class="menu-item disabled">4. SHARED DOCUMENTS</button>
+            <button class="menu-item disabled">5. SYSTEM DIAGNOSTICS</button>
+            <p style="margin-top: 50px;">DRIVE A: 14% CAPACITY UTILIZED</p>
         </div>
 
         <div id="mail-section" class="hidden">
-            <h1>S-MAIL INBOX - 12 MESSAGES</h1>
+            <h1>S-MAIL INBOX - 18 MESSAGES</h1>
             <div id="mail-list"></div>
             <button class="back-btn" onclick="showMenu()">[ESC] RETURN TO MAIN MENU</button>
         </div>
@@ -145,91 +138,36 @@
 
 <script>
     const mails = [
-        {
-            from: "admin@syntec.net",
-            date: "OCT-12-1986",
-            subject: "PASSWORD EXPIRATION",
-            body: "YOUR NETWORK PASSWORD WILL EXPIRE IN 3 DAYS. PLEASE UPDATE VIA THE TERMINAL SETTINGS ON LEVEL 2. FAILURE TO COMPLY WILL RESULT IN LOCKOUT."
-        },
-        {
-            from: "b.cobalt@syntec.net",
-            date: "OCT-10-1986",
-            subject: "RE: CALIBRATION LOGS",
-            body: "J13, THE SENSORS IN LAB 4 ARE DRIFTING AGAIN. PLEASE RE-RUN THE PEGASUS ALIGNMENT SCRIPT BEFORE END OF SHIFT. I DON'T WANT TO SEE ANOTHER ERROR REPORT TOMORROW."
-        },
-        {
-            from: "hr.dept@syntec.net",
-            date: "OCT-09-1986",
-            subject: "BENEFITS ENROLLMENT",
-            body: "REMINDER TO ALL STAFF: THE DEADLINE FOR UPDATING YOUR MEDICAL INSURANCE SELECTIONS FOR 1987 IS THIS FRIDAY. COPIES OF THE FORMS ARE AVAILABLE AT THE FRONT DESK."
-        },
-        {
-            from: "facilities@syntec.net",
-            date: "OCT-08-1986",
-            subject: "BREAKROOM CONDUCT",
-            body: "REMINDER: ALL STAFF MUST LABEL THEIR PERSONAL REFRIGERATION ITEMS. AN UNIDENTIFIED LIQUID WAS REMOVED FROM THE DISPENSER YESTERDAY. COMPLIANCE IS MANDATORY."
-        },
-        {
-            from: "lab.coord@syntec.net",
-            date: "OCT-07-1986",
-            subject: "RE: REAGENT ORDER",
-            body: "THE SHIPMENT OF SODIUM CHLORIDE HAS BEEN DELAYED. PLEASE ADJUST YOUR TESTING SCHEDULE ACCORDINGLY. CONTACT PROCUREMENT FOR EMERGENCY STOCKS."
-        },
-        {
-            from: "janitorial@syntec.net",
-            date: "OCT-06-1986",
-            subject: "FLOOR WAXING SCHEDULE",
-            body: "LEVEL 3 CORRIDORS WILL BE CLOSED FOR MAINTENANCE STARTING AT 20:00 HOURS. PLEASE ENSURE ALL DESKS ARE CLEARED OF SENSITIVE DOCUMENTS."
-        },
-        {
-            from: "accounting@syntec.net",
-            date: "OCT-05-1986",
-            subject: "REQUISITION #4409",
-            body: "YOUR REQUEST FOR ADDITIONAL STATIONERY AND FLOPPY DISKS HAS BEEN DENIED. PLEASE UTILIZE EXISTING STOCKS UNTIL THE NEXT QUARTERLY REVIEW."
-        },
-        {
-            from: "w.nathanial@syntec.net",
-            date: "OCT-04-1986",
-            subject: "LOG FILING",
-            body: "ENSURE ALL DAILY ACTIVITY LOGS ARE SAVED TO THE CENTRAL REPOSITORY. DO NOT LEAVE DATA ON LOCAL DISKS. N.S. IS MONITORING UPTIME RATIOS."
-        },
-        {
-            from: "safety.officer@syntec.net",
-            date: "OCT-03-1986",
-            subject: "EYEWASH STATION INSPECTION",
-            body: "ANNUAL INSPECTION OF SAFETY EQUIPMENT COMPLETED. UNIT #12 (LAB 4) REQUIRES REPAIR. DO NOT USE CHEMICAL AGENTS IN THIS AREA UNTIL FURTHER NOTICE."
-        },
-        {
-            from: "procurement@syntec.net",
-            date: "OCT-02-1986",
-            subject: "NEW BADGE PHOTOS",
-            body: "WE ARE UPDATING ALL PERSONNEL BADGES TO THE NEW FORMAT. PLEASE VISIT SECURITY DURING YOUR LUNCH BREAK TO HAVE YOUR PHOTO TAKEN."
-        },
-        {
-            from: "it.dept@syntec.net",
-            date: "SEP-30-1986",
-            subject: "SYSTEM MAINTENANCE",
-            body: "THE PEGASUS SERVER WILL BE OFFLINE FOR SCHEDULED BACKUPS FROM 01:00 TO 03:00 ON SATURDAY. SAVE YOUR WORK FREQUENTLY."
-        },
-        {
-            from: "n.syphus@syntec.net",
-            date: "SEP-28-1986",
-            subject: "QUARTERLY MEMO",
-            body: "A REMINDER THAT EXCELLENCE IS OUR PRIMARY DIRECTIVE. THE WORK WE DO AT SYNTEC LABS IS SHAPING THE FUTURE. DISCRETION IS EXPECTED FROM EVERYONE."
-        }
+        { from: "it.admin@syntec.net", date: "OCT-24-1986", subject: "URGENT: SECURITY PATCH", body: "ALL TERMINAL USERS MUST LOG OFF BY 18:00 FOR A KERNEL PATCH. DO NOT LEAVE DISKS IN DRIVES." },
+        { from: "b.cobalt@syntec.net", date: "OCT-22-1986", subject: "RE: LAB 4 SENSORS", body: "J13, I AM STILL SEEING FLUCTUATIONS IN THE TEMPERATURE LOGS. DID YOU RECALIBRATE THE UNIT AS REQUESTED?" },
+        { from: "hr.dept@syntec.net", date: "OCT-21-1986", subject: "HOLIDAY SCHEDULE", body: "SYNTEC WILL OBSERVE MODIFIED HOURS FOR THE UPCOMING MONTH. PLEASE COORDINATE WITH YOUR SUPERVISOR." },
+        { from: "facilities@syntec.net", date: "OCT-19-1986", subject: "PARKING LOT C CLOSED", body: "LOT C WILL BE REPAVED STARTING MONDAY. PLEASE UTILIZE THE MAIN DECK OR THE NORTH OVERFLOW LOT." },
+        { from: "b.cobalt@syntec.net", date: "OCT-18-1986", subject: "SUPPLY CHAIN ISSUES", body: "THE LATEST BATCH OF REAGENTS IS CONTAMINATED. DO NOT PROCEED WITH THE PEGASUS TRIALS UNTIL THE NEW SHIPMENT ARRIVES." },
+        { from: "w.nathanial@syntec.net", date: "OCT-15-1986", subject: "WEEKLY REPORT", body: "I NEED YOUR PROJECTED UPTIME STATISTICS BY FRIDAY. N.S. IS ASKING FOR THE Q4 PROJECTIONS." },
+        { from: "accounting@syntec.net", date: "OCT-14-1986", subject: "TRAVEL REIMBURSEMENT", body: "YOUR VOUCHER #9902 HAS BEEN PROCESSED. FUNDS WILL BE DISBURSED IN THE NEXT PAY CYCLE." },
+        { from: "it.admin@syntec.net", date: "OCT-12-1986", subject: "PASSWORD EXPIRATION", body: "PASSWORD CHANGE REQUIRED WITHIN 72 HOURS. MINIMUM 8 CHARACTERS." },
+        { from: "lab.coord@syntec.net", date: "OCT-10-1986", subject: "WASTE DISPOSAL", body: "BIOHAZARD BIN #4 IS OVERFLOWING. PLEASE USE THE SECONDARY DISPOSAL UNIT IN THE SOUTH HALLWAY." },
+        { from: "b.cobalt@syntec.net", date: "OCT-08-1986", subject: "LUNCH INQUIRY", body: "ARE YOU JOINING THE TEAM AT THE DINER TODAY? WE ARE DISCUSSING THE NEW FILTRATION PROTOCOLS." },
+        { from: "janitorial@syntec.net", date: "OCT-06-1986", subject: "LOST KEYS", body: "A SET OF KEYS WAS FOUND IN THE BREAKROOM. PLEASE CLAIM AT THE SECURITY DESK." },
+        { from: "w.nathanial@syntec.net", date: "OCT-04-1986", subject: "STORAGE QUOTAS", body: "YOUR LOCAL DISK IS NEARLY FULL. PLEASE MOVE ARCHIVAL LOGS TO THE CENTRAL SERVER." },
+        { from: "safety.officer@syntec.net", date: "OCT-03-1986", subject: "MANDATORY DRILL", body: "FIRE DRILL SCHEDULED FOR 10:00 AM TOMORROW. EVACUATE VIA THE NEAREST LAB EXIT." },
+        { from: "procurement@syntec.net", date: "OCT-01-1986", subject: "BADGE RENEWAL", body: "PLEASE SUBMIT YOUR CURRENT BADGE FOR PHOTO UPDATES." },
+        { from: "it.admin@syntec.net", date: "SEP-30-1986", subject: "NETWORK LAG", body: "WE ARE INVESTIGATING SLOW RESPONSE TIMES ON THE MAINFRAME. PLEASE BE PATIENT." },
+        { from: "n.syphus.office@syntec.net", date: "SEP-28-1986", subject: "CONFIDENTIALITY", body: "REMINDER: ALL DATA GENERATED ON-SITE REMAINS THE SOLE PROPERTY OF SYNTEC LABS. LEAKS WILL BE PROSECUTED." },
+        { from: "facilities@syntec.net", date: "SEP-25-1986", subject: "HVAC REPAIR", body: "THE VENTILATION IN LAB 4 WILL BE SERVICED AT NOON. WEAR APPROPRIATE GEAR IF WORKING THROUGH THE REPAIR." },
+        { from: "b.cobalt@syntec.net", date: "SEP-23-1986", subject: "CALIBRATION LOGS", body: "I AM UPLOADING THE MASTER LIST. PLEASE CROSS-REFERENCE THESE WITH THE DRIVE 1 DATA." }
     ];
 
     function showMail() {
         document.getElementById('main-menu').classList.add('hidden');
         document.getElementById('message-view').classList.add('hidden');
         document.getElementById('mail-section').classList.remove('hidden');
-        
         const list = document.getElementById('mail-list');
         list.innerHTML = "";
         mails.forEach((m, i) => {
             const div = document.createElement('div');
             div.className = "mail-row";
-            div.innerHTML = `[${i+1}] ${m.date} - ${m.subject.substring(0, 25)}...`;
+            div.innerHTML = `[${i+1}] ${m.date} | ${m.from.split('@')[0]}`;
             div.onclick = () => openMessage(i);
             list.appendChild(div);
         });
