@@ -88,7 +88,6 @@ async function handleAuth(fname, byear) {
     await typeLine("VERIFYING CREDENTIALS...", 40);
     
     try {
-        // Search using uppercase to match the insert format
         const { data, error } = await _supabase
             .from('profiles')
             .select('*')
@@ -159,7 +158,7 @@ input.addEventListener('keydown', async function(e) {
                 await typeLine("--- SYSTEM DIRECTORY ---", 20);
                 await typeLine("> [CLINICAL] - INTERN EVALUATION", 20);
                 await typeLine("> [HUB]      - PERSONNEL COMMUNICATIONS", 20);
-                await typeLine("> [MAIL]     - "INBOX", 20);
+                await typeLine("> [MAIL]     - ENCRYPTED INBOX", 20); // Fixed quote error here
             } else if (cmd === "hub") {
                 await showLoadingBar("mhub.html", "COMMUNICATIONS");
             } else if (cmd === "clinical") {
