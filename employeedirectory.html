@@ -58,8 +58,7 @@
     </div>
 
     <div class="module-box" id="work-area">
-        <div id="case-display">
-            </div>
+        <div id="case-display"></div>
 
         <div class="input-area">
             <p id="prompt-text">TYPE DIAGNOSIS AND PRESS ENTER:</p>
@@ -77,6 +76,7 @@
     let score = 0;
     let currentAnswer = "";
     
+    // Merged all cases into one single array
     const cases = [
         {
             type: "DIAGNOSIS",
@@ -104,61 +104,60 @@
             data: "AGE: 19 | SEX: F | SYMPTOMS: EXTREME FATIGUE, SORE THROAT, SWOLLEN LYMPH NODES, SPLENOMEGALY.",
             prompt: "WHICH TEST CONFIRMS THE DIAGNOSIS? (MONOSPOT / STREP / MRI)",
             answer: "MONOSPOT"
+        },
+        {
+            type: "DIAGNOSIS",
+            data: "AGE: 8 | SEX: M | HISTORY: RECENT VIRAL INFECTION | SYMPTOMS: LETHARGY, RECURRENT VOMITING, CONFUSION. ASPIRIN WAS ADMINISTERED FOR FEVER 4 DAYS AGO.",
+            answer: "REYE SYNDROME"
+        },
+        {
+            type: "TEST",
+            data: "AGE: 55 | SEX: F | SYMPTOMS: POLYURIA, POLYDIPSIA, UNEXPLAINED WEIGHT LOSS. PATIENT COMPLAINS OF 'FRUITY' BREATH ODOR.",
+            prompt: "WHICH URINE COMPONENT SHOULD BE TESTED IMMEDIATELY? (KETONES / ALBUMIN / CALCIUM)",
+            answer: "KETONES"
+        },
+        {
+            type: "BLOOD",
+            data: "AGE: 29 | SEX: F | BLOOD WORK: HGB: 8.2 (LOW), MCV: 72 (LOW), FERRITIN: 10 (LOW) | SYMPTOMS: PICA, PALLOR, FATIGUE.",
+            answer: "IRON DEFICIENCY ANEMIA"
+        },
+        {
+            type: "DIAGNOSIS",
+            data: "AGE: 14 | SEX: M | SYMPTOMS: SUDDEN LOSS OF CONSCIOUSNESS, VIOLENT MUSCULAR CONTRACTIONS, TONGUE BITING, POST-ICTAL CONFUSION.",
+            answer: "GRAND MAL SEIZURE"
+        },
+        {
+            type: "TEST",
+            data: "AGE: 68 | SEX: M | HISTORY: ATRIAL FIBRILLATION | SYMPTOMS: SUDDEN ONSET APHASIA, RIGHT-SIDED HEMIPLEGIA.",
+            prompt: "WHICH IMAGING IS REQUIRED TO RULE OUT HEMORRHAGE? (CT SCAN / ULTRASOUND / EKG)",
+            answer: "CT SCAN"
+        },
+        {
+            type: "BLOOD",
+            data: "AGE: 40 | SEX: F | BLOOD WORK: TSH: 12.5 (HIGH), FREE T4: 0.5 (LOW) | SYMPTOMS: COLD INTOLERANCE, BRADYCARDIA, DRY SKIN.",
+            answer: "HYPOTHYROIDISM"
+        },
+        {
+            type: "DIAGNOSIS",
+            data: "AGE: 5 | SEX: F | SYMPTOMS: HIGH FEVER, DROOLING, STRIDOR, PATIENT SITTING IN 'TRIPOD POSITION'.",
+            answer: "EPIGLOTTITIS"
+        },
+        {
+            type: "TEST",
+            data: "AGE: 34 | SEX: M | SYMPTOMS: SEVERE HEADACHE, NUCHAL RIGIDITY (STIFF NECK), PHOTOPHOBIA, FEVER.",
+            prompt: "WHICH PROCEDURE IS NECESSARY FOR CSF ANALYSIS? (LUMBAR PUNCTURE / BIOPSY / X-RAY)",
+            answer: "LUMBAR PUNCTURE"
+        },
+        {
+            type: "DIAGNOSIS",
+            data: "AGE: 50 | SEX: F | SYMPTOMS: BONE PAIN, FRACTURE AFTER MINOR FALL. HISTORY: POST-MENOPAUSAL, LOW CALCIUM INTAKE.",
+            answer: "OSTEOPOROSIS"
+        },
+        {
+            type: "BLOOD",
+            data: "AGE: 60 | SEX: M | BLOOD WORK: GLUCOSE (FASTING): 240 MG/DL (HIGH) | SYMPTOMS: BLURRED VISION, SLOW-HEALING SORE ON FOOT.",
+            answer: "DIABETES MELLITUS"
         }
-        const cases = [
-    {
-        type: "DIAGNOSIS",
-        data: "AGE: 8 | SEX: M | HISTORY: RECENT VIRAL INFECTION | SYMPTOMS: LETHARGY, RECURRENT VOMITING, CONFUSION. ASPIRIN WAS ADMINISTERED FOR FEVER 4 DAYS AGO.",
-        answer: "REYE SYNDROME"
-    },
-    {
-        type: "TEST",
-        data: "AGE: 55 | SEX: F | SYMPTOMS: POLYURIA, POLYDIPSIA, UNEXPLAINED WEIGHT LOSS. PATIENT COMPLAINS OF 'FRUITY' BREATH ODOR.",
-        prompt: "WHICH URINE COMPONENT SHOULD BE TESTED IMMEDIATELY? (KETONES / ALBUMIN / CALCIUM)",
-        answer: "KETONES"
-    },
-    {
-        type: "BLOOD",
-        data: "AGE: 29 | SEX: F | BLOOD WORK: HGB: 8.2 (LOW), MCV: 72 (LOW), FERRITIN: 10 (LOW) | SYMPTOMS: PICA, PALLOR, FATIGUE.",
-        answer: "IRON DEFICIENCY ANEMIA"
-    },
-    {
-        type: "DIAGNOSIS",
-        data: "AGE: 14 | SEX: M | SYMPTOMS: SUDDEN LOSS OF CONSCIOUSNESS, VIOLENT MUSCULAR CONTRACTIONS, TONGUE BITING, POST-ICTAL CONFUSION.",
-        answer: "GRAND MAL SEIZURE"
-    },
-    {
-        type: "TEST",
-        data: "AGE: 68 | SEX: M | HISTORY: ATRIAL FIBRILLATION | SYMPTOMS: SUDDEN ONSET APHASIA, RIGHT-SIDED HEMIPLEGIA.",
-        prompt: "WHICH IMAGING IS REQUIRED TO RULE OUT HEMORRHAGE? (CT SCAN / ULTRASOUND / EKG)",
-        answer: "CT SCAN"
-    },
-    {
-        type: "BLOOD",
-        data: "AGE: 40 | SEX: F | BLOOD WORK: TSH: 12.5 (HIGH), FREE T4: 0.5 (LOW) | SYMPTOMS: COLD INTOLERANCE, BRADYCARDIA, DRY SKIN.",
-        answer: "HYPOTHYROIDISM"
-    },
-    {
-        type: "DIAGNOSIS",
-        data: "AGE: 5 | SEX: F | SYMPTOMS: HIGH FEVER, DROOLING, STRIDOR, PATIENT SITTING IN 'TRIPOD POSITION'.",
-        answer: "EPIGLOTTITIS"
-    },
-    {
-        type: "TEST",
-        data: "AGE: 34 | SEX: M | SYMPTOMS: SEVERE HEADACHE, NUCHAL RIGIDITY (STIFF NECK), PHOTOPHOBIA, FEVER.",
-        prompt: "WHICH PROCEDURE IS NECESSARY FOR CSF ANALYSIS? (LUMBAR PUNCTURE / BIOPSY / X-RAY)",
-        answer: "LUMBAR PUNCTURE"
-    },
-    {
-        type: "DIAGNOSIS",
-        data: "AGE: 50 | SEX: F | SYMPTOMS: BONE PAIN, FRACTURE AFTER MINOR FALL. HISTORY: POST-MENOPAUSAL, LOW CALCIUM INTAKE.",
-        answer: "OSTEOPOROSIS"
-    },
-    {
-        type: "BLOOD",
-        data: "AGE: 60 | SEX: M | BLOOD WORK: GLUCOSE (FASTING): 240 MG/DL (HIGH) | SYMPTOMS: BLURRED VISION, SLOW-HEALING SORE ON FOOT.",
-        answer: "DIABETES MELLITUS"
-    }
     ];
 
     const inputField = document.getElementById('user-input');
