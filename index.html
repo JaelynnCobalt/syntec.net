@@ -81,10 +81,9 @@
 </div>
 
 <script>
-// 2. CONFIGURATION
-const S_URL = "https://ctrbkrwiwpojbzfpsxwl.supabase.co";
-const S_KEY = "sb_publishable_uK-ihohO48o6BPRW8rmDqQ_LbJnfTI7";
-// Important: 'supabase' is the correct constructor for v2
+// UPDATED WITH YOUR NEW CREDENTIALS
+const S_URL = "https://zefaapnmutxgnabpxoog.supabase.co";
+const S_KEY = "sb_publishable_zI-xgDNT8kQciUQ-j_EFsw_89a_CyGM";
 const _supabase = supabase.createClient(S_URL, S_KEY);
 
 const input = document.getElementById('command-line');
@@ -92,11 +91,10 @@ const output = document.getElementById('output');
 const label = document.getElementById('label');
 const inputZone = document.getElementById('input-zone');
 
-let stage = 0; // 0: Name, 1: Birth Year
+let stage = 0; 
 let locked = false;
 let tempName = "";
 
-// Helper to add text to screen
 function typeLine(text, speed = 20) {
     return new Promise(resolve => {
         const p = document.createElement('p');
@@ -116,10 +114,8 @@ function typeLine(text, speed = 20) {
     });
 }
 
-// Helper for pauses
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-// LOGIN & REGISTRATION LOGIC
 async function processAuth(fname, byear) {
     locked = true;
     inputZone.style.display = "none";
@@ -132,13 +128,12 @@ async function processAuth(fname, byear) {
             .select('*')
             .eq('first_name', fname.toUpperCase())
             .eq('year_of_birth', parseInt(byear))
-            .single();
+            .maybeSingle();
 
         if (data) {
             await typeLine("IDENTITY VERIFIED. ACCESS GRANTED.", 30);
             localStorage.setItem('syntec_id', data.employee_id);
         } else {
-            // New user registration
             await typeLine("NO RECORD FOUND. EVALUATING APPLICATION...", 50);
             await delay(1000);
             
@@ -165,14 +160,14 @@ async function processAuth(fname, byear) {
         window.location.href = "mhub.html";
 
     } catch (err) {
-        console.error(err);
-        await typeLine("CRITICAL ERROR: CONNECTION TIMEOUT.", 10);
-        await delay(2000);
-        location.reload(); // Restart
+        console.error("Supabase Error:", err);
+        await typeLine("CRITICAL ERROR: CONNECTION REJECTED.", 10);
+        await typeLine("CHECK DATABASE RLS POLICIES.", 10);
+        await delay(3000);
+        location.reload(); 
     }
 }
 
-// INPUT LISTENER
 input.addEventListener('keydown', async function(e) {
     if (e.key === 'Enter' && !locked) {
         const val = input.value.trim();
@@ -195,6 +190,5 @@ input.addEventListener('keydown', async function(e) {
     }
 });
 </script>
-
 </body>
 </html>
