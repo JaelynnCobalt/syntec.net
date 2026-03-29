@@ -207,7 +207,7 @@ async function processInput(cmd, norm) {
                 stage = 1;
                 label.innerHTML = "COMMAND:&nbsp;";
                 await typeLine("WELCOME, " + cmd.toUpperCase(), 30);
-                await typeLine("TYPE 'DIR' TO VIEW ACCESSIBLE MODULES.", 30);
+                await typeLine("TYPE 'DIR' TO VIEW ACCESSIBLE DATA.", 30);
             } else {
                 await typeLine("ERROR: INVALID CREDENTIALS", 30);
             }
@@ -224,7 +224,7 @@ async function processInput(cmd, norm) {
             else if (norm === "clinical") {
                 await typeLine("PREPARING CLINICAL EVALUATION ENVIRONMENT...", 40);
                 await delay(800);
-                startLoading("clinical-modules.html");
+                startLoading("clinical-practice.html");
             }
             else if (norm === "status") {
                 await typeLine("ACCESSING STATUS REPORTS...", 30);
@@ -254,7 +254,7 @@ async function processInput(cmd, norm) {
             if (norm === "hazelnut") {
                 await typeLine("ORDER CONFIRMED. REDIRECTING...", 30);
                 await delay(700);
-                startLoading("pegasus.html");
+                startLoading("smail.html");
             }
             else if (norm === "peppermint") {
                 await typeLine("ORDER CONFIRMED. REDIRECTING...", 30);
