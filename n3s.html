@@ -26,7 +26,6 @@
             position: relative;
         }
 
-        /* Scanline Effect */
         .crt-monitor::after {
             content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
@@ -44,21 +43,17 @@
         .system { color: var(--dark-red); font-style: italic; font-size: 0.9rem; }
 
         .input-line { display: flex; align-items: center; }
+        #label { color: var(--neon-red); white-space: pre; }
         #user-input {
             background: transparent; border: none; color: var(--neon-red);
             font-family: inherit; font-size: 1.1rem; width: 100%; outline: none;
         }
-
-        .hidden { display: none !important; }
-
-        /* Login Screen Styling */
-        #login-screen { text-align: center; }
-        .glitch { animation: jitter 4s infinite; }
-        @keyframes jitter {
-            0% { transform: translate(0); }
-            2% { transform: translate(2px, -1px); }
-            4% { transform: translate(-1px, 2px); }
-            6% { transform: translate(0); }
+        
+        /* Style for the return link */
+        .return-link {
+            color: var(--neon-red);
+            text-decoration: underline;
+            cursor: pointer;
         }
 
         #chat-log::-webkit-scrollbar { width: 4px; }
@@ -68,45 +63,24 @@
 <body>
 
 <div class="crt-monitor">
-    <div id="login-screen" class="glitch">
-        <h2 style="border-bottom: 1px solid var(--neon-red); padding-bottom: 10px;">RESTRICTED DIRECTORY: N3S</h2>
-        <p>UNAUTHORIZED ACCESS IS A TERMINABLE OFFENSE</p>
-        <br>
-        <div style="text-align: left; width: 250px; margin: 0 auto;">
-            <label>EMPLOYEE ID:</label><br>
-            <input type="text" id="login-id" style="background:transparent; border:1px solid var(--dark-red); color:var(--neon-red); width:100%; margin-bottom:15px;" autofocus><br>
-            <label>PASSWORD:</label><br>
-            <input type="password" id="login-pass" style="background:transparent; border:1px solid var(--dark-red); color:var(--neon-red); width:100%;">
-            <p style="font-size: 0.7rem; color: #440000; margin-top: 20px;">[PRESS ENTER TO VERIFY]</p>
-        </div>
+    <div id="chat-log">
+        <p class="system">[UPLINK ESTABLISHED: REMOTE NODE 013-S]</p>
+        <p class="system">[SECURITY PROTOCOL ACTIVE: N3S DIRECTORY IS RESTRICTED]</p>
+        <p class="msg">PLEASE PROVIDE CREDENTIALS TO INITIALIZE...</p>
     </div>
-
-    <div id="chat-interface" class="hidden" style="display:flex; flex-direction:column; height:100%;">
-        <div id="chat-log"></div>
-        <div class="input-line">
-            <span>>&nbsp;</span>
-            <input type="text" id="user-input" autocomplete="off">
-        </div>
+    <div class="input-line">
+        <span id="label">LOGIN: </span>
+        <input type="text" id="user-input" autofocus autocomplete="off">
     </div>
 </div>
 
 <script>
-    const loginScreen = document.getElementById('login-screen');
-    const chatInterface = document.getElementById('chat-interface');
     const chatLog = document.getElementById('chat-log');
     const userInput = document.getElementById('user-input');
-    
-    // Login Logic (Accepts anything)
-    document.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !loginScreen.classList.contains('hidden')) {
-            const id = document.getElementById('login-id').value;
-            if (id.length > 0) {
-                loginScreen.classList.add('hidden');
-                chatInterface.classList.remove('hidden');
-                initiateChat();
-            }
-        }
-    });
+    const label = document.getElementById('label');
+
+    let stage = 0; // 0: Login, 1: Password, 2: Chat
+    let locked = false;
 
     const responses = {
         "WHO ARE YOU": "I AM THE FOUNDER. THE VISIONARY. THE ONE WHO SACRIFICED EVERYTHING FOR PROGRESS.",
@@ -133,40 +107,58 @@
         for (let i = 0; i < text.length; i++) {
             contentSpan.textContent += text.charAt(i);
             chatLog.scrollTop = chatLog.scrollHeight;
-            await new Promise(r => setTimeout(r, 40)); // Speed of Nelson's typing
+            await new Promise(r => setTimeout(r, 40));
         }
+    }
+
+    function addPlainMsg(sender, text, className) {
+        const p = document.createElement('p');
+        p.className = `msg ${className}`;
+        p.innerHTML = `${sender}: ${text}`;
+        chatLog.appendChild(p);
+        chatLog.scrollTop = chatLog.scrollHeight;
     }
 
     function addSystemMsg(text) {
         const p = document.createElement('p');
         p.className = "msg system";
-        p.innerText = text;
+        p.innerHTML = text;
         chatLog.appendChild(p);
+        chatLog.scrollTop = chatLog.scrollHeight;
     }
 
-    async function initiateChat() {
-        userInput.focus();
-        addSystemMsg("[UPLINK ESTABLISHED: REMOTE NODE 013-S]");
-        addSystemMsg("[SYNCING CONSCIOUSNESS ARCHIVE...]");
-        await new Promise(r => setTimeout(r, 1000));
-        await typeWriter("NELSON", "WHO IS THIS? WHY ARE YOU ACCESSING MY PRIVATE DIRECTORY?", "nelson");
-    }
-
-    userInput.addEventListener('keypress', async (e) => {
-        if (e.key === 'Enter') {
+    userInput.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter' && !locked) {
             const val = userInput.value.trim().toUpperCase();
-            if (!val) return;
+            if (!val && stage !== 1) return; 
 
-            // Immediate User Entry
-            const p = document.createElement('p');
-            p.className = "msg user";
-            p.innerHTML = `YOU: ${val}`;
-            chatLog.appendChild(p);
+            locked = true;
+            const currentLabel = label.textContent;
+            addPlainMsg(currentLabel.replace(': ', ''), stage === 1 ? "****" : val, "user");
             userInput.value = "";
-            chatLog.scrollTop = chatLog.scrollHeight;
 
-            // Thinking Delay
-            await new Promise(r => setTimeout(r, 1500));
+            await processLogic(val);
+            // Only unlock if we aren't at the "Timeout" stage
+            if (label.textContent !== "[TERMINATED]: ") {
+                locked = false;
+            }
+        }
+    });
+
+    async function processLogic(val) {
+        if (stage === 0) {
+            label.textContent = "PASSWORD: ";
+            userInput.type = "password";
+            stage = 1;
+        } 
+        else if (stage === 1) {
+            label.textContent = "> ";
+            userInput.type = "text";
+            addSystemMsg("[ACCESS GRANTED. NEURAL ARCHIVE UNLOCKED.]");
+            stage = 2;
+        } 
+        else if (stage === 2) {
+            await new Promise(r => setTimeout(r, 1000));
 
             let reply = responses["DEFAULT"];
             for (let key in responses) {
@@ -175,9 +167,22 @@
                     break;
                 }
             }
+            
             await typeWriter("NELSON", reply, "nelson");
+
+            // Check for Timeout Trigger
+            if (reply === "THIS UNIT HAS TIMED OUT") {
+                locked = true; // Permanently lock input
+                userInput.disabled = true;
+                userInput.placeholder = "CONNECTION LOST...";
+                label.textContent = "[TERMINATED]: ";
+                
+                await new Promise(r => setTimeout(r, 1500));
+                addSystemMsg("[FATAL ERROR: NEURAL LINK SEVERED]");
+                addSystemMsg(`[CLICK <span class="return-link" onclick="window.location.href='index.html'">HERE</span> TO RETURN TO TERMINAL DIRECTORY]`);
+            }
         }
-    });
+    }
 </script>
 
 </body>
