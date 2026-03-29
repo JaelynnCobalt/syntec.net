@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SYNTEC PEGASUS SYSTEM</title>
+    <title>SYN PEGASUS SYSTEM</title>
     <style>
         body {
             background-color: #000;
@@ -101,40 +101,42 @@
 
 <script>
     const mails = [
-        // THREAD: PSYCH EVAL
-        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "NOV-02-1986", subject: "RE: EVALUATION RESULTS", body: "THE UPDATED ASSESSMENT FROM THE COMPANY PHYSICIAN IS ATTACHED. THEY HAVE NOTED 'SIGNIFICANT COGNITIVE RIGIDITY' AND 'HYPER-FOCUS ON LOGARITHMIC STRUCTURES.' I TOLD THEM THIS IS AN ASSET TO THE PEGASUS PROJECT, NOT A DEFICIT. DO NOT LET THE TERMINOLOGY UPSET YOU. \n\n- ABBA", starred: true },
-        { folder: 'sent', from: "j.cobalt@syntec.net", date: "NOV-01-1986", subject: "RE: EVALUATION RESULTS", body: "DID THEY MENTION THE AUDITORY HYPER-SENSITIVITY IN LAB 4? THE HUMMING FROM THE MAINFRAME IS INTERFERING WITH MY DATA ENTRY. I REQUIRE THE NOISE-REDUCTION HEADSETS." },
-        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-31-1986", subject: "EVALUATION RESULTS", body: "THE CLINICAL TEAM HAS FINISHED THE INTERN PSYCH-EVALS. YOURS IS MARKED UNDER 'ASOCIAL TENDENCIES - CATEGORY B'. THEY ARE RECOMMENDING YOU REMAIN IN ISOLATED DATA ENTRY FOR THE TIME BEING. I CONCUR. IT IS QUIETER FOR YOU THERE." },
+        // THREAD: THE PSYCH EVAL (1980s Terminology)
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "NOV-02-1986", subject: "RE: EVALUATION RESULTS", body: "THE CLINICAL SUMMARY NOTES 'MARKED DEFICITS IN SOCIAL RECIPROCITY' BUT CONFIRMS 'SUPERIOR IQ IN NON-VERBAL DOMAINS.' THEY ARE USING THE TERM ASPERGER'S SYNDROME. \n\n- PAPPAS", starred: true },
+        { folder: 'sent', from: "j.13@syntec.net", date: "NOV-01-1986", subject: "RE: EVALUATION RESULTS", body: "THE EVALUATOR KEPT TABBING HIS PEN. IT WAS 72 BEATS PER MINUTE. I COULD NOT FOCUS ON THE PATTERN RECOGNITION BLOCK TEST BECAUSE OF THE SOUND. I BELIEVE MY SCORE WOULD HAVE BEEN 4% HIGHER WITHOUT THE DISTRACTION." },
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-31-1986", subject: "EVALUATION RESULTS", body: "I HAVE THE PRELIMINARY PSYCH-EVALS FROM THE INTERN POOL. YOURS IS HIGHLIGHTED. THEY WANT TO MONITOR YOUR 'REPETITIVE BEHAVIORS' IN THE LAB. I WILL ENSURE THEY LEAVE YOU TO YOUR WORK. \n\n- PAPPAS", starred: true },
         
-        // STARRED TECHNICAL LORE
-        { folder: 'starred', from: "b.cobalt@syntec.net", date: "OCT-20-1986", subject: "CORE ALIGNMENT", body: "WHEN CALCULATING THE RADIANCE VARIANCE, ENSURE YOU ARE USING THE 1982 STANDARD, NOT THE NEW REVISION. THE MATHEMATICS ARE CLEANER.", starred: true },
-        { folder: 'starred', from: "it.admin@syntec.net", date: "OCT-15-1986", subject: "OVERRIDE KEY", body: "YOUR WORKSTATION OVERRIDE KEY IS: 8-6-3. DO NOT LOSE THIS.", starred: true },
+        // WESLEY NATHANIAL (The Corporate Voice)
+        { folder: 'inbox', from: "w.nathanial@syntec.net", date: "NOV-04-1986", subject: "GREAT JOB ON THE BUFFER LOGS", body: "[REDACTED], JUST WANTED TO DROP A LINE AND SAY WE'RE REALLY IMPRESSED WITH THE SPEED OF YOUR ARCHIVING. YOU'RE PUTTING THE OTHER INTERNS TO SHAME! LET'S CHAT ON MONDAY ABOUT EXPANDING YOUR ROLE IN THE PEGASUS WING. KEEP IT UP!" },
+        { folder: 'inbox', from: "w.nathanial@syntec.net", date: "OCT-28-1986", subject: "LOG DISCREPANCY", body: "HEY THERE, JUST NOTICED A GAP IN THE 03:00 SCAN. PROBABLY  A GLITCH, BUT COULD YOU TAKE A QUICK LOOK AND SEE WHERE THOSE FILES LANDED? THANKS." },
+        { folder: 'inbox', from: "w.nathanial@syntec.net", date: "OCT-15-1986", subject: "LUNCH MIXER?", body: "THE TEAM IS HEADING DOWN TO THE LOBBY FOR A QUICK MIXER TO CELEBRATE THE Q3 WINS. WOULD LOVE TO SEE YOU THERE IF YOU CAN TEAR YOURSELF AWAY FROM THE TERMINAL FOR A BIT!" },
+
+        // COBALT TECHNICAL (The Autistic Voice)
+        { folder: 'starred', from: "b.cobalt@syntec.net", date: "OCT-20-1986", subject: "CORE ALIGNMENT", body: "ENSURE YOU ARE UTILIZING THE 1982 RADIANCE STANDARDS. THE 1986 REVISION HAS AN UNACCEPTABLE MARGIN OF ERROR IN THE THIRD DECIMAL PLACE. DO NOT COMPROMISE THE DATA SET.", starred: true },
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-12-1986", subject: "LUNCH BATCH", body: "THE PREPARED MEAL IS IN THE FRIDGE. I HAVE SEPARATED THE PROTEIN FROM THE CELLULOSE TO ENSURE THE TEXTURES REMAIN DISTINCT. DO NOT FORGET TO EAT AT 12:00 PRECISELY." },
+
+        // MUNDANE/HR
+        { folder: 'inbox', from: "it.admin@syntec.net", date: "NOV-03-1986", subject: "TERMINAL UPDATE", body: "YOUR WORKSTATION WILL REBOOT AT MIDNIGHT. SAVE ALL PROGRESS." },
+        { folder: 'inbox', from: "hr.dept@syntec.net", date: "OCT-27-1986", subject: "BENEFITS FORM #44", body: "PLEASE SIGN THE ATTACHED DISCLOSURE REGARDING LAB SAFETY PROTOCOLS." },
+        { folder: 'inbox', from: "facilities@syntec.net", date: "OCT-24-1986", subject: "NORTH WING ACCESS", body: "THE NORTH GATE WILL BE SECURED DURING THE WEEKEND FOR REPAIRS." },
+        { folder: 'inbox', from: "it.admin@syntec.net", date: "OCT-20-1986", subject: "OVERRIDE KEY", body: "USER_J13 TEMPORARY KEY: 8-6-3. VALID FOR 24 HOURS.", starred: true },
+        { folder: 'inbox', from: "lab.coord@syntec.net", date: "OCT-15-1986", subject: "REAGENT LIST", body: "WE ARE MISSING THE SHIPMENT LOGS FOR THE SODIUM BATCH." },
+        { folder: 'inbox', from: "marketing@syntec.net", date: "OCT-10-1986", subject: "SYNTEC SPIRIT WEEK", body: "GET READY FOR OUR ANNUAL SPIRIT WEEK! SHOW YOUR SYNTEC PRIDE." },
+        { folder: 'inbox', from: "it.admin@syntec.net", date: "OCT-08-1986", subject: "DISK QUOTA", body: "YOU ARE UTILIZING 88% OF YOUR ALLOCATED SECTOR SPACE." },
         
-        // INBOX (MUNDANE/TECHNICAL)
-        { folder: 'inbox', from: "w.nathanial@syntec.net", date: "NOV-04-1986", subject: "LOG DISCREPANCY", body: "INTERN J13, YOUR ENTRIES FOR THE 03:00 SCAN ARE MISSING. PLEASE EXPLAIN." },
-        { folder: 'inbox', from: "it.admin@syntec.net", date: "NOV-03-1986", subject: "TERMINAL LOCKOUT", body: "REMINDER: THREE FAILED LOGIN ATTEMPTS WILL TRIGGER A HARD-DISK WIPE. WATCH YOUR KEYSTROKES." },
-        { folder: 'inbox', from: "lab.coord@syntec.net", date: "NOV-02-1986", subject: "REAGENT INVENTORY", body: "WE ARE LOW ON STABILIZER C. PLEASE UPDATE THE PROCUREMENT LIST BY EOD." },
-        { folder: 'inbox', from: "facilities@syntec.net", date: "OCT-30-1986", subject: "VENTILATION NOTICE", body: "AIR FILTRATION IN THE NORTH WING WILL BE REDUCED TO 50% CAPACITY TONIGHT." },
-        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-28-1986", subject: "LUNCH", body: "I HAVE LEFT THE PREPARED MEAL IN THE SECONDARY FRIDGE. IT IS LABELED 'COBALT - DO NOT TOUCH'. THE TEXTURE SHOULD BE SUITABLE TODAY." },
-        { folder: 'inbox', from: "hr.dept@syntec.net", date: "OCT-27-1986", subject: "DRESS CODE REMINDER", body: "ALL STAFF MUST WEAR SYNTEC-ISSUED LAB COATS AT ALL TIMES. NO EXCEPTIONS." },
-        { folder: 'inbox', from: "accounting@syntec.net", date: "OCT-25-1986", subject: "STIPEND UPDATE", body: "INTERN STIPENDS WILL BE DEPOSITED ON THE 1ST. ENSURE YOUR BANKING SLIPS ARE FILED." },
-        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-22-1986", subject: "READING MATERIAL", body: "I HAVE PLACED THE VOLUMES ON QUANTUM STASIS ON YOUR DESK. PAGE 402 HAS AN ERROR IN THE SECOND FORMULA. SEE IF YOU CAN FIND IT." },
-        { folder: 'inbox', from: "it.admin@syntec.net", date: "OCT-20-1986", subject: "PEGASUS UPTIME", body: "SERVER STABILITY HAS REACHED 99.4%. GOOD WORK ON THE BUFFER LOGS." },
-        { folder: 'inbox', from: "w.nathanial@syntec.net", date: "OCT-18-1986", subject: "QUARTERLY PROGRESS", body: "MR. SYPHUS HAS NOTED THE EFFICIENCY OF THE PEGASUS INTERNS. KEEP UP THE PACE." },
-        
-        // SENT (Jaelynn's focus)
-        { folder: 'sent', from: "j.cobalt@syntec.net", date: "NOV-04-1986", subject: "RE: LOG DISCREPANCY", body: "THE SCAN WAS NOT MISSING. THE FOLDER WAS MISLABELED BY THE AUTOMATED SYSTEM. I HAVE CORRECTED THE FILENAME TO PEGASUS_0300_A." },
-        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-28-1986", subject: "RE: LUNCH", body: "THANK YOU. THE PREVIOUS BATCH WAS TOO SOFT. I PREFER THE CONSISTENCY OF THIS ONE." },
-        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-22-1986", subject: "RE: READING MATERIAL", body: "THE ERROR IS ON LINE 14. THEY FORGOT TO ACCOUNT FOR THE DECAY CONSTANT. IT WAS OBVIOUS." },
-        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-15-1986", subject: "FILING COMPLETE", body: "ALL RECORDS FROM SEPTEMBER HAVE BEEN COMPLETED AND ARCHIVED." },
-        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-10-1986", subject: "STATIONERY REQUEST", body: "I REQUIRE THREE MORE REAMS OF GREEN-BAR PAPER FOR THE OVERFLOW LOGS." },
-        
+        // SENT
+        { folder: 'sent', from: "j.13@syntec.net", date: "NOV-04-1986", subject: "RE: LOG DISCREPANCY", body: "THE SCAN WAS NOT MISSING. THE AUTOMATED NAMING CONVENTION FAILED. I HAVE MANUALLY RE-INDEXED IT UNDER PEGASUS_0300_A." },
+        { folder: 'sent', from: "j.13@syntec.net", date: "OCT-28-1986", subject: "RE: LUNCH BATCH", body: "THE TEXTURE WAS OPTIMAL. THANK YOU. THE RED PLASTIC CONTAINER HAS BEEN CLEANED AND RETURNED TO THE STATIONS." },
+        { folder: 'sent', from: "j.13@syntec.net", date: "OCT-15-1986", subject: "RE: LUNCH MIXER?", body: "I HAVE 4,200 LINES OF DATA TO AUDIT. I DO NOT HAVE TIME FOR THE MIXER. PLEASE SAVE A SET OF DOCUMENTATION FOR ME IF THERE ARE NEW UPDATES." },
+        { folder: 'sent', from: "j.13@syntec.net", date: "OCT-12-1986", subject: "BUFFER ERROR FOUND", body: "I FOUND THE LEAK IN THE PEGASUS LOGGING SCRIPT. IT WAS A TRANSCRIPTION ERROR IN THE C-LOOP." },
+        { folder: 'sent', from: "j.13@syntec.net", date: "OCT-05-1986", subject: "STATIONERY REQUEST", body: "I REQUIRE THREE REAMS OF GREEN-BAR FEED PAPER. THE CURRENT STOCK IS SUB-PAR QUALITY." },
+
         // TRASH
-        { folder: 'trash', from: "marketing@syntec.net", date: "OCT-05-1986", subject: "SYNTEC PRIDE", body: "BUY YOUR SYNTEC BRANDED MUGS IN THE LOBBY!" },
         { folder: 'trash', from: "hr.dept@syntec.net", date: "OCT-02-1986", subject: "SURVEY", body: "HOW ARE WE DOING? TAKE THE EMPLOYEE SATISFACTION SURVEY." },
-        { folder: 'trash', from: "it.admin@syntec.net", date: "SEP-28-1986", subject: "DELETED FILES", body: "THE SYSTEM HAS AUTOMATICALLY PURGED YOUR TEMP DATA." },
-        { folder: 'trash', from: "facilities@syntec.net", date: "SEP-25-1986", subject: "ELEVATOR REPAIR", body: "ELEVATOR 2 IS NOW FUNCTIONAL." },
-        { folder: 'trash', from: "newsletter@syntec.net", date: "SEP-20-1986", subject: "NEWSLETTER", body: "WELCOME TO THE FALL QUARTER AT SYNTEC." }
+        { folder: 'trash', from: "it.admin@syntec.net", date: "SEP-28-1986", subject: "DELETED FILES", body: "SYSTEM AUTOMATIC PURGE COMPLETED." },
+        { folder: 'trash', from: "newsletter@syntec.net", date: "SEP-20-1986", subject: "NEWSLETTER", body: "WELCOME TO THE FALL QUARTER AT SYNTEC." },
+        { folder: 'trash', from: "facilities@syntec.net", date: "SEP-15-1986", subject: "ELEVATOR REPAIR", body: "ELEVATOR 2 IS BACK IN SERVICE." },
+        { folder: 'trash', from: "marketing@syntec.net", date: "SEP-10-1986", subject: "MUG SALE", body: "LAST CHANCE FOR SYNTEC MUGS!" }
     ];
 
     function renderList(folderName) {
@@ -142,8 +144,11 @@
         list.innerHTML = "";
         
         document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-        const activeBtn = Array.from(document.querySelectorAll('.nav-item')).find(b => b.innerText.toLowerCase().includes(folderName));
-        if(activeBtn) activeBtn.classList.add('active');
+        const navItems = document.querySelectorAll('.nav-item');
+        if (folderName === 'inbox') navItems[0].classList.add('active');
+        if (folderName === 'starred') navItems[1].classList.add('active');
+        if (folderName === 'sent') navItems[2].classList.add('active');
+        if (folderName === 'trash') navItems[3].classList.add('active');
 
         const filtered = mails.filter(m => {
             if(folderName === 'starred') return m.starred === true;
@@ -154,7 +159,9 @@
             const row = document.createElement('div');
             row.className = "mail-row";
             const star = m.starred ? "[*]" : "[ ]";
-            row.innerHTML = `${star} ${m.date} | ${m.from.split('@')[0]} | ${m.subject}`;
+            const sender = m.from.split('@')[0];
+            const displaySub = m.subject.length > 25 ? m.subject.substring(0, 22) + "..." : m.subject;
+            row.innerHTML = `${star} ${m.date} | ${sender} | ${displaySub}`;
             row.onclick = () => openMessage(m);
             list.appendChild(row);
         });
