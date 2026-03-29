@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CLINICAL PRACTICE </title>
+    <title>CLINICAL PRACTICE - MOBILE</title>
     <style>
         :root {
             --neon-green: #33ff33;
@@ -14,40 +14,35 @@
         body {
             background-color: #000; color: var(--neon-green);
             font-family: 'Courier New', Courier, monospace;
-            display: flex; justify-content: center; align-items: flex-start;
+            display: flex; justify-content: center; align-items: center;
             height: 100vh; margin: 0; text-transform: uppercase; overflow: hidden;
         }
 
         .crt-monitor {
-            position: relative; width: 100vw; height: 100vh;
-            padding: 15px; border: 4px solid #2a2a2a; border-radius: 10px;
-            background: var(--bg-black); box-shadow: inset 0 0 50px #000;
+            position: relative; width: 96vw; height: 94vh;
+            padding: 15px; border: 4px solid #2a2a2a; border-radius: 15px;
+            background: var(--bg-black); box-shadow: inset 0 0 40px #000;
             display: flex; flex-direction: column; box-sizing: border-box;
         }
 
-        /* Scanline effect simplified for mobile performance */
+        /* Scanline effect */
         .crt-monitor::after {
             content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
             background-size: 100% 3px; z-index: 10; pointer-events: none;
         }
 
-        .header { border-bottom: 2px solid var(--neon-green); padding-bottom: 8px; margin-bottom: 12px; flex-shrink: 0; }
-        .header h1 { font-size: 1.1rem; margin: 0 0 5px 0; }
+        .header { border-bottom: 2px solid var(--neon-green); padding-bottom: 8px; margin-bottom: 10px; flex-shrink: 0; }
+        .header h1 { font-size: 1.1rem; margin: 0; }
         
-        .module-box { 
-            border: 1px solid var(--neon-green); padding: 12px; 
-            flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; 
-            background: rgba(51, 255, 51, 0.02);
-        }
-
+        .module-box { border: 1px solid var(--neon-green); padding: 12px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
         .hidden { display: none !important; }
         
-        /* Buttons - Optimized for Thumbs */
+        /* Buttons */
         .menu-btn { 
             background: transparent; color: var(--neon-green); border: 1px solid var(--neon-green); 
-            padding: 18px 12px; margin: 8px 0; cursor: pointer; text-align: left; 
-            font-family: inherit; width: 100%; font-size: 0.85rem;
+            padding: 12px; margin: 6px 0; cursor: pointer; text-align: left; font-family: inherit; width: 100%;
+            font-size: 0.85rem;
         }
         .menu-btn:active { background: var(--neon-green); color: #000; }
         .menu-btn:disabled { color: var(--dark-green); border-color: var(--dark-green); opacity: 0.5; }
@@ -56,20 +51,15 @@
             background: rgba(51, 255, 51, 0.05); padding: 12px; 
             border-left: 3px solid var(--neon-green); margin-bottom: 15px; 
             line-height: 1.4; font-size: 0.85rem; border-style: dashed;
-            word-wrap: break-word;
         }
+        .scribble-title { color: #fff; text-decoration: underline; margin-bottom: 8px; display: block; }
         
-        .scribble-title { color: #fff; text-decoration: underline; margin-bottom: 8px; display: block; font-weight: bold; }
-        
-        /* Input area fixes for iOS Zoom */
         input[type="text"], textarea {
             background: rgba(51, 255, 51, 0.1); border: 1px solid var(--neon-green);
-            color: var(--neon-green); font-family: inherit; 
-            font-size: 16px; /* Prevents auto-zoom on iPhone */
-            width: 100%; outline: none; padding: 12px; box-sizing: border-box;
-            border-radius: 0; -webkit-appearance: none;
+            color: var(--neon-green); font-family: inherit; font-size: 16px; /* 16px prevents mobile zoom */
+            width: 100%; outline: none; padding: 10px; box-sizing: border-box;
         }
-        textarea { height: 100px; resize: none; text-transform: uppercase; }
+        textarea { height: 80px; resize: none; text-transform: uppercase; }
         
         .progress-container { width: 100%; height: 10px; border: 1px solid var(--neon-green); margin: 15px 0; display: none; }
         .progress-bar { width: 0%; height: 100%; background: var(--neon-green); }
@@ -79,22 +69,22 @@
         .action-row { display: flex; gap: 8px; margin-top: 10px; }
         .hint-btn, .back-btn { 
             background: var(--dark-green); color: var(--neon-green); border: none; 
-            padding: 12px; cursor: pointer; font-family: inherit; font-size: 0.8rem; flex: 1;
+            padding: 10px; cursor: pointer; font-family: inherit; font-size: 0.75rem; flex: 1;
         }
         .submit-btn { 
             background: var(--neon-green); color: #000; font-weight: bold; 
             width: 100%; margin-top: 10px; cursor: pointer; border: none; 
-            padding: 15px; font-family: inherit; font-size: 0.9rem;
+            padding: 12px; font-family: inherit; font-size: 0.85rem;
         }
 
-        #feedback { font-size: 0.8rem; min-height: 1.2rem; color: #fff; text-shadow: 0 0 5px var(--neon-green); }
+        #feedback { font-size: 0.8rem; min-height: 1rem; margin: 8px 0; }
     </style>
 </head>
 <body>
 
 <div class="crt-monitor">
     <div class="header">
-        <h1 id="module-title">SYSTEM SELECTION</h1>
+        <h1 id="module-title">SYSTEM MENU</h1>
         <div class="score-board">
             <span>USER: INTERN_J13</span>
             <span id="progress-text">PROGRESS: 0 / 10</span>
@@ -102,11 +92,11 @@
     </div>
 
     <div id="menu-view" class="module-box">
-        <p style="font-size: 0.8rem; margin-bottom: 10px;">SELECT TRAINING TRACK:</p>
+        <p style="font-size: 0.8rem; margin-top: 0;">SELECT TRACK:</p>
         <button class="menu-btn" id="btn-general" onclick="startModule('general')">01. GENERAL MEDICINE</button>
         <button class="menu-btn" id="btn-psychiatry" onclick="startModule('psychiatry')">02. PSYCHIATRY</button>
         <button class="menu-btn" id="btn-emergency" onclick="startModule('emergency')">03. EMERGENCY DEPT</button>
-        <button class="menu-btn" id="btn-charting" onclick="startModule('charting')">04. CHARTING / OBS</button>
+        <button class="menu-btn" id="btn-charting" onclick="startModule('charting')">04. CHARTING</button>
     </div>
 
     <div id="work-view" class="module-box hidden">
@@ -114,14 +104,15 @@
         <div id="input-container"></div>
         <div class="progress-container" id="prog-cont"><div class="progress-bar" id="prog-bar"></div></div>
         <p id="feedback"></p>
-        <div class="action-row">
+        <div class="action-row" style="margin-top: auto;">
             <button class="back-btn" onclick="returnToMenu()">[ EXIT ]</button>
         </div>
     </div>
 </div>
 
 <script>
-    // Database and logic remain identical to ensure compatibility
+    // Database and Logic remain the same as the desktop version
+    // (Pasted below to ensure full functionality)
     let currentModule = "";
     let score = 0;
     let currentKeywords = []; 
@@ -135,8 +126,185 @@
             { data: "AGE: 45 | SEX: M | HISTORY: ASBESTOS EXPOSURE. | SYMPTOMS: PERSISTENT COUGH, WEIGHT LOSS.", answer: "LUNG CANCER", hint: "MALIGNANT PULMONARY NEOPLASM." },
             { data: "AGE: 30 | SEX: M | BLOOD: WBC 18,000 | SYMPTOMS: RLQ PAIN, REBOUND TENDERNESS.", answer: "APPENDICITIS", hint: "INFLAMMATION OF THE APPENDIX." },
             { data: "AGE: 52 | SEX: F | HISTORY: SEDENTARY. | SYMPTOMS: POLYDIPSIA, POLYURIA, FRUITY BREATH.", answer: "DIABETES", hint: "HYPERGLYCEMIC INSULIN DEFICIENCY." },
-            { data: "AGE: 68 | SEX: M | HISTORY: CHRONIC SMOKER. | SYMPTOMS: BARREL CHEST, PURSED-LIP BREATHING.", answer: "EMPHYSEMA", hint: "A FORM OF COPD." },
+            { data: "AGE: 68 | SEX: M | HISTORY: CHRONIC SMOKER. | SYMPTOMS: BARREL CHEST, PURSED-LIP BREATHING.", answer: "EMPHYSEMA", hint: "A FORM OF CHRONIC OBSTRUCTIVE PULMONARY DISEASE." },
             { data: "AGE: 24 | SEX: F | HISTORY: RECENT TRP TO TROPICS. | SYMPTOMS: HIGH FEVER, RASH, SEVERE JOINT PAIN.", answer: "DENGUE FEVER", hint: "ALSO KNOWN AS BREAKBONE FEVER." },
-            { data: "AGE: 41 | SEX: M | HISTORY: OBESE. | SYMPTOMS: SNORING, DAYTIME SOMNOLENCE, HEADACHES.", answer: "SLEEP APNEA", hint: "UPPER AIRWAY OBSTRUCTION DURING SLEEP." },
+            { data: "AGE: 41 | SEX: M | HISTORY: OBESE. | SYMPTOMS: SNORING, DAYTIME SOMNOLENCE, HEADACHES.", answer: "SLEEP APNEA", hint: "REPETITIVE UPPER AIRWAY OBSTRUCTION DURING SLEEP." },
             { data: "AGE: 35 | SEX: F | HISTORY: AUTOIMMUNE. | SYMPTOMS: BUTTERFLY RASH ON FACE, MALAR ERUPTION.", answer: "LUPUS", hint: "SYSTEMIC ERYTHEMATOSUS CONDITION." },
-            { data: "AGE: 14 | SEX: M | HISTORY: RECENT SORE THROAT. | SYMPTOMS: HEART MURMUR,
+            { data: "AGE: 14 | SEX: M | HISTORY: RECENT SORE THROAT. | SYMPTOMS: HEART MURMUR, joint pain, rash.", answer: "RHEUMATIC FEVER", hint: "INFLAMMATORY COMPLICATION OF STREP THROAT." },
+            { data: "AGE: 60 | SEX: F | HISTORY: POST-MENOPAUSAL. | SYMPTOMS: LOSS OF HEIGHT, DOWAGER'S HUMP.", answer: "OSTEOPOROSIS", hint: "REDUCTION IN BONE DENSITY." },
+            { data: "AGE: 29 | SEX: M | HISTORY: INJECTION DRUG USE. | SYMPTOMS: LYMPHADENOPATHY, NIGHT SWEATS, ORAL THRUSH.", answer: "HIV/AIDS", hint: "EMERGING RETROVIRAL INFECTION (V3-V)." }
+        ],
+        psychiatry: [
+            { data: "AGE: 19 | SEX: M | SYMPTOMS: AUDITORY HALLUCINATIONS, WORD SALAD, FLAT AFFECT.", answer: "SCHIZOPHRENIA", hint: "A BREAK FROM REALITY; PSYCHOSIS." },
+            { data: "AGE: 04 | SEX: M | OBSERVATION: LACK OF EYE CONTACT, REPETITIVE HAND FLAPPING, DELAYED SPEECH.", answer: "INFANTILE AUTISM", hint: "EARLY CHILDHOOD PERVASIVE DEVELOPMENTAL DISORDER." },
+            { data: "AGE: 08 | SEX: M | OBSERVATION: FIXATION ON TRAIN SCHEDULES, HIGH VERBAL IQ, SOCIAL AWKWARDNESS.", answer: "ASPERGERS", hint: "HIGH-FUNCTIONING AUTISTIC VARIANT." },
+            { data: "AGE: 22 | SEX: F | SYMPTOMS: INTENSE FEAR OF GAINING WEIGHT, BODY DYSMORPHIA, BRADYCARDIA.", answer: "ANOREXIA NERVOSA", hint: "EATING DISORDER CHARACTERIZED BY STARVATION." },
+            { data: "AGE: 31 | SEX: M | SYMPTOMS: EPISODES OF PRESSURIZED SPEECH, GRANDIOSITY, FOLLOWED BY DEEP LETHARGY.", answer: "BIPOLAR DISORDER", hint: "PREVIOUSLY TERMED MANIC DEPRESSION." },
+            { data: "AGE: 40 | SEX: F | SYMPTOMS: RECURRENT PANIC ATTACKS, FEAR OF PUBLIC PLACES WHERE ESCAPE IS HARD.", answer: "AGORAPHOBIA", hint: "ANXIETY DISORDER OFTEN LINKED TO OPEN SPACES." },
+            { data: "AGE: 25 | SEX: M | SYMPTOMS: INTRUSIVE THOUGHTS OF CONTAMINATION, REPETITIVE HAND WASHING.", answer: "OCD", hint: "OBSESSIVE COMPULSIVE NEUROSIS." },
+            { data: "AGE: 06 | SEX: F | OBSERVATION: INABILITY TO SIT STILL, CONSTANT INTERRUPTING, SHORT ATTENTION SPAN.", answer: "ADHD", hint: "ATTENTION DEFICIT HYPERACTIVITY DISORDER." },
+            { data: "AGE: 28 | SEX: F | SYMPTOMS: FEAR OF ABANDONMENT, UNSTABLE RELATIONSHIPS, SELF-HARM.", answer: "BORDERLINE PERSONALITY", hint: "PERSONALITY DISORDER ON THE 'EDGE' OF PSYCHOSIS/NEUROSIS." },
+            { data: "AGE: 50 | SEX: M | SYMPTOMS: LOSS OF INTEREST IN EVERYTHING, INSOMNIA, FEELINGS OF WORTHLESSNESS.", answer: "MAJOR DEPRESSION", hint: "PERSISTENT CLINICAL MELANCHOLIA." }
+        ],
+        emergency: [
+            { data: "AGE: 50 | SEX: M | SYMPTOMS: CRUSHING SUBSTERNAL CHEST PAIN, DIAPHORESIS.", answer: "MYOCARDIAL INFARCTION", hint: "HEART ATTACK." },
+            { data: "AGE: 25 | SEX: F | SYMPTOMS: SUDDEN SOB, PLEURITIC CHEST PAIN, TACHYCARDIA. POST-SURGERY.", answer: "PULMONARY EMBOLISM", hint: "BLOOD CLOT IN THE LUNGS." },
+            { data: "AGE: 18 | SEX: M | SYMPTOMS: NUCHAL RIGIDITY, HIGH FEVER, PETECHIAL RASH.", answer: "MENINGITIS", hint: "INFLAMMATION OF THE PROTECTIVE BRAIN MEMBRANES." },
+            { data: "AGE: 44 | SEX: F | SYMPTOMS: RUQ PAIN AFTER FATTY MEAL, POSITIVE MURPHY'S SIGN.", answer: "CHOLECYSTITIS", hint: "GALLBLADDER INFLAMMATION." },
+            { data: "AGE: 10 | SEX: M | SYMPTOMS: STRIDOR, TRIPOD POSITION, DROOLING.", answer: "EPIGLOTTITIS", hint: "AIRWAY EMERGENCY; SWOLLEN GLOTTIS." },
+            { data: "AGE: 32 | SEX: M | SYMPTOMS: TEARING BACK PAIN, HYPOTENSION, PULSATILE ABDOMINAL MASS.", answer: "AORTIC ANEURYSM", hint: "RUPTURE OF THE MAJOR ARTERY." },
+            { data: "AGE: 22 | SEX: F | SYMPTOMS: UNILATERAL PELVIC PAIN, VAGINAL BLEEDING, POSITIVE PREGNANCY TEST.", answer: "ECTOPIC PREGNANCY", hint: "IMPLANTATION OUTSIDE THE UTERUS." },
+            { data: "AGE: 65 | SEX: M | SYMPTOMS: SUDDEN FACIAL DROOP, UNILATERAL WEAKNESS, APHASIA.", answer: "STROKE", hint: "CEREBROVASCULAR ACCIDENT." },
+            { data: "AGE: 07 | SEX: F | SYMPTOMS: WHEEZING, SILENT CHEST, USE OF ACCESSORY MUSCLES.", answer: "STATUS ASTHMATICUS", hint: "SEVERE, NON-RESPONSIVE ASTHMA ATTACK." },
+            { data: "AGE: 40 | SEX: M | SYMPTOMS: FOUND UNCONSCIOUS, PINPOINT PUPILS, BRADYPNEA.", answer: "OPIOID OVERDOSE", hint: "NARCOTIC TOXICITY." }
+        ],
+        charting: [
+            { name: "SAMUEL_W", age: "54", sex: "M", scribbles: "Eyes looking yellow. Heavy drinker—20 years. Belly is hard and big.", keywords: ["JAUNDICE", "CIRRHOSIS", "ALCOHOL"], hint: "Keywords: J_______, C_______, A______" },
+            { name: "MARCUS_H", age: "09", sex: "M", scribbles: "Kid doesn't play with others. Lines up cars for hours. Screams if routine changes.", keywords: ["AUTISM", "REPETITIVE", "SOCIAL"], hint: "Keywords: A_____, R_________, S_____" },
+            { name: "JANET_P", age: "31", sex: "F", scribbles: "Very thin. Erosion on teeth. Swollen parotid glands. Admits to bingeing/purging.", keywords: ["BULIMIA", "PURGING", "ENAMEL"], hint: "Keywords: B______, P______, E_____" },
+            { name: "THOMAS_C", age: "45", sex: "M", scribbles: "Woke up with big toe on fire. Red, hot, swollen. He ate steak and port wine last night.", keywords: ["GOUT", "URIC", "ARTHRITIS"], hint: "Keywords: G___, U___ ACID, A________" },
+            { name: "ELEANOR_V", age: "72", sex: "F", scribbles: "Fell in shower. Right leg is shorter and externally rotated. Extreme hip pain.", keywords: ["FRACTURE", "FEMUR", "OSTEOPOROSIS"], hint: "Keywords: F_______, F____, O___________" },
+            { name: "VICTOR_B", age: "12", sex: "M", scribbles: "Sore throat for a week. Massive lymph nodes. Splenomegaly noted. Very tired.", keywords: ["MONONUCLEOSIS", "EBV", "FATIGUE"], hint: "Keywords: M____________, E__, F______" },
+            { name: "LINDA_S", age: "28", sex: "F", scribbles: "Stabbed in chest. Distended neck veins. Muffled heart sounds. BP is dropping.", keywords: ["TAMPONADE", "CARDIAC", "TRAUMA"], hint: "Keywords: T________, C______, T_____" },
+            { name: "UNKNOWN_02", age: "??", sex: "M", scribbles: "Found in snowbank. Shivering stopped. Skin is blue/cold. HR 40.", keywords: ["HYPOTHERMIA", "REWARMING", "EXPOSURE"], hint: "Keywords: H__________, R________, E_______" },
+            { name: "WALTER_D", age: "58", sex: "M", scribbles: "Sudden headache—'worst of his life.' Vomiting. Losing consciousness fast.", keywords: ["SUBARACHNOID", "HEMORRHAGE", "ANEURYSM"], hint: "Keywords: S___________, H_________, A_______" },
+            { name: "LUCY_T", age: "05", sex: "F", scribbles: "Barking cough like a seal. Worse at night. Labored breathing.", keywords: ["CROUP", "STRIDOR", "LARYNX"], hint: "Keywords: C____, S______, L_____" }
+        ]
+    };
+
+    function startModule(mod) {
+        currentModule = mod;
+        score = 0;
+        document.getElementById('menu-view').classList.add('hidden');
+        document.getElementById('work-view').classList.remove('hidden');
+        document.getElementById('module-title').innerText = "TRACK: " + mod.toUpperCase();
+        updateScoreDisplay();
+        loadNewCase();
+    }
+
+    function returnToMenu() {
+        document.getElementById('work-view').classList.add('hidden');
+        document.getElementById('menu-view').classList.remove('hidden');
+        document.getElementById('module-title').innerText = "SYSTEM MENU";
+        document.getElementById('feedback').innerText = "";
+    }
+
+    function loadNewCase() {
+        const modCases = database[currentModule];
+        const c = modCases[score % modCases.length];
+        currentAnswer = c.answer || "";
+        currentKeywords = c.keywords || [];
+        currentHint = c.hint;
+
+        const display = document.getElementById('case-display');
+        const inputArea = document.getElementById('input-container');
+
+        if (currentModule === 'charting') {
+            display.innerHTML = `
+                <div class="patient-file">
+                    <span class="scribble-title">[PHYSICIAN_NOTES]</span>
+                    * NAME: ${c.name}<br>
+                    * AGE/SEX: ${c.age} / ${c.sex}<br>
+                    * NOTES: ${c.scribbles}
+                </div>`;
+            inputArea.innerHTML = `
+                <textarea id="user-text" placeholder="TRANSCRIBE NOTE..."></textarea>
+                <button class="submit-btn" onclick="processInput()">UPLINK DATA</button>
+                <div class="action-row"><button class="hint-btn" onclick="showHint()">[ HINT ]</button></div>`;
+        } else {
+            display.innerHTML = `<div class="patient-file"><strong>[DATA_FILE]</strong><br><br>${c.data}</div>`;
+            inputArea.innerHTML = `
+                <input type="text" id="user-input" autocomplete="off" placeholder="DIAGNOSIS...">
+                <button class="submit-btn" onclick="processInput()">SUBMIT</button>
+                <div class="action-row"><button class="hint-btn" onclick="showHint()">[ HINT ]</button></div>`;
+            
+            const input = document.getElementById('user-input');
+            input.addEventListener('keypress', (e) => { if(e.key === 'Enter') processInput(); });
+        }
+        document.getElementById('feedback').innerText = "";
+    }
+
+    function processInput() {
+        let val = "";
+        let isCorrect = false;
+
+        if (currentModule === 'charting') {
+            const textarea = document.getElementById('user-text');
+            if (!textarea) return;
+            val = textarea.value.toUpperCase();
+            if (val.includes(CHEAT_CODE)) { score = 10; isCorrect = true; } 
+            else {
+                let matches = 0;
+                currentKeywords.forEach(k => { if (val.includes(k.toUpperCase())) matches++; });
+                isCorrect = (matches >= 3);
+            }
+        } else {
+            const inputField = document.getElementById('user-input');
+            if (!inputField) return;
+            val = inputField.value.trim().toUpperCase();
+            if (val === CHEAT_CODE) { score = 10; isCorrect = true; }
+            else { isCorrect = (val === currentAnswer); }
+        }
+
+        runProgressBar(isCorrect);
+    }
+
+    function runProgressBar(isCorrect) {
+        document.getElementById('input-container').classList.add('hidden');
+        document.getElementById('prog-cont').style.display = "block";
+        let width = 0;
+        const interval = setInterval(() => {
+            if (width >= 100) {
+                clearInterval(interval);
+                finalize(isCorrect);
+            } else { width += 10; document.getElementById('prog-bar').style.width = width + '%'; }
+        }, 40);
+    }
+
+    function finalize(isCorrect) {
+        document.getElementById('prog-cont').style.display = "none";
+        document.getElementById('prog-bar').style.width = "0%";
+        document.getElementById('input-container').classList.remove('hidden');
+
+        if (isCorrect) {
+            if (score < 10) score++;
+            updateScoreDisplay();
+            if (score >= 10) {
+                completedModules[currentModule] = true;
+                markModuleComplete();
+            } else {
+                loadNewCase();
+            }
+        } else {
+            document.getElementById('feedback').innerText = "ERROR: DATA REJECTED.";
+        }
+    }
+
+    function markModuleComplete() {
+        document.getElementById('feedback').innerText = "MODULE VALIDATED.";
+        const btn = document.getElementById('btn-' + currentModule);
+        if (btn) {
+            btn.innerText = currentModule.toUpperCase() + " [DONE]";
+            btn.disabled = true;
+        }
+
+        setTimeout(() => {
+            if (Object.values(completedModules).every(v => v === true)) {
+                document.getElementById('feedback').innerText = "CURRICULUM COMPLETE.";
+                setTimeout(() => window.location.href = "mindex.html", 2000);
+            } else {
+                returnToMenu();
+            }
+        }, 1200);
+    }
+
+    function updateScoreDisplay() {
+        document.getElementById('progress-text').innerText = `PROGRESS: ${score} / 10`;
+    }
+
+    function showHint() {
+        document.getElementById('feedback').innerText = "HINT: " + currentHint;
+    }
+</script> 
+</body>
+</html>
