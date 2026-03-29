@@ -63,8 +63,7 @@
 
     <div id="work-view" class="module-box hidden">
         <div id="case-display"></div>
-        <div id="input-container">
-            </div>
+        <div id="input-container"></div>
         <div class="progress-container" id="prog-cont"><div class="progress-bar" id="prog-bar"></div></div>
         <p id="feedback" style="margin-top:10px;"></p>
     </div>
@@ -81,8 +80,6 @@
 
     const database = {
         general: [
-            { data: "AGE: 45 | SEX: M | HISTORY: ASBESTOS EXPOSURE. | SYMPTOMS: PERSISTENT COUGH, WEIGHT LOSS.", answer: "LUNG CANCER", hint: "MALIGNANT PULMONARY NEOPLASM." },
-            { data: "AGE: 30 | SEX: M | BLOOD: WBC 18,000 | SYMPTOMS: RLQ PAIN, REBOUND TENDERNESS.", answer: "APPENDICITIS", hint: "INFLAMMATION OF THE APPENDIX." },
             { data: "AGE: 45 | SEX: M | HISTORY: ASBESTOS EXPOSURE. | SYMPTOMS: PERSISTENT COUGH, WEIGHT LOSS.", answer: "LUNG CANCER", hint: "MALIGNANT PULMONARY NEOPLASM." },
             { data: "AGE: 30 | SEX: M | BLOOD: WBC 18,000 | SYMPTOMS: RLQ PAIN, REBOUND TENDERNESS.", answer: "APPENDICITIS", hint: "INFLAMMATION OF THE APPENDIX." },
             { data: "AGE: 52 | SEX: F | HISTORY: SEDENTARY. | SYMPTOMS: POLYDIPSIA, POLYURIA, FRUITY BREATH.", answer: "DIABETES", hint: "HYPERGLYCEMIC INSULIN DEFICIENCY." },
@@ -105,7 +102,6 @@
             { data: "AGE: 06 | SEX: F | OBSERVATION: INABILITY TO SIT STILL, CONSTANT INTERRUPTING, SHORT ATTENTION SPAN.", answer: "ADHD", hint: "ATTENTION DEFICIT HYPERACTIVITY DISORDER." },
             { data: "AGE: 28 | SEX: F | SYMPTOMS: FEAR OF ABANDONMENT, UNSTABLE RELATIONSHIPS, SELF-HARM.", answer: "BORDERLINE PERSONALITY", hint: "PERSONALITY DISORDER ON THE 'EDGE' OF PSYCHOSIS/NEUROSIS." },
             { data: "AGE: 50 | SEX: M | SYMPTOMS: LOSS OF INTEREST IN EVERYTHING, INSOMNIA, FEELINGS OF WORTHLESSNESS.", answer: "MAJOR DEPRESSION", hint: "PERSISTENT CLINICAL MELANCHOLIA." }
-    
         ],
         emergency: [
             { data: "AGE: 50 | SEX: M | SYMPTOMS: CRUSHING SUBSTERNAL CHEST PAIN, DIAPHORESIS.", answer: "MYOCARDIAL INFARCTION", hint: "HEART ATTACK." },
@@ -118,7 +114,6 @@
             { data: "AGE: 65 | SEX: M | SYMPTOMS: SUDDEN FACIAL DROOP, UNILATERAL WEAKNESS, APHASIA.", answer: "STROKE", hint: "CEREBROVASCULAR ACCIDENT." },
             { data: "AGE: 07 | SEX: F | SYMPTOMS: WHEEZING, SILENT CHEST, USE OF ACCESSORY MUSCLES.", answer: "STATUS ASTHMATICUS", hint: "SEVERE, NON-RESPONSIVE ASTHMA ATTACK." },
             { data: "AGE: 40 | SEX: M | SYMPTOMS: FOUND UNCONSCIOUS, PINPOINT PUPILS, BRADYPNEA.", answer: "OPIOID OVERDOSE", hint: "NARCOTIC TOXICITY." }
-      
         ],
         charting: [
             { 
@@ -127,7 +122,8 @@
                 keywords: ["JAUNDICE", "CIRRHOSIS", "ALCOHOL"],
                 hint: "Keywords: J_______, C_______, A______"
             },
-            name: "MARCUS_H", age: "09", sex: "M",
+            { 
+                name: "MARCUS_H", age: "09", sex: "M",
                 scribbles: "Kid doesn't play with others. Lines up cars for hours. Screams if routine changes.", 
                 keywords: ["AUTISM", "REPETITIVE", "SOCIAL"],
                 hint: "Keywords: A_____, R_________, S_____"
@@ -179,6 +175,7 @@
                 scribbles: "Barking cough like a seal. Worse at night. Labored breathing.", 
                 keywords: ["CROUP", "STRIDOR", "LARYNX"],
                 hint: "Keywords: C____, S______, L_____"
+            }
         ]
     };
 
@@ -194,7 +191,6 @@
 
     function loadNewCase() {
         const modCases = database[currentModule];
-        // Cycle through cases or random
         const c = modCases[score % modCases.length];
         currentAnswer = c.answer || "";
         currentKeywords = c.keywords || [];
@@ -235,7 +231,9 @@
         let isCorrect = false;
 
         if (currentModule === 'charting') {
-            val = document.getElementById('user-text').value.toUpperCase();
+            const textarea = document.getElementById('user-text');
+            if (!textarea) return;
+            val = textarea.value.toUpperCase();
             if (val.includes(CHEAT_CODE)) { score = 10; isCorrect = true; } 
             else {
                 let matches = 0;
@@ -243,7 +241,9 @@
                 isCorrect = (matches >= 3);
             }
         } else {
-            val = document.getElementById('user-input').value.trim().toUpperCase();
+            const inputField = document.getElementById('user-input');
+            if (!inputField) return;
+            val = inputField.value.trim().toUpperCase();
             if (val === CHEAT_CODE) { score = 10; isCorrect = true; }
             else { isCorrect = (val === currentAnswer); }
         }
