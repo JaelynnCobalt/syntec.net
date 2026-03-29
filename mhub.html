@@ -6,22 +6,23 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --neon: #33ff33; --bg: #0a0a0a; --panel: #0d0d0d; }
-        body { background-color: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; text-shadow: 0 0 5px var(--neon); overflow: hidden; }
+        body { background-color: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; margin: 0; text-shadow: 0 0 5px var(--neon); overflow: hidden; }
         
-        .header { padding: 10px; border-bottom: 2px solid var(--neon); text-align: center; font-weight: bold; letter-spacing: 2px; }
+        .header { padding: 10px; border-bottom: 2px solid var(--neon); text-align: center; font-weight: bold; letter-spacing: 2px; background: #000; }
         .main-container { display: flex; flex: 1; overflow: hidden; }
 
         /* Panels */
         .side-panel { width: 280px; border-right: 2px solid var(--neon); padding: 15px; display: flex; flex-direction: column; background: var(--panel); overflow-y: auto; }
         .right-panel { width: 300px; border-left: 2px solid var(--neon); padding: 15px; background: var(--panel); }
         
-        .section-title { border-bottom: 1px solid var(--neon); margin-bottom: 10px; font-size: 0.9rem; padding-bottom: 3px; display: block; }
+        .section-title { border-bottom: 1px solid var(--neon); margin-bottom: 10px; font-size: 0.9rem; padding-bottom: 3px; display: block; color: var(--neon); }
         .data-point { margin-bottom: 15px; font-size: 0.85rem; line-height: 1.4; }
-        .data-label { color: #88ff88; font-size: 0.7rem; display: block; }
+        .data-label { color: #88ff88; font-size: 0.7rem; display: block; opacity: 0.8; }
 
         /* Chat */
         .chat-area { flex: 1; display: flex; flex-direction: column; padding: 10px; background: #050505; }
-        #messages { flex: 1; overflow-y: auto; border: 1px solid var(--neon); padding: 10px; margin-bottom: 10px; font-size: 0.9rem; }
+        #messages { flex: 1; overflow-y: auto; border: 1px solid var(--neon); padding: 10px; margin-bottom: 10px; font-size: 0.9rem; background: rgba(0,0,0,0.5); }
+        .msg-line { margin: 5px 0; border-bottom: 1px solid #1a1a1a; padding-bottom: 2px; }
         
         /* Inputs & Buttons */
         input { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px; font-family: inherit; outline: none; width: calc(100% - 18px); margin-bottom: 5px; }
@@ -29,33 +30,21 @@
         button:hover { background: #22cc22; }
 
         .friend-item { padding: 4px; font-size: 0.85rem; cursor: pointer; border: 1px solid transparent; }
-        .friend-item:hover { border: 1px solid var(--neon); }
+        .friend-item:hover { background: rgba(51, 255, 51, 0.1); }
         .task-item { font-size: 0.85rem; margin-bottom: 8px; color: #ffff33; }
     </style>
 </head>
-<body>
+<body onclick="document.getElementById('msg-input').focus()">
 
 <div class="header">SYSTEM OVERSEER: PEGASUS NETWORK HUB</div>
 
 <div class="main-container">
     <div class="side-panel">
         <span class="section-title">PERSONNEL DOSSIER</span>
-        <div class="data-point">
-            <span class="data-label">NAME</span>
-            <span id="user-name">LOADING...</span>
-        </div>
-        <div class="data-point">
-            <span class="data-label">EMPLOYEE ID</span>
-            <span id="user-id">---</span>
-        </div>
-        <div class="data-point">
-            <span class="data-label">CLEARANCE LEVEL</span>
-            <span id="user-clearance" style="color:red">REDACTED</span>
-        </div>
-        <div class="data-point">
-            <span class="data-label">CURRENT ASSIGNMENT</span>
-            <span id="user-project">UNASSIGNED</span>
-        </div>
+        <div class="data-point"><span class="data-label">NAME</span><span id="user-name">...</span></div>
+        <div class="data-point"><span class="data-label">EMPLOYEE ID</span><span id="user-id">---</span></div>
+        <div class="data-point"><span class="data-label">CLEARANCE LEVEL</span><span id="user-clearance" style="color:red">REDACTED</span></div>
+        <div class="data-point"><span class="data-label">CURRENT ASSIGNMENT</span><span id="user-project">UNASSIGNED</span></div>
 
         <span class="section-title">SECURE CONTACTS</span>
         <div id="friends-list" style="margin-bottom: 15px;"></div>
@@ -64,10 +53,10 @@
     </div>
 
     <div class="chat-area">
-        <span class="section-title">SECURE CHANNEL: #GENERAL</span>
+        <span class="section-title">SECURE CHANNEL: #INTERNAL_MESSAGES</span>
         <div id="messages"></div>
         <div style="display:flex; gap: 5px;">
-            <input type="text" id="msg-input" placeholder="ENCRYPT MESSAGE...">
+            <input type="text" id="msg-input" placeholder="ENCRYPT MESSAGE..." autocomplete="off">
             <button onclick="sendMessage()" style="width: 80px;">SEND</button>
         </div>
     </div>
@@ -81,9 +70,9 @@
         <br>
         <span class="section-title">SYSTEM STATUS</span>
         <div class="data-point" style="font-size: 0.75rem;">
-            UPLINK: STABLE<br>
+            UPLINK: ACTIVE<br>
             ENCRYPTION: AES-256<br>
-            LOCATION: [S-LABS-V8]
+            STATION: S-LABS-V8
         </div>
         <button onclick="location.href='index.html'" style="background:transparent; color:var(--neon); border: 1px solid var(--neon);">LOGOUT</button>
     </div>
@@ -96,23 +85,18 @@ const _supabase = supabase.createClient(S_URL, S_KEY);
 
 const myID = localStorage.getItem('syntec_id') || "UNKNOWN";
 
-// 1. FETCH PROFILE DATA
+// Load user details
 async function loadProfile() {
-    const { data, error } = await _supabase
-        .from('profiles')
-        .select('*')
-        .eq('employee_id', myID)
-        .single();
-
+    const { data } = await _supabase.from('profiles').select('*').eq('employee_id', myID).single();
     if (data) {
         document.getElementById('user-name').textContent = data.first_name;
         document.getElementById('user-id').textContent = data.employee_id;
-        document.getElementById('user-clearance').textContent = data.clearance_level || "LEVEL 1 - INTERN";
-        document.getElementById('user-project').textContent = data.project_assignment || "PENDING EVALUATION";
+        document.getElementById('user-clearance').textContent = data.clearance_level || "LEVEL 1";
+        document.getElementById('user-project').textContent = data.project_assignment || "EVALUATION PHASE";
     }
 }
 
-// 2. LOAD CONNECTIONS
+// Load Friends
 async function loadFriends() {
     const { data } = await _supabase.from('friends').select('*').eq('user_id', myID);
     const list = document.getElementById('friends-list');
@@ -127,40 +111,64 @@ async function loadFriends() {
     }
 }
 
-// 3. ADD CONNECTION
 async function addFriend() {
     const targetID = document.getElementById('search-id').value.toUpperCase().trim();
     const { data: profile } = await _supabase.from('profiles').select('first_name').eq('employee_id', targetID).single();
-
     if (profile) {
         await _supabase.from('friends').insert([{ user_id: myID, friend_id: targetID, friend_name: profile.first_name }]);
         document.getElementById('search-id').value = "";
         loadFriends();
-    } else {
-        alert("ID NOT FOUND IN SYNTEC DATABASE");
     }
 }
 
-// 4. CHAT
+// Fixed Chat Logic
 async function sendMessage() {
-    const content = document.getElementById('msg-input').value;
+    const input = document.getElementById('msg-input');
+    const content = input.value.trim();
     if (!content) return;
-    await _supabase.from('Syn_Internal_Messages').insert([{ sender_name: myID, content: content }]);
-    document.getElementById('msg-input').value = "";
+
+    const { error } = await _supabase
+        .from('internal_messages') // MATCHES YOUR TABLE NAME
+        .insert([{ sender_name: myID, content: content }]);
+
+    if (error) console.error("Send error:", error);
+    input.value = "";
 }
 
-_supabase.channel('any').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'Syn_Internal_Messages' }, payload => {
-    const msg = payload.new;
-    const div = document.createElement('p');
+// Listen for Enter Key in chat
+document.getElementById('msg-input').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') sendMessage();
+});
+
+// Realtime Updates
+const channel = _supabase
+    .channel('room1')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'internal_messages' }, payload => {
+        const msg = payload.new;
+        displayMessage(msg);
+    })
+    .subscribe();
+
+function displayMessage(msg) {
+    const div = document.createElement('div');
+    div.className = "msg-line";
     div.innerHTML = `<span style="color:#88ff88">[${msg.sender_name}]</span>: ${msg.content}`;
     const mBox = document.getElementById('messages');
     mBox.appendChild(div);
     mBox.scrollTop = mBox.scrollHeight;
-}).subscribe();
+}
 
-// INIT
-loadProfile();
-loadFriends();
+// Initial Load
+async function init() {
+    await loadProfile();
+    await loadFriends();
+    
+    // Load last 50 messages on start
+    const { data } = await _supabase.from('internal_messages').select('*').order('created_at', { ascending: true }).limit(50);
+    if (data) data.forEach(displayMessage);
+}
+
+init();
 </script>
 </body>
 </html>
