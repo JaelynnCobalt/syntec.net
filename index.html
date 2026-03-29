@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Syntec Terminal - Apple II</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 body {
@@ -91,6 +92,7 @@ animation: blink 0.8s infinite;
 <p>COPYRIGHT 1986 SYNTEC LABS</p>
 <p>---------------------------</p>
 <p>PLEASE LOG IN TO PROCEED...</p>
+<p style="font-size: 0.8rem; color: #1a551a;">[ TYPE 'JOIN' TO APPLY FOR EMPLOYMENT ]</p>
 </div>
 
 <div class="input-area" id="input-zone">
@@ -100,6 +102,11 @@ animation: blink 0.8s infinite;
 </div>
 
 <script>
+// 2. INITIALIZE SUPABASE
+const S_URL = "https://ctrbkrwiwpojbzfpsxwl.supabase.co";
+const S_KEY = "sb_publishable_uK-ihohO48o6BPRW8rmDqQ_LbJnfTI7";
+const supabase = lib.createClient(S_URL, S_KEY);
+
 const input = document.getElementById('command-line');
 const output = document.getElementById('output');
 const label = document.getElementById('label');
@@ -107,6 +114,10 @@ const inputZone = document.getElementById('input-zone');
 
 let stage = 0;
 let locked = false;
+
+// Registration Variables
+let tempName = "";
+let tempYear = "";
 
 function typeLine(text, speed = 25) {
     return new Promise(resolve => {
@@ -131,21 +142,13 @@ function normalize(str) {
     return str.toLowerCase().replace(/[^\w\s]/g, '').trim();
 }
 
-async function showLoadingBar(type = "clinical") {
+async function showLoadingBar(destination = "mhub.html") {
     locked = true;
     inputZone.style.display = "none";
     output.innerHTML = "";
     
-    // Dynamic loading text based on command
-    if (type === "mountaineer") {
-        await typeLine("ACCESSING HIDDEN DIRECTORY...", 50);
-        await typeLine("MOUNTING VOLUME: n3s.dsk", 50);
-    } else {
-        await typeLine("INITIALIZING CLINICAL INTERFACE...", 50);
-        await typeLine("MOUNTING DATABASE: J13-V8.4", 50);
-    }
-    
-    await typeLine("ESTABLISHING SECURE UPLINK...", 80);
+    await typeLine("INITIALIZING UPLINK...", 50);
+    await typeLine("VERIFYING PERSONNEL BIOMETRICS...", 50);
     
     const container = document.createElement('div');
     container.className = "loading-container";
@@ -157,22 +160,16 @@ async function showLoadingBar(type = "clinical") {
 
     const segments = 20;
     for (let i = 0; i < segments; i++) {
-        await delay(200); 
+        await delay(100); 
         bar.textContent += "■";
         output.scrollTop = output.scrollHeight;
     }
     bar.textContent += "]";
     
     await delay(500);
-    await typeLine("CONNECTION ESTABLISHED. REDIRECTING...", 30);
+    await typeLine("IDENTITY CONFIRMED. REDIRECTING...", 30);
     await delay(1000);
-    
-    // Conditional Redirect
-    if (type === "mountaineer") {
-        window.location.href = "n3s.html";
-    } else {
-        window.location.href = "clinical-practice.html";
-    }
+    window.location.href = destination;
 }
 
 input.addEventListener('keydown', async function(e) {
@@ -189,63 +186,73 @@ input.addEventListener('keydown', async function(e) {
 
 async function processInput(cmd, norm) {
     switch(stage) {
-        case 0:
-            if (cmd.toUpperCase() === 'W015' || cmd.toUpperCase() === 'J13') {
-                await typeLine("ACCESS GRANTED...", 30);
-                await delay(400);
-                stage = 1;
-                label.textContent = "COMMAND: ";
-                await typeLine("WELCOME, " + cmd.toUpperCase(), 30);
-                await typeLine("TYPE 'DIR' FOR MODULE LIST.", 30);
+        case 0: // Main Login
+            if (norm === 'join' || norm === 'apply') {
+                await typeLine("--- EMPLOYMENT APPLICATION ---", 30);
+                await typeLine("ENTER FIRST NAME:", 30);
+                label.textContent = "NAME: ";
+                stage = 10; // Jump to registration flow
+            } 
+            else if (cmd.toUpperCase() === 'W015' || cmd.toUpperCase() === 'J13') {
+                await typeLine("MASTER ACCESS GRANTED...", 30);
+                localStorage.setItem('syntec_id', cmd.toUpperCase());
+                await showLoadingBar();
             } else {
                 await typeLine("ERROR: INVALID CREDENTIALS", 30);
             }
             break;
 
-        case 1:
-            if (norm === "dir" || norm === "directory") {
-                await typeLine("--- SYSTEM DIRECTORY ---", 20);
-                await typeLine("> [CLINICAL] - INTERN EVALUATION", 20);
-                await typeLine("> [STATUS]   - FACILITY REPORT", 20);
-                await typeLine("------------------------", 20);
-            } 
-            else if (norm === "clinical") {
-                await showLoadingBar("clinical");
-            }
-            else if (norm === "mountaineer") {
-                await showLoadingBar("mountaineer");
-            }
-            else if (norm === "status") {
-                await typeLine("ACCESSING STATUS REPORTS...", 30);
-                await typeLine("LOG: THEYRE OUT OF CREAM IN THE BREAKROOM", 30);
-                stage = 2;
-                label.textContent = "QUERY: ";
-            }
-            else {
-                await typeLine("ERROR: COMMAND NOT RECOGNIZED", 30);
-            }
+        case 10: // Reg Stage: Get Name
+            tempName = cmd.toUpperCase();
+            await typeLine("ENTER YEAR OF BIRTH (YYYY):", 30);
+            label.textContent = "YEAR: ";
+            stage = 11;
             break;
 
-        case 2:
-            if (norm === "regular or vanilla") {
-                await typeLine("VANILLA UNAVAILABLE. SELECT ALTERNATE:", 30);
-                await typeLine("> HAZELNUT", 30);
-                await typeLine("> PEPPERMINT", 30);
-                stage = 3;
-                label.textContent = "SELECT: ";
+        case 11: // Reg Stage: Process Auth
+            tempYear = cmd;
+            if(!/^\d{4}$/.test(tempYear)) {
+                await typeLine("ERROR: INVALID DATE FORMAT.", 30);
+                await typeLine("RE-ENTER YEAR OF BIRTH:", 30);
+                return;
+            }
+
+            await typeLine("SEARCHING PERSONNEL DATABASE...", 50);
+
+            // Check if user exists
+            const { data: existingUser } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('first_name', tempName)
+                .eq('year_of_birth', parseInt(tempYear))
+                .single();
+
+            if (existingUser) {
+                await typeLine("IDENTITY VERIFIED. WELCOME BACK.", 30);
+                localStorage.setItem('syntec_id', existingUser.employee_id);
+                await showLoadingBar();
             } else {
-                await typeLine("INVALID STATUS QUERY.", 30);
-            }
-            break;
+                // Generate and Insert New User
+                const generatedID = `${tempName[0]}${tempYear}-${Math.floor(100 + Math.random() * 900)}`;
+                
+                const { error } = await supabase
+                    .from('profiles')
+                    .insert([{ 
+                        first_name: tempName, 
+                        year_of_birth: parseInt(tempYear), 
+                        employee_id: generatedID 
+                    }]);
 
-        case 3:
-            if (norm === "hazelnut") {
-                await typeLine("ORDER CONFIRMED...", 30);
-                window.location.href = "smail.html";
-            }
-            else if (norm === "peppermint") {
-                await typeLine("ORDER CONFIRMED...", 30);
-                window.location.href = "863.html";
+                if(!error) {
+                    await typeLine("APPLICATION APPROVED.", 30);
+                    await typeLine("ID ASSIGNED: " + generatedID, 50);
+                    localStorage.setItem('syntec_id', generatedID);
+                    await showLoadingBar();
+                } else {
+                    await typeLine("SYSTEM ERROR: REGISTRATION DENIED.", 30);
+                    stage = 0;
+                    label.textContent = "LOGIN: ";
+                }
             }
             break;
     }
