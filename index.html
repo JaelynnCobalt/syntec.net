@@ -5,32 +5,79 @@
 <title>Syntec Terminal - Apple II</title>
 
 <style>
-/* CSS remains the same as your provided code */
 body {
-background-color: #0a0a0a; color: #33ff33;
+background-color: #0a0a0a;
+color: #33ff33;
 font-family: 'Courier New', Courier, monospace;
-display: flex; justify-content: center; align-items: center;
-height: 100vh; margin: 0; overflow: hidden;
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;
+margin: 0;
+overflow: hidden;
 text-shadow: 0 0 5px #33ff33;
 }
+
 .crt-overlay {
-position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+position: fixed;
+top: 0; left: 0; width: 100%; height: 100%;
 background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
 linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-background-size: 100% 4px, 3px 100%; pointer-events: none; z-index: 10;
+background-size: 100% 4px, 3px 100%;
+pointer-events: none;
+z-index: 10;
 }
+
 .screen {
-width: 80%; max-width: 800px; height: 600px; padding: 20px;
-border: 2px solid #33ff33; box-shadow: 0 0 20px rgba(51, 255, 51, 0.2);
-background: #050505; overflow-y: auto;
+width: 80%;
+max-width: 800px;
+height: 600px;
+padding: 20px;
+border: 2px solid #33ff33;
+box-shadow: 0 0 20px rgba(51, 255, 51, 0.2);
+background: #050505;
+overflow-y: auto;
+position: relative;
 }
-.input-area { display: flex; margin-top: 20px; }
+
+.input-area {
+display: flex;
+margin-top: 20px;
+}
+
 #command-line {
-background: transparent; border: none; color: #33ff33;
-font-family: inherit; font-size: 1.2rem; outline: none; width: 100%;
+background: transparent;
+border: none;
+color: #33ff33;
+font-family: inherit;
+font-size: 1.2rem;
+outline: none;
+width: 100%;
 }
-.cursor { display: inline-block; width: 10px; height: 1.2rem; background: #33ff33; animation: blink 0.8s infinite; }
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+.loading-container {
+margin-top: 20px;
+width: 100%;
+}
+
+.loading-bar {
+color: #33ff33;
+letter-spacing: 5px;
+font-size: 1.5rem;
+}
+
+.cursor {
+display: inline-block;
+width: 10px;
+height: 1.2rem;
+background: #33ff33;
+animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+0%, 100% { opacity: 1; }
+50% { opacity: 0; }
+}
 </style>
 </head>
 
@@ -46,7 +93,7 @@ font-family: inherit; font-size: 1.2rem; outline: none; width: 100%;
 <p>PLEASE LOG IN TO PROCEED...</p>
 </div>
 
-<div class="input-area">
+<div class="input-area" id="input-zone">
 <span id="label">LOGIN:&nbsp;</span>
 <input type="text" id="command-line" autofocus autocomplete="off">
 </div>
@@ -56,6 +103,7 @@ font-family: inherit; font-size: 1.2rem; outline: none; width: 100%;
 const input = document.getElementById('command-line');
 const output = document.getElementById('output');
 const label = document.getElementById('label');
+const inputZone = document.getElementById('input-zone');
 
 let stage = 0;
 let locked = false;
@@ -83,6 +131,37 @@ function normalize(str) {
     return str.toLowerCase().replace(/[^\w\s]/g, '').trim();
 }
 
+async function showLoadingBar() {
+    locked = true;
+    inputZone.style.display = "none";
+    output.innerHTML = "";
+    
+    await typeLine("INITIALIZING CLINICAL INTERFACE...", 50);
+    await typeLine("MOUNTING DATABASE: J13-V8.4", 50);
+    await typeLine("ESTABLISHING SECURE UPLINK...", 80);
+    
+    const container = document.createElement('div');
+    container.className = "loading-container";
+    const bar = document.createElement('div');
+    bar.className = "loading-bar";
+    bar.textContent = "[";
+    container.appendChild(bar);
+    output.appendChild(container);
+
+    const segments = 20;
+    for (let i = 0; i < segments; i++) {
+        await delay(250); // Control the speed here (250ms per block)
+        bar.textContent += "■";
+        output.scrollTop = output.scrollHeight;
+    }
+    bar.textContent += "]";
+    
+    await delay(500);
+    await typeLine("CORE LOADED. REDIRECTING...", 30);
+    await delay(1000);
+    window.location.href = "clinical-modules.html";
+}
+
 input.addEventListener('keydown', async function(e) {
     if (e.key === 'Enter' && !locked) {
         locked = true;
@@ -97,35 +176,28 @@ input.addEventListener('keydown', async function(e) {
 
 async function processInput(cmd, norm) {
     switch(stage) {
-        // LOGIN
         case 0:
             if (cmd.toUpperCase() === 'W015' || cmd.toUpperCase() === 'J13') {
                 await typeLine("ACCESS GRANTED...", 30);
                 await delay(400);
-                await typeLine("INITIALIZING USER INTERFACE...", 30);
-                await delay(500);
                 stage = 1;
                 label.textContent = "COMMAND: ";
                 await typeLine("WELCOME, " + cmd.toUpperCase(), 30);
-                await typeLine("TYPE 'DIR' TO VIEW ACCESSIBLE MODULES.", 30);
+                await typeLine("TYPE 'DIR' FOR MODULE LIST.", 30);
             } else {
                 await typeLine("ERROR: INVALID CREDENTIALS", 30);
             }
             break;
 
-        // MAIN COMMAND LINE
         case 1:
             if (norm === "dir" || norm === "directory") {
                 await typeLine("--- SYSTEM DIRECTORY ---", 20);
-                await typeLine("> [CLINICAL] - INTERN EVALUATION TRACK", 20);
-                await typeLine("> [STATUS]   - FACILITY STATUS REPORT", 20);
+                await typeLine("> [CLINICAL] - INTERN EVALUATION", 20);
+                await typeLine("> [STATUS]   - FACILITY REPORT", 20);
                 await typeLine("------------------------", 20);
             } 
             else if (norm === "clinical") {
-                await typeLine("LOADING CLINICAL EVALUATION ENVIRONMENT...", 40);
-                await typeLine("ACCESSING DATABASE J13-V8.4...", 60);
-                await delay(1000);
-                window.location.href = "clinical-modules.html";
+                await showLoadingBar();
             }
             else if (norm === "status") {
                 await typeLine("ACCESSING STATUS REPORTS...", 30);
@@ -138,7 +210,6 @@ async function processInput(cmd, norm) {
             }
             break;
 
-        // STATUS REPORT (BREAKROOM FLOW)
         case 2:
             if (norm === "regular or vanilla") {
                 await typeLine("VANILLA UNAVAILABLE. SELECT ALTERNATE:", 30);
@@ -151,20 +222,14 @@ async function processInput(cmd, norm) {
             }
             break;
 
-        // BREAKROOM FINAL CHOICE
         case 3:
             if (norm === "hazelnut") {
-                await typeLine("ORDER CONFIRMED. REDIRECTING...", 30);
-                await delay(700);
+                await typeLine("ORDER CONFIRMED...", 30);
                 window.location.href = "pegasus.html";
             }
             else if (norm === "peppermint") {
-                await typeLine("ORDER CONFIRMED. REDIRECTING...", 30);
-                await delay(700);
+                await typeLine("ORDER CONFIRMED...", 30);
                 window.location.href = "863.html";
-            }
-            else {
-                await typeLine("FLAVOR PROFILE NOT FOUND.", 30);
             }
             break;
     }
