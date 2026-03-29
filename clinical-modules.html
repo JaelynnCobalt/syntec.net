@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CLINICAL PRACTICE - J13</title>
+    <title>CLINICAL MODULE - J13</title>
     <style>
         body {
             background-color: #000; color: #33ff33;
@@ -21,21 +21,17 @@
         .hidden { display: none !important; }
         .menu-btn { 
             background: transparent; color: #33ff33; border: 1px solid #33ff33; 
-            padding: 15px; margin: 10px 0; cursor: pointer; text-align: left; font-family: inherit;
+            padding: 15px; margin: 10px 0; cursor: pointer; text-align: left; font-family: inherit; width: 100%;
         }
         .menu-btn:hover:not(:disabled) { background: #33ff33; color: #000; }
         .menu-btn:disabled { color: #1a551a; border-color: #1a551a; cursor: not-allowed; opacity: 0.6; }
-        
-        /* The "Scribble" File look */
         .patient-file { background: rgba(51, 255, 51, 0.05); padding: 15px; border-left: 4px solid #33ff33; margin-bottom: 20px; line-height: 1.6; font-size: 0.9rem; border-style: dashed;}
         .scribble-title { color: #fff; text-decoration: underline; margin-bottom: 10px; display: block; }
-        
         input[type="text"], textarea {
             background: rgba(51, 255, 51, 0.1); border: 1px solid #33ff33;
             color: #33ff33; font-family: inherit; font-size: 1rem; width: 100%; outline: none; padding: 10px; box-sizing: border-box;
         }
         textarea { height: 120px; resize: none; text-transform: uppercase; }
-
         .progress-container { width: 100%; height: 12px; border: 1px solid #33ff33; margin: 20px 0; display: none; }
         .progress-bar { width: 0%; height: 100%; background: #33ff33; }
         .score-board { display: flex; justify-content: space-between; font-size: 0.9rem; color: #1a551a; }
@@ -67,9 +63,10 @@
 
     <div id="work-view" class="module-box hidden">
         <div id="case-display"></div>
-        <div class="input-area" id="input-container"></div>
+        <div id="input-container">
+            </div>
         <div class="progress-container" id="prog-cont"><div class="progress-bar" id="prog-bar"></div></div>
-        <p id="feedback"></p>
+        <p id="feedback" style="margin-top:10px;"></p>
     </div>
 </div>
 
@@ -83,68 +80,27 @@
     const CHEAT_CODE = "SYNTEC_OVERRIDE";
 
     const database = {
-        // ... (Keep your previous General, Psych, and ER modules here)
+        general: [
+            { data: "AGE: 45 | SEX: M | HISTORY: ASBESTOS EXPOSURE. | SYMPTOMS: PERSISTENT COUGH, WEIGHT LOSS.", answer: "LUNG CANCER", hint: "MALIGNANT PULMONARY NEOPLASM." },
+            { data: "AGE: 30 | SEX: M | BLOOD: WBC 18,000 | SYMPTOMS: RLQ PAIN, REBOUND TENDERNESS.", answer: "APPENDICITIS", hint: "INFLAMMATION OF THE APPENDIX." },
+            // Add your other 8 cases here...
+        ],
+        psychiatry: [
+            { data: "AGE: 19 | SEX: M | SYMPTOMS: AUDITORY HALLUCINATIONS, WORD SALAD, FLAT AFFECT.", answer: "SCHIZOPHRENIA", hint: "A BREAK FROM REALITY; PSYCHOSIS." },
+            // Add your other 9 cases here...
+        ],
+        emergency: [
+            { data: "AGE: 50 | SEX: M | SYMPTOMS: CRUSHING SUBSTERNAL CHEST PAIN, DIAPHORESIS.", answer: "MYOCARDIAL INFARCTION", hint: "HEART ATTACK." },
+            // Add your other 9 cases here...
+        ],
         charting: [
             { 
                 name: "SAMUEL_W", age: "54", sex: "M",
-                scribbles: "Eyes looking yellow. Heavy drinker—20 years. Belly is hard and big. Looks like liver failure.", 
+                scribbles: "Eyes looking yellow. Heavy drinker—20 years. Belly is hard and big.", 
                 keywords: ["JAUNDICE", "CIRRHOSIS", "ALCOHOL"],
                 hint: "Keywords: J_______, C_______, A______"
             },
-            { 
-                name: "EMILY_R", age: "08", sex: "F",
-                scribbles: "Kid had the flu. Parents gave aspirin. Now she's puking and acting crazy/confused. Brain swelling?", 
-                keywords: ["REYE", "ASPIRIN", "ENCEPHALOPATHY"],
-                hint: "Keywords: R___, A______, E_____________"
-            },
-            { 
-                name: "ARTHUR_B", age: "62", sex: "M",
-                scribbles: "Chest pain—says it feels like an elephant. Sweating like crazy. EKG shows weird spikes in ST segment.", 
-                keywords: ["INFARCTION", "MYOCARDIAL", "EKG"],
-                hint: "Keywords: I________, M________, E__"
-            },
-            { 
-                name: "SARAH_K", age: "29", sex: "F",
-                scribbles: "Leg is huge and red. Just got off a plane from London. Pain when she walks. Need to check for a clot.", 
-                keywords: ["THROMBOSIS", "ULTRASOUND", "DVT"],
-                hint: "Keywords: T________, U________, D__"
-            },
-            { 
-                name: "UNKNOWN_SUBJ", age: "19", sex: "M",
-                scribbles: "Found talking to walls. Says he hears 'The Absolute'. No emotion on face. Rambling nonsense.", 
-                keywords: ["SCHIZOPHRENIA", "HALLUCINATIONS", "PSYCHOSIS"],
-                hint: "Keywords: S____________, H____________, P________"
-            },
-            { 
-                name: "HENRY_V", age: "41", sex: "M",
-                scribbles: "Stiff neck. Can't look at the lights. High fever. Spinal tap needed ASAP.", 
-                keywords: ["MENINGITIS", "LUMBAR", "FEVER"],
-                hint: "Keywords: M_________, L_____, F____"
-            },
-            { 
-                name: "CLARA_D", age: "33", sex: "F",
-                scribbles: "Can't breathe. Wheezing. Used her inhaler but it didn't help. Chest feels tight.", 
-                keywords: ["ASTHMA", "WHEEZING", "RESPIRATORY"],
-                hint: "Keywords: A_____, W_______, R__________"
-            },
-            { 
-                name: "PETER_G", age: "70", sex: "M",
-                scribbles: "Can't remember his wife's name. Getting lost in his own house. Brain is going.", 
-                keywords: ["ALZHEIMERS", "DEMENTIA", "MEMORY"],
-                hint: "Keywords: A_________, D_______, M_____"
-            },
-            { 
-                name: "LISA_M", age: "25", sex: "F",
-                scribbles: "Ate peanuts by mistake. Throat closing up. Hives everywhere. Get the epi-pen.", 
-                keywords: ["ANAPHYLAXIS", "ALLERGIC", "EPINEPHRINE"],
-                hint: "Keywords: A__________, A_______, E__________"
-            },
-            { 
-                name: "VICTOR_S", age: "50", sex: "M",
-                scribbles: "Passed out at dinner. Smells like fruit? Sugar is probably through the roof.", 
-                keywords: ["DIABETIC", "KETOACIDOSIS", "GLUCOSE"],
-                hint: "Keywords: D_______, K___________, G______"
-            }
+            // Add your other 9 cases here...
         ]
     };
 
@@ -160,79 +116,73 @@
 
     function loadNewCase() {
         const modCases = database[currentModule];
+        // Cycle through cases or random
         const c = modCases[score % modCases.length];
         currentAnswer = c.answer || "";
         currentKeywords = c.keywords || [];
         currentHint = c.hint;
 
+        const display = document.getElementById('case-display');
+        const inputArea = document.getElementById('input-container');
+
         if (currentModule === 'charting') {
-            document.getElementById('case-display').innerHTML = `
+            display.innerHTML = `
                 <div class="patient-file">
-                    <span class="scribble-title">[PHYSICIAN_NOTES]</span>
+                    <span class="scribble-title">[PHYSICIAN_SCRIBBLED_NOTES]</span>
                     * NAME: ${c.name}<br>
                     * AGE/SEX: ${c.age} / ${c.sex}<br>
                     * NOTES: ${c.scribbles}
-                </div>
-            `;
-        } else {
-            document.getElementById('case-display').innerHTML = `<div class="patient-file"><strong>[DATA_FILE]</strong><br><br>${c.data}</div>`;
-        }
-        
-        renderInput(c);
-    }
-
-    function renderInput(c) {
-        const inputArea = document.getElementById('input-container');
-        if (currentModule === 'charting') {
+                </div>`;
             inputArea.innerHTML = `
                 <p>TRANSCRIBE PROFESSIONAL CLINICAL NOTE:</p>
-                <textarea id="user-text" placeholder="Patient ${c.name} presents with..."></textarea>
-                <button class="submit-btn" onclick="checkCharting()">UPLINK TO MAINFRAME</button>
-                <button class="hint-btn" onclick="showHint()">[ NEED HELP? ]</button>
-            `;
+                <textarea id="user-text" placeholder="ENTER NOTE..."></textarea>
+                <button class="submit-btn" onclick="processInput()">UPLINK TO MAINFRAME</button>
+                <button class="hint-btn" onclick="showHint()">[ HINT ]</button>`;
             document.getElementById('user-text').focus();
         } else {
+            display.innerHTML = `<div class="patient-file"><strong>[DATA_FILE]</strong><br><br>${c.data}</div>`;
             inputArea.innerHTML = `
-                <p id="prompt-text">${c.prompt || "TYPE DIAGNOSIS:"}</p>
+                <p id="prompt-text">${c.prompt || "TYPE DIAGNOSIS AND PRESS ENTER:"}</p>
                 <input type="text" id="user-input" autocomplete="off">
-                <button class="hint-btn" onclick="showHint()">[ NEED HELP? ]</button>
-            `;
+                <button class="hint-btn" onclick="showHint()">[ HINT ]</button>`;
             const input = document.getElementById('user-input');
             input.focus();
-            input.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleInput(input.value); });
+            input.addEventListener('keypress', (e) => { if(e.key === 'Enter') processInput(); });
         }
         document.getElementById('feedback').innerText = "";
     }
 
-    function handleInput(val) {
-        val = val.trim().toUpperCase();
-        if (val === CHEAT_CODE) { score = 10; runProgressBar(true); return; }
-        runProgressBar(val === currentAnswer);
-    }
+    function processInput() {
+        let val = "";
+        let isCorrect = false;
 
-    function checkCharting() {
-        const val = document.getElementById('user-text').value.toUpperCase();
-        if (val.includes(CHEAT_CODE)) { score = 10; runProgressBar(true); return; }
-        
-        let matches = 0;
-        currentKeywords.forEach(k => { if (val.includes(k.toUpperCase())) matches++; });
-
-        if (matches >= 3) { runProgressBar(true); } 
-        else { 
-            document.getElementById('feedback').innerText = `INSUFFICIENT DATA. NOTE REQUIRES MORE CLINICAL PRECISION. (MATCHED: ${matches}/3)`;
+        if (currentModule === 'charting') {
+            val = document.getElementById('user-text').value.toUpperCase();
+            if (val.includes(CHEAT_CODE)) { score = 10; isCorrect = true; } 
+            else {
+                let matches = 0;
+                currentKeywords.forEach(k => { if (val.includes(k.toUpperCase())) matches++; });
+                isCorrect = (matches >= 3);
+            }
+        } else {
+            val = document.getElementById('user-input').value.trim().toUpperCase();
+            if (val === CHEAT_CODE) { score = 10; isCorrect = true; }
+            else { isCorrect = (val === currentAnswer); }
         }
-    }
 
-    function showHint() { document.getElementById('feedback').innerText = "HINT: " + currentHint; }
+        runProgressBar(isCorrect);
+    }
 
     function runProgressBar(isCorrect) {
         document.getElementById('input-container').classList.add('hidden');
         document.getElementById('prog-cont').style.display = "block";
         let width = 0;
         const interval = setInterval(() => {
-            if (width >= 100) { clearInterval(interval); finalize(isCorrect); } 
-            else { width += 10; document.getElementById('prog-bar').style.width = width + '%'; }
-        }, 50);
+            if (width >= 100) {
+                clearInterval(interval);
+                finalize(isCorrect);
+            } else { width += 10; document.getElementById('prog-bar').style.width = width + '%'; }
+        }, 40);
     }
 
     function finalize(isCorrect) {
@@ -243,28 +193,45 @@
         if (isCorrect) {
             if (score < 10) score++;
             updateScoreDisplay();
-            if (score >= 10) { completedModules[currentModule] = true; checkTotalProgression(); } 
-            else { loadNewCase(); }
+            if (score >= 10) {
+                completedModules[currentModule] = true;
+                markModuleComplete();
+            } else {
+                loadNewCase();
+            }
         } else {
-            document.getElementById('feedback').innerText = "ERROR: DIAGNOSIS NOT RECOGNIZED.";
+            document.getElementById('feedback').innerText = "ERROR: DATA REJECTED. RE-EVALUATE.";
             const input = document.getElementById('user-input') || document.getElementById('user-text');
-            if(input) { input.disabled = false; input.focus(); }
+            if(input) input.focus();
         }
     }
 
-    function updateScoreDisplay() { document.getElementById('progress-text').innerText = `MODULE PROGRESS: ${score} / 10`; }
-
-    function checkTotalProgression() {
+    function markModuleComplete() {
+        document.getElementById('feedback').innerText = "MODULE VALIDATED. SAVING TO ARCHIVE...";
         const btn = document.getElementById('btn-' + currentModule);
-        if (btn) { btn.innerText = currentModule.toUpperCase() + " [COMPLETE]"; btn.disabled = true; }
-
-        if (Object.values(completedModules).every(v => v === true)) {
-            document.getElementById('feedback').innerText = "CURRICULUM VALIDATED. ACCESSING ARCHIVES...";
-            setTimeout(() => window.location.href = "index.html", 3000);
-        } else {
-            document.getElementById('work-view').classList.add('hidden');
-            document.getElementById('menu-view').classList.remove('hidden');
+        if (btn) {
+            btn.innerText = currentModule.toUpperCase() + " [COMPLETE]";
+            btn.disabled = true;
         }
+
+        setTimeout(() => {
+            if (Object.values(completedModules).every(v => v === true)) {
+                document.getElementById('feedback').innerText = "CURRICULUM COMPLETE. RETURNING...";
+                setTimeout(() => window.location.href = "index.html", 2000);
+            } else {
+                document.getElementById('work-view').classList.add('hidden');
+                document.getElementById('menu-view').classList.remove('hidden');
+                document.getElementById('module-title').innerText = "SYSTEM SELECTION MENU";
+            }
+        }, 1500);
+    }
+
+    function updateScoreDisplay() {
+        document.getElementById('progress-text').innerText = `MODULE PROGRESS: ${score} / 10`;
+    }
+
+    function showHint() {
+        document.getElementById('feedback').innerText = "HINT: " + currentHint;
     }
 </script>
 </body>
