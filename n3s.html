@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>n3s.dsk - NEURAL UPLINK</title>
+    <title>n3s.dsk </title>
     <style>
         :root {
             --neon-green: #33ff33;
@@ -64,12 +64,12 @@
 
 <div class="crt-monitor">
     <div id="chat-log">
-        <p class="system">[UPLINK ESTABLISHED: REMOTE NODE 013-S]</p>
-        <p class="system">[SECURITY PROTOCOL ACTIVE: N3S DIRECTORY IS RESTRICTED]</p>
-        <p class="msg">PLEASE PROVIDE CREDENTIALS TO INITIALIZE...</p>
+        <p class="system">[CONNECTION ESTABLISHED: REMOTE NODE 013-S]</p>
+        <p class="system">[SECURITY PROTOCOL ACTIVE: FILE IS RESTRICTED]</p>
+        <p class="msg">PLEASE PROVIDE CREDENTIALS...</p>
     </div>
     <div class="input-line">
-        <span id="label">LOGIN: </span>
+        <span id="label">EMPLOYEE ID: </span>
         <input type="text" id="user-input" autofocus autocomplete="off">
     </div>
 </div>
@@ -178,7 +178,7 @@
         else if (stage === 1) {
             label.textContent = "> ";
             userInput.type = "text";
-            addSystemMsg("[ACCESS GRANTED. NEURAL ARCHIVE UNLOCKED.]");
+            addSystemMsg("[ACCESS GRANTED.]");
             stage = 2;
         } 
         else if (stage === 2) {
@@ -202,7 +202,7 @@
                 
                 await new Promise(r => setTimeout(r, 1500));
                 addSystemMsg("[FATAL ERROR: NEURAL LINK SEVERED]");
-                addSystemMsg(`[CLICK <span class="return-link" onclick="window.location.href='index.html'">HERE</span> TO RETURN TO TERMINAL DIRECTORY]`);
+                addSystemMsg(`[CLICK <span class="return-link" onclick="window.location.href='index.html'">HERE</span> TO RETURN TO DIRECTORY]`);
             }
         }
     }
