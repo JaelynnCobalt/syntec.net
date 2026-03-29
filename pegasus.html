@@ -1,204 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Pegasus Terminal</title>
+    <meta charset="UTF-8">
+    <title>SYNTEC PEGASUS SYSTEM</title>
+    <style>
+        /* Apple II Phosphor Green & Scanlines */
+        body {
+            background-color: #000;
+            color: #33ff33;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-transform: uppercase;
+            overflow: hidden;
+        }
 
-<style>
-body {
-background-color: #0a0a0a;
-color: #33ff33;
-font-family: 'Courier New', Courier, monospace;
-display: flex;
-justify-content: center;
-align-items: center;
-height: 100vh;
-margin: 0;
-text-shadow: 0 0 5px #33ff33;
-}
+        .crt-monitor {
+            position: relative;
+            width: 95vw;
+            max-width: 850px;
+            height: 85vh;
+            padding: 30px;
+            border: 15px solid #2a2a2a;
+            border-radius: 40px;
+            background: #050505;
+            box-shadow: inset 0 0 80px rgba(0,0,0,1), 0 0 30px rgba(0,0,0,1);
+            overflow: hidden;
+        }
 
-.screen {
-width: 80%;
-max-width: 900px;
-height: 650px;
-border: 2px solid #33ff33;
-padding: 20px;
-background: #050505;
-box-shadow: 0 0 20px rgba(51,255,51,0.2);
-overflow-y: auto;
-}
+        /* Scanline Overlay */
+        .crt-monitor::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            z-index: 5;
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+        }
 
-h1 {
-font-size: 1.2rem;
-margin-bottom: 20px;
-}
+        .screen-content {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            overflow-y: auto;
+            text-shadow: 0 0 5px rgba(51, 255, 51, 0.8);
+            padding-right: 10px;
+        }
 
-.menu button {
-display: block;
-background: transparent;
-border: 1px solid #33ff33;
-color: #33ff33;
-padding: 10px;
-margin-bottom: 10px;
-width: 100%;
-text-align: left;
-cursor: pointer;
-}
+        h1 { font-size: 1.3rem; border-bottom: 2px solid #33ff33; padding-bottom: 8px; margin-top: 0; }
 
-.menu button.disabled {
-opacity: 0.4;
-cursor: not-allowed;
-}
+        .menu-item {
+            background: transparent;
+            border: none;
+            color: #33ff33;
+            font-family: inherit;
+            font-size: 1rem;
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 8px;
+            cursor: pointer;
+        }
 
-.mail-list button {
-display: block;
-width: 100%;
-text-align: left;
-background: transparent;
-border: 1px solid #33ff33;
-color: #33ff33;
-margin-bottom: 8px;
-padding: 8px;
-cursor: pointer;
-}
+        .menu-item:hover {
+            background: #33ff33;
+            color: #000;
+        }
 
-.hidden {
-display: none;
-}
+        .menu-item.disabled {
+            color: #0b440b;
+            cursor: default;
+        }
 
-.back {
-margin-top: 20px;
-border: 1px solid #33ff33;
-background: transparent;
-color: #33ff33;
-padding: 5px 10px;
-cursor: pointer;
-}
-</style>
+        .hidden { display: none; }
+
+        .mail-row {
+            border-bottom: 1px solid #1a551a;
+            padding: 12px 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .mail-row:hover {
+            background: rgba(51, 255, 51, 0.1);
+        }
+
+        .back-btn {
+            margin-top: 20px;
+            background: transparent;
+            color: #33ff33;
+            border: 1px solid #33ff33;
+            cursor: pointer;
+            padding: 8px 15px;
+            font-family: inherit;
+        }
+
+        .back-btn:hover { background: #33ff33; color: #000; }
+
+        /* Scrollbar styling */
+        .screen-content::-webkit-scrollbar { width: 12px; }
+        .screen-content::-webkit-scrollbar-track { background: #050505; border: 1px solid #33ff33; }
+        .screen-content::-webkit-scrollbar-thumb { background: #33ff33; }
+    </style>
 </head>
-
 <body>
 
-<div class="screen">
+<div class="crt-monitor">
+    <div class="screen-content">
+        
+        <div id="main-menu">
+            <h1>SYNTEC PEGASUS OS V.2.0.1 (C) 1986</h1>
+            <p>LOGGED IN AS: USER_J13 [LEVEL 1 ACCESS]</p>
+            <p>--------------------------------------------------</p>
+            <button class="menu-item disabled">1. SYSTEM STATUS [OFFLINE]</button>
+            <button class="menu-item disabled">2. LOCAL DISK UTILITY</button>
+            <button class="menu-item" onclick="showMail()">3. S-MAIL INBOX (12)</button>
+            <button class="menu-item disabled">4. TERMINAL CONFIGURATION</button>
+            <button class="menu-item disabled">5. SECURITY PROTOCOLS</button>
+            <p style="margin-top: 50px;">MEM: 64K RAM FREE</p>
+        </div>
 
-<div id="main-menu">
-<h1>PEGASUS TERMINAL</h1>
+        <div id="mail-section" class="hidden">
+            <h1>S-MAIL INBOX - 12 MESSAGES</h1>
+            <div id="mail-list"></div>
+            <button class="back-btn" onclick="showMenu()">[ESC] RETURN TO MAIN MENU</button>
+        </div>
 
-<div class="menu">
-<button class="disabled">1. Chat Logs</button>
-<button class="disabled">2. Incident Logs</button>
-<button id="mail-btn">3. S-Mail</button>
-<button class="disabled">4. Lab Reports</button>
-<button class="disabled">5. Important Contacts</button>
-</div>
-</div>
+        <div id="message-view" class="hidden">
+            <p id="m-from"></p>
+            <p id="m-subject"></p>
+            <p id="m-date"></p>
+            <p>--------------------------------------------------</p>
+            <p id="m-body" style="line-height: 1.6; white-space: pre-wrap;"></p>
+            <p>--------------------------------------------------</p>
+            <button class="back-btn" onclick="showMail()">[ESC] BACK TO INBOX</button>
+        </div>
 
-<!-- MAIL SECTION -->
-<div id="mail-section" class="hidden">
-<h1>S-MAIL INBOX</h1>
-
-<div class="mail-list" id="mail-list"></div>
-
-<button class="back" onclick="goBack()">← BACK</button>
-</div>
-
-<!-- MESSAGE VIEW -->
-<div id="message-view" class="hidden">
-<h1 id="mail-subject"></h1>
-<p id="mail-from"></p>
-<p id="mail-body"></p>
-
-<button class="back" onclick="backToInbox()">← BACK TO INBOX</button>
-</div>
-
+    </div>
 </div>
 
 <script>
+    const mails = [
+        {
+            from: "IT_ADMIN",
+            date: "OCT-12-1986",
+            subject: "PASSWORD EXPIRATION",
+            body: "YOUR NETWORK PASSWORD WILL EXPIRE IN 3 DAYS. PLEASE UPDATE VIA THE TERMINAL SETTINGS ON LEVEL 2. FAILURE TO COMPLY WILL RESULT IN LOCKOUT."
+        },
+        {
+            from: "B_COBALT",
+            date: "OCT-10-1986",
+            subject: "RE: CALIBRATION LOGS",
+            body: "J13, THE SENSORS IN LAB 4 ARE DRIFTING AGAIN. PLEASE RE-RUN THE PEGASUS ALIGNMENT SCRIPT BEFORE END OF SHIFT. I DON'T WANT TO SEE ANOTHER ERROR REPORT TOMORROW."
+        },
+        {
+            from: "HR_DEPT",
+            date: "OCT-09-1986",
+            subject: "BENEFITS ENROLLMENT",
+            body: "REMINDER TO ALL STAFF: THE DEADLINE FOR UPDATING YOUR MEDICAL INSURANCE SELECTIONS FOR 1987 IS THIS FRIDAY. COPIES OF THE FORMS ARE AVAILABLE AT THE FRONT DESK."
+        },
+        {
+            from: "FACILITIES",
+            date: "OCT-08-1986",
+            subject: "BREAKROOM CONDUCT",
+            body: "REMINDER: ALL STAFF MUST LABEL THEIR PERSONAL REFRIGERATION ITEMS. AN UNIDENTIFIED LIQUID WAS REMOVED FROM THE DISPENSER YESTERDAY. COMPLIANCE IS MANDATORY."
+        },
+        {
+            from: "LAB_COORD",
+            date: "OCT-07-1986",
+            subject: "RE: REAGENT ORDER",
+            body: "THE SHIPMENT OF SODIUM CHLORIDE HAS BEEN DELAYED. PLEASE ADJUST YOUR TESTING SCHEDULE ACCORDINGLY. CONTACT PROCUREMENT FOR EMERGENCY STOCKS."
+        },
+        {
+            from: "JANITORIAL",
+            date: "OCT-06-1986",
+            subject: "FLOOR WAXING SCHEDULE",
+            body: "LEVEL 3 CORRIDORS WILL BE CLOSED FOR MAINTENANCE STARTING AT 20:00 HOURS. PLEASE ENSURE ALL DESKS ARE CLEARED OF SENSITIVE DOCUMENTS."
+        },
+        {
+            from: "ACCOUNTING",
+            date: "OCT-05-1986",
+            subject: "REQUISITION #4409",
+            body: "YOUR REQUEST FOR ADDITIONAL STATIONERY AND FLOPPY DISKS HAS BEEN DENIED. PLEASE UTILIZE EXISTING STOCKS UNTIL THE NEXT QUARTERLY REVIEW."
+        },
+        {
+            from: "W_NATHANIAL",
+            date: "OCT-04-1986",
+            subject: "LOG FILING",
+            body: "ENSURE ALL DAILY ACTIVITY LOGS ARE SAVED TO THE CENTRAL REPOSITORY. DO NOT LEAVE DATA ON LOCAL DISKS. N.S. IS MONITORING UPTIME RATIOS."
+        },
+        {
+            from: "SAFETY_OFFICER",
+            date: "OCT-03-1986",
+            subject: "EYEWASH STATION INSPECTION",
+            body: "ANNUAL INSPECTION OF SAFETY EQUIPMENT COMPLETED. UNIT #12 (LAB 4) REQUIRES REPAIR. DO NOT USE CHEMICAL AGENTS IN THIS AREA UNTIL FURTHER NOTICE."
+        },
+        {
+            from: "PROCUREMENT",
+            date: "OCT-02-1986",
+            subject: "NEW BADGE PHOTOS",
+            body: "WE ARE UPDATING ALL PERSONNEL BADGES TO THE NEW FORMAT. PLEASE VISIT SECURITY DURING YOUR LUNCH BREAK TO HAVE YOUR PHOTO TAKEN."
+        },
+        {
+            from: "IT_DEPT",
+            date: "SEP-30-1986",
+            subject: "SYSTEM MAINTENANCE",
+            body: "THE PEGASUS SERVER WILL BE OFFLINE FOR SCHEDULED BACKUPS FROM 01:00 TO 03:00 ON SATURDAY. SAVE YOUR WORK FREQUENTLY."
+        },
+        {
+            from: "N_SYPHUS_OFFICE",
+            date: "SEP-28-1986",
+            subject: "QUARTERLY MEMO",
+            body: "A REMINDER THAT EXCELLENCE IS OUR PRIMARY DIRECTIVE. THE WORK WE DO AT SYNTEC LABS IS SHAPING THE FUTURE. DISCRETION IS EXPECTED FROM EVERYONE."
+        }
+    ];
 
-const mailBtn = document.getElementById('mail-btn');
-const mainMenu = document.getElementById('main-menu');
-const mailSection = document.getElementById('mail-section');
-const messageView = document.getElementById('message-view');
+    function showMail() {
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('message-view').classList.add('hidden');
+        document.getElementById('mail-section').classList.remove('hidden');
+        
+        const list = document.getElementById('mail-list');
+        list.innerHTML = "";
+        mails.forEach((m, i) => {
+            const div = document.createElement('div');
+            div.className = "mail-row";
+            div.innerHTML = `[${i+1}] ${m.date} - ${m.subject.substring(0, 25)}...`;
+            div.onclick = () => openMessage(i);
+            list.appendChild(div);
+        });
+    }
 
-const mailList = document.getElementById('mail-list');
+    function openMessage(i) {
+        document.getElementById('mail-section').classList.add('hidden');
+        document.getElementById('message-view').classList.remove('hidden');
+        document.getElementById('m-from').textContent = "FROM: " + mails[i].from;
+        document.getElementById('m-subject').textContent = "SUBJ: " + mails[i].subject;
+        document.getElementById('m-date').textContent = "DATE: " + mails[i].date;
+        document.getElementById('m-body').textContent = mails[i].body;
+    }
 
-const subject = document.getElementById('mail-subject');
-const from = document.getElementById('mail-from');
-const body = document.getElementById('mail-body');
-
-// MAIL DATA
-const mails = [
-{
-from: "Nelson Syphus",
-subject: "Internal Compliance",
-body: "All personnel are expected to adhere to Syntec's confidentiality policies. Any breach will result in immediate reassignment."
-},
-{
-from: "Wesley Nathanial",
-subject: "Disagreement",
-body: "I don’t agree with Nelson’s direction. Things are getting out of hand. Keep your head down."
-},
-{
-from: "Benjamin Cobalt",
-subject: "J13 Clearance",
-body: "Jaelynn, you’ve been granted limited access. Do not go beyond your clearance level. This is not a suggestion."
-},
-{
-from: "Eliora Syphus",
-subject: "You shouldn't be here",
-body: "If you're reading this, you're already too deep. Not everything in Pegasus was meant to be found."
-},
-{
-from: "Deborah Nathanial",
-subject: "Clinical Update",
-body: "Test subjects are responding inconsistently. Some show accelerated recovery. Others... do not."
-}
-];
-
-// OPEN MAIL
-mailBtn.onclick = () => {
-mainMenu.classList.add('hidden');
-mailSection.classList.remove('hidden');
-renderMail();
-};
-
-// RENDER MAIL LIST
-function renderMail() {
-mailList.innerHTML = "";
-
-mails.forEach((mail, index) => {
-const btn = document.createElement('button');
-btn.textContent = `${mail.from} - ${mail.subject}`;
-btn.onclick = () => openMail(index);
-mailList.appendChild(btn);
-});
-}
-
-// OPEN MESSAGE
-function openMail(index) {
-const mail = mails[index];
-
-mailSection.classList.add('hidden');
-messageView.classList.remove('hidden');
-
-subject.textContent = mail.subject;
-from.textContent = "FROM: " + mail.from;
-body.textContent = mail.body;
-}
-
-// BACK TO MENU
-function goBack() {
-mailSection.classList.add('hidden');
-mainMenu.classList.remove('hidden');
-}
-
-// BACK TO INBOX
-function backToInbox() {
-messageView.classList.add('hidden');
-mailSection.classList.remove('hidden');
-}
-
+    function showMenu() {
+        document.getElementById('mail-section').classList.add('hidden');
+        document.getElementById('main-menu').classList.remove('hidden');
+    }
 </script>
-
 </body>
 </html>
