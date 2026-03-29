@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pegasus Terminal</title>
+
+<style>
+body {
+background-color: #0a0a0a;
+color: #33ff33;
+font-family: 'Courier New', Courier, monospace;
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;
+margin: 0;
+text-shadow: 0 0 5px #33ff33;
+}
+
+.screen {
+width: 80%;
+max-width: 900px;
+height: 650px;
+border: 2px solid #33ff33;
+padding: 20px;
+background: #050505;
+box-shadow: 0 0 20px rgba(51,255,51,0.2);
+overflow-y: auto;
+}
+
+h1 {
+font-size: 1.2rem;
+margin-bottom: 20px;
+}
+
+.menu button {
+display: block;
+background: transparent;
+border: 1px solid #33ff33;
+color: #33ff33;
+padding: 10px;
+margin-bottom: 10px;
+width: 100%;
+text-align: left;
+cursor: pointer;
+}
+
+.menu button.disabled {
+opacity: 0.4;
+cursor: not-allowed;
+}
+
+.mail-list button {
+display: block;
+width: 100%;
+text-align: left;
+background: transparent;
+border: 1px solid #33ff33;
+color: #33ff33;
+margin-bottom: 8px;
+padding: 8px;
+cursor: pointer;
+}
+
+.hidden {
+display: none;
+}
+
+.back {
+margin-top: 20px;
+border: 1px solid #33ff33;
+background: transparent;
+color: #33ff33;
+padding: 5px 10px;
+cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="screen">
+
+<div id="main-menu">
+<h1>PEGASUS TERMINAL</h1>
+
+<div class="menu">
+<button class="disabled">1. Chat Logs</button>
+<button class="disabled">2. Incident Logs</button>
+<button id="mail-btn">3. S-Mail</button>
+<button class="disabled">4. Lab Reports</button>
+<button class="disabled">5. Important Contacts</button>
+</div>
+</div>
+
+<!-- MAIL SECTION -->
+<div id="mail-section" class="hidden">
+<h1>S-MAIL INBOX</h1>
+
+<div class="mail-list" id="mail-list"></div>
+
+<button class="back" onclick="goBack()">← BACK</button>
+</div>
+
+<!-- MESSAGE VIEW -->
+<div id="message-view" class="hidden">
+<h1 id="mail-subject"></h1>
+<p id="mail-from"></p>
+<p id="mail-body"></p>
+
+<button class="back" onclick="backToInbox()">← BACK TO INBOX</button>
+</div>
+
+</div>
+
+<script>
+
+const mailBtn = document.getElementById('mail-btn');
+const mainMenu = document.getElementById('main-menu');
+const mailSection = document.getElementById('mail-section');
+const messageView = document.getElementById('message-view');
+
+const mailList = document.getElementById('mail-list');
+
+const subject = document.getElementById('mail-subject');
+const from = document.getElementById('mail-from');
+const body = document.getElementById('mail-body');
+
+// MAIL DATA
+const mails = [
+{
+from: "Nelson Syphus",
+subject: "Internal Compliance",
+body: "All personnel are expected to adhere to Syntec's confidentiality policies. Any breach will result in immediate reassignment."
+},
+{
+from: "Wesley Nathanial",
+subject: "Disagreement",
+body: "I don’t agree with Nelson’s direction. Things are getting out of hand. Keep your head down."
+},
+{
+from: "Benjamin Cobalt",
+subject: "J13 Clearance",
+body: "Jaelynn, you’ve been granted limited access. Do not go beyond your clearance level. This is not a suggestion."
+},
+{
+from: "Eliora Syphus",
+subject: "You shouldn't be here",
+body: "If you're reading this, you're already too deep. Not everything in Pegasus was meant to be found."
+},
+{
+from: "Deborah Nathanial",
+subject: "Clinical Update",
+body: "Test subjects are responding inconsistently. Some show accelerated recovery. Others... do not."
+}
+];
+
+// OPEN MAIL
+mailBtn.onclick = () => {
+mainMenu.classList.add('hidden');
+mailSection.classList.remove('hidden');
+renderMail();
+};
+
+// RENDER MAIL LIST
+function renderMail() {
+mailList.innerHTML = "";
+
+mails.forEach((mail, index) => {
+const btn = document.createElement('button');
+btn.textContent = `${mail.from} - ${mail.subject}`;
+btn.onclick = () => openMail(index);
+mailList.appendChild(btn);
+});
+}
+
+// OPEN MESSAGE
+function openMail(index) {
+const mail = mails[index];
+
+mailSection.classList.add('hidden');
+messageView.classList.remove('hidden');
+
+subject.textContent = mail.subject;
+from.textContent = "FROM: " + mail.from;
+body.textContent = mail.body;
+}
+
+// BACK TO MENU
+function goBack() {
+mailSection.classList.add('hidden');
+mainMenu.classList.remove('hidden');
+}
+
+// BACK TO INBOX
+function backToInbox() {
+messageView.classList.add('hidden');
+mailSection.classList.remove('hidden');
+}
+
+</script>
+
+</body>
+</html>
