@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Syntec(TM) Terminal - Pegasus OS</title>
+    <title>Syntec(TM) Terminal _ Pegasus OS</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background-color: #0a0a0a; color: #33ff33; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; text-shadow: 0 0 5px #33ff33; }
@@ -145,10 +145,13 @@ input.addEventListener('keydown', async function(e) {
                 await typeLine("--- SYSTEM DIRECTORY ---", 20);
                 await typeLine("> [CLINICAL] - INTERN EVALUATION", 20);
                 await typeLine("> [HUB]      - PERSONNEL COMMUNICATIONS", 20);
+                await typeLine("> [MAIL]     - SMAIL TERMINAL", 20);
             } else if (cmd === "hub") {
                 await showLoadingBar("mhub.html", "COMMUNICATIONS");
             } else if (cmd === "clinical") {
                 await showLoadingBar("clinical-practice.html", "CLINICAL");
+            } else if (cmd === "mail") {
+                await showLoadingBar("smail.html", "SMAIL TERMINAL");
             } else {
                 await typeLine("INVALID PROMPT", 20);
             }
