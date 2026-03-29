@@ -2,197 +2,243 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SYNTEC TERMINAL - TASK UPLOAD</title>
+    <title>SYNTEC CLINICAL MODULE - J13</title>
     <style>
         body {
             background-color: #000;
             color: #33ff33;
             font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-transform: uppercase;
-            overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; margin: 0; text-transform: uppercase; overflow: hidden;
         }
 
         .crt-monitor {
-            position: relative;
-            width: 90vw;
-            max-width: 800px;
-            height: 80vh;
-            padding: 25px;
-            border: 12px solid #2a2a2a;
-            border-radius: 35px;
-            background: #050505;
-            box-shadow: inset 0 0 60px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,1);
-            display: flex;
-            flex-direction: column;
+            position: relative; width: 95vw; max-width: 850px; height: 90vh;
+            padding: 25px; border: 15px solid #2a2a2a; border-radius: 40px;
+            background: #050505; box-shadow: inset 0 0 80px #000;
+            display: flex; flex-direction: column;
         }
 
-        .crt-monitor::before {
-            content: " ";
-            display: block;
-            position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+        .crt-monitor::after {
+            content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-            z-index: 10;
-            background-size: 100% 3px;
-            pointer-events: none;
+            z-index: 10; background-size: 100% 3px; pointer-events: none;
         }
 
-        .header { border-bottom: 2px solid #33ff33; padding-bottom: 10px; margin-bottom: 20px; flex-shrink: 0; }
+        .header { border-bottom: 2px solid #33ff33; padding-bottom: 10px; margin-bottom: 15px; }
+        .module-box { border: 1px solid #33ff33; padding: 20px; flex-grow: 1; overflow-y: auto; }
         
-        .stat-bar { display: flex; justify-content: space-between; margin-bottom: 15px; color: #1a551a; font-size: 0.8rem; }
-        .stars { color: #33ff33; font-weight: bold; }
-
-        .task-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            border: 1px solid #1a551a;
-            padding: 30px;
-            background: rgba(0, 20, 0, 0.2);
+        .patient-file { background: rgba(51, 255, 51, 0.05); padding: 15px; margin-bottom: 20px; border-left: 4px solid #33ff33; }
+        .input-area { margin-top: 20px; }
+        
+        input[type="text"] {
+            background: transparent; border: none; border-bottom: 2px solid #33ff33;
+            color: #33ff33; font-family: inherit; font-size: 1.1rem; width: 100%;
+            outline: none; padding: 5px;
         }
 
-        .instruction { color: #1a551a; font-size: 0.8rem; margin-bottom: 5px; }
-        #prompt-text { font-size: 1.1rem; margin-bottom: 20px; color: #33ff33; }
-
-        .input-area { display: flex; align-items: center; gap: 10px; }
-        #user-input {
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid #33ff33;
-            color: #33ff33;
-            font-family: inherit;
-            font-size: 1.2rem;
-            width: 100%;
-            outline: none;
-            text-transform: uppercase;
-        }
-
-        /* Progress UI */
-        .progress-box { margin-top: 30px; display: none; }
-        .progress-bar-container { width: 100%; height: 15px; border: 1px solid #33ff33; margin-top: 10px; }
-        .progress-bar-fill { width: 0%; height: 100%; background: #33ff33; }
-
-        #status-msg { margin-top: 10px; font-size: 0.8rem; height: 1.2rem; }
+        .progress-container { width: 100%; height: 12px; border: 1px solid #33ff33; margin: 20px 0; display: none; }
+        .progress-bar { width: 0%; height: 100%; background: #33ff33; }
+        
+        .score-board { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 10px; color: #1a551a; }
+        .correct { color: #33ff33; font-weight: bold; }
+        .flash { animation: blink 0.2s 3; }
+        @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
 
 <div class="crt-monitor">
     <div class="header">
-        <h1>SYNTEC WORKSTATION J13</h1>
-        <p>TASK TERMINAL V.2.1 | LEVEL 3 INTERN ACCESS</p>
-    </div>
-
-    <div class="stat-bar">
-        <span>SECTOR: PEGASUS-04</span>
-        <span>CREDIT STARS: <span id="star-count" class="stars">0</span> / 5</span>
-    </div>
-
-    <div class="task-container">
-        <div id="active-task-ui">
-            <p class="instruction">PLEASE TYPE THE FOLLOWING STRING TO COMMENCE FILING:</p>
-            <p id="prompt-text">LOADING...</p>
-            
-            <div class="input-area">
-                <span>></span>
-                <input type="text" id="user-input" autocomplete="off" autofocus>
-            </div>
-
-            <div class="progress-box" id="progress-box">
-                <p id="status-msg">UPLOADING TO CENTRAL CORE...</p>
-                <div class="progress-bar-container">
-                    <div class="progress-bar-fill" id="progress-fill"></div>
-                </div>
-            </div>
+        <h1>CLINICAL EVALUATION MODULE v.8.4</h1>
+        <div class="score-board">
+            <span>ASSIGNED: INTERN_J13</span>
+            <span>VALIDATED SAMPLES: <span id="score" class="correct">0</span> / 10</span>
         </div>
     </div>
 
-    <p style="font-size: 0.6rem; color: #1a551a; margin-top: 10px;">
-        WARNING: IMPROPER DATA ENTRY MAY RESULT IN TERMINAL LOCKOUT.
-    </p>
+    <div class="module-box" id="work-area">
+        <div id="case-display">
+            </div>
+
+        <div class="input-area">
+            <p id="prompt-text">TYPE DIAGNOSIS AND PRESS ENTER:</p>
+            <input type="text" id="user-input" autocomplete="off">
+            
+            <div class="progress-container" id="prog-cont">
+                <div class="progress-bar" id="prog-bar"></div>
+            </div>
+            <p id="feedback" style="margin-top: 10px;"></p>
+        </div>
+    </div>
 </div>
 
 <script>
-    let stars = 0;
-    const taskData = [
-        { label: "LOG: RADIANCE_VAR_1986", code: "RV-86-4409" },
-        { label: "ARCHIVE: STABILIZER_DECAY", code: "STAB-C-DECAY" },
-        { label: "FILE: B_COBALT_INTERNAL", code: "COBALT-PR-33" },
-        { label: "ENTRY: PEGASUS_BUFFER_CLR", code: "BUFF-CLR-004" },
-        { label: "REPORT: LAB_4_TEMP_SYNC", code: "L4-TEMP-LOG-A" },
-        { label: "TRANSCRIPTION: W_N_MEMO_9", code: "WN-MEMO-402" },
-        { label: "PURGE: EXPIRED_SAMPLES", code: "PURGE-B-99" },
-        { label: "RE-INDEX: USER_DIRECTORY", code: "INDEX-J13-SYN" }
+    let score = 0;
+    let currentAnswer = "";
+    
+    const cases = [
+        {
+            type: "DIAGNOSIS",
+            data: "AGE: 45 | SEX: M | MEDS: NONE | HISTORY: CHRONIC SMOKER | SYMPTOMS: PERSISTENT COUGH, WEIGHT LOSS, CLUBBING OF FINGERS.",
+            answer: "LUNG CANCER"
+        },
+        {
+            type: "TEST",
+            data: "AGE: 22 | SEX: F | MEDS: ORAL CONTRACEPTIVES | HISTORY: RECENT LONG-HAUL FLIGHT | SYMPTOMS: UNILATERAL LEG SWELLING, TENDERNESS.",
+            prompt: "WHAT TEST SHOULD BE ORDERED? (D-DIMER / ULTRASOUND / X-RAY)",
+            answer: "ULTRASOUND"
+        },
+        {
+            type: "BLOOD",
+            data: "AGE: 30 | SEX: M | BLOOD WORK: WBC: 18,000 (HIGH), NEUTROPHILS: 85% | SYMPTOMS: ACUTE RIGHT LOWER QUADRANT PAIN, REBOUND TENDERNESS.",
+            answer: "APPENDICITIS"
+        },
+        {
+            type: "DIAGNOSIS",
+            data: "AGE: 62 | SEX: M | MEDS: DIGOXIN | HISTORY: HYPERTENSION | SYMPTOMS: CRUSHING SUBSTERNAL CHEST PAIN RADIATING TO LEFT JAW.",
+            answer: "MYOCARDIAL INFARCTION"
+        },
+        {
+            type: "TEST",
+            data: "AGE: 19 | SEX: F | SYMPTOMS: EXTREME FATIGUE, SORE THROAT, SWOLLEN LYMPH NODES, SPLENOMEGALY.",
+            prompt: "WHICH TEST CONFIRMS THE DIAGNOSIS? (MONOSPOT / STREP / MRI)",
+            answer: "MONOSPOT"
+        }
+        const cases = [
+    {
+        type: "DIAGNOSIS",
+        data: "AGE: 8 | SEX: M | HISTORY: RECENT VIRAL INFECTION | SYMPTOMS: LETHARGY, RECURRENT VOMITING, CONFUSION. ASPIRIN WAS ADMINISTERED FOR FEVER 4 DAYS AGO.",
+        answer: "REYE SYNDROME"
+    },
+    {
+        type: "TEST",
+        data: "AGE: 55 | SEX: F | SYMPTOMS: POLYURIA, POLYDIPSIA, UNEXPLAINED WEIGHT LOSS. PATIENT COMPLAINS OF 'FRUITY' BREATH ODOR.",
+        prompt: "WHICH URINE COMPONENT SHOULD BE TESTED IMMEDIATELY? (KETONES / ALBUMIN / CALCIUM)",
+        answer: "KETONES"
+    },
+    {
+        type: "BLOOD",
+        data: "AGE: 29 | SEX: F | BLOOD WORK: HGB: 8.2 (LOW), MCV: 72 (LOW), FERRITIN: 10 (LOW) | SYMPTOMS: PICA, PALLOR, FATIGUE.",
+        answer: "IRON DEFICIENCY ANEMIA"
+    },
+    {
+        type: "DIAGNOSIS",
+        data: "AGE: 14 | SEX: M | SYMPTOMS: SUDDEN LOSS OF CONSCIOUSNESS, VIOLENT MUSCULAR CONTRACTIONS, TONGUE BITING, POST-ICTAL CONFUSION.",
+        answer: "GRAND MAL SEIZURE"
+    },
+    {
+        type: "TEST",
+        data: "AGE: 68 | SEX: M | HISTORY: ATRIAL FIBRILLATION | SYMPTOMS: SUDDEN ONSET APHASIA, RIGHT-SIDED HEMIPLEGIA.",
+        prompt: "WHICH IMAGING IS REQUIRED TO RULE OUT HEMORRHAGE? (CT SCAN / ULTRASOUND / EKG)",
+        answer: "CT SCAN"
+    },
+    {
+        type: "BLOOD",
+        data: "AGE: 40 | SEX: F | BLOOD WORK: TSH: 12.5 (HIGH), FREE T4: 0.5 (LOW) | SYMPTOMS: COLD INTOLERANCE, BRADYCARDIA, DRY SKIN.",
+        answer: "HYPOTHYROIDISM"
+    },
+    {
+        type: "DIAGNOSIS",
+        data: "AGE: 5 | SEX: F | SYMPTOMS: HIGH FEVER, DROOLING, STRIDOR, PATIENT SITTING IN 'TRIPOD POSITION'.",
+        answer: "EPIGLOTTITIS"
+    },
+    {
+        type: "TEST",
+        data: "AGE: 34 | SEX: M | SYMPTOMS: SEVERE HEADACHE, NUCHAL RIGIDITY (STIFF NECK), PHOTOPHOBIA, FEVER.",
+        prompt: "WHICH PROCEDURE IS NECESSARY FOR CSF ANALYSIS? (LUMBAR PUNCTURE / BIOPSY / X-RAY)",
+        answer: "LUMBAR PUNCTURE"
+    },
+    {
+        type: "DIAGNOSIS",
+        data: "AGE: 50 | SEX: F | SYMPTOMS: BONE PAIN, FRACTURE AFTER MINOR FALL. HISTORY: POST-MENOPAUSAL, LOW CALCIUM INTAKE.",
+        answer: "OSTEOPOROSIS"
+    },
+    {
+        type: "BLOOD",
+        data: "AGE: 60 | SEX: M | BLOOD WORK: GLUCOSE (FASTING): 240 MG/DL (HIGH) | SYMPTOMS: BLURRED VISION, SLOW-HEALING SORE ON FOOT.",
+        answer: "DIABETES MELLITUS"
+    }
     ];
 
-    let currentTask = null;
-    const userInput = document.getElementById('user-input');
+    const inputField = document.getElementById('user-input');
+    const caseDisplay = document.getElementById('case-display');
+    const progCont = document.getElementById('prog-cont');
+    const progBar = document.getElementById('prog-bar');
+    const feedback = document.getElementById('feedback');
     const promptText = document.getElementById('prompt-text');
-    const progressBox = document.getElementById('progress-box');
-    const progressFill = document.getElementById('progress-fill');
-    const starCount = document.getElementById('star-count');
-    const statusMsg = document.getElementById('status-msg');
 
-    function loadNewTask() {
-        currentTask = taskData[Math.floor(Math.random() * taskData.length)];
-        promptText.innerText = `${currentTask.label} [${currentTask.code}]`;
-        userInput.value = "";
-        userInput.disabled = false;
-        userInput.focus();
-        progressBox.style.display = "none";
-        progressFill.style.width = "0%";
+    function loadNewCase() {
+        const c = cases[Math.floor(Math.random() * cases.length)];
+        currentAnswer = c.answer;
+        
+        caseDisplay.innerHTML = `
+            <div class="patient-file">
+                <strong>[MODULE: ${c.type}]</strong><br><br>
+                ${c.data}
+            </div>
+        `;
+        promptText.innerText = c.prompt || "TYPE PRIMARY DIAGNOSIS AND PRESS ENTER:";
+        inputField.value = "";
+        inputField.disabled = false;
+        inputField.focus();
+        feedback.innerText = "";
     }
 
-    userInput.addEventListener('keypress', function (e) {
+    inputField.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
-            if (userInput.value.toUpperCase() === currentTask.code) {
-                startUpload();
+            const val = inputField.value.trim().toUpperCase();
+            if (val === currentAnswer) {
+                runProgressBar(true);
             } else {
-                statusMsg.innerText = "ERROR: STRING MISMATCH. RE-ENTRY REQUIRED.";
-                userInput.value = "";
+                runProgressBar(false);
             }
         }
     });
 
-    function startUpload() {
-        userInput.disabled = true;
-        progressBox.style.display = "block";
-        statusMsg.innerText = "UPLOADING TO CENTRAL CORE...";
+    function runProgressBar(isCorrect) {
+        inputField.disabled = true;
+        progCont.style.display = "block";
+        feedback.innerText = "UPLOADING TO SYNTEC MAINFRAME...";
         
         let width = 0;
         const interval = setInterval(() => {
             if (width >= 100) {
                 clearInterval(interval);
-                finishTask();
+                finalize(isCorrect);
             } else {
-                width += 2;
-                progressFill.style.width = width + '%';
+                width += 5;
+                progBar.style.width = width + '%';
             }
         }, 40);
     }
 
-    function finishTask() {
-        stars++;
-        starCount.innerText = stars;
-        statusMsg.innerText = "DATA VERIFIED. +1 STAR GRANTED.";
-
-        if (stars >= 5) {
-            statusMsg.innerText = "QUOTA MET. ACCESSING COMMISSARY...";
-            setTimeout(() => {
-                window.location.href = "syntecstore.html";
-            }, 2000);
+    function finalize(isCorrect) {
+        progCont.style.display = "none";
+        progBar.style.width = "0%";
+        
+        if (isCorrect) {
+            score++;
+            document.getElementById('score').innerText = score;
+            feedback.innerText = "VALIDATED. DATA STORED.";
+            if (score >= 10) {
+                feedback.innerText = "MODULE COMPLETE. ACCESSING STORE...";
+                setTimeout(() => window.location.href = "syntecstore.html", 2000);
+            } else {
+                setTimeout(loadNewCase, 1000);
+            }
         } else {
-            setTimeout(loadNewTask, 1500);
+            feedback.innerText = "INCORRECT DATA ENTRY. RE-EVALUATE.";
+            setTimeout(() => {
+                inputField.disabled = false;
+                inputField.value = "";
+                inputField.focus();
+                feedback.innerText = "";
+            }, 1500);
         }
     }
 
-    // Initialize
-    window.onload = loadNewTask;
+    window.onload = loadNewCase;
 </script>
 </body>
 </html>
