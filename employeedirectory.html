@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SYNTEC EMPLOYEE DIRECTORY & TASKS</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #33ff33;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-transform: uppercase;
+            overflow: hidden;
+        }
+
+        .crt-monitor {
+            position: relative;
+            width: 90vw;
+            max-width: 800px;
+            height: 80vh;
+            padding: 25px;
+            border: 12px solid #2a2a2a;
+            border-radius: 35px;
+            background: #050505;
+            box-shadow: inset 0 0 60px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Scanlines */
+        .crt-monitor::before {
+            content: " ";
+            display: block;
+            position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            z-index: 10;
+            background-size: 100% 3px;
+            pointer-events: none;
+        }
+
+        .header { border-bottom: 2px solid #33ff33; padding-bottom: 10px; margin-bottom: 20px; }
+        
+        .stat-bar { display: flex; justify-content: space-between; margin-bottom: 20px; color: #1a551a; font-size: 0.9rem; }
+        .stars { color: #33ff33; font-weight: bold; }
+
+        .task-box {
+            border: 1px solid #33ff33;
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #task-description { margin-bottom: 30px; line-height: 1.5; min-height: 60px; }
+
+        .btn {
+            background: transparent;
+            color: #33ff33;
+            border: 1px solid #33ff33;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: inherit;
+            text-transform: uppercase;
+            align-self: center;
+        }
+
+        .btn:hover { background: #33ff33; color: #000; }
+        .btn:disabled { border-color: #1a551a; color: #1a551a; cursor: not-allowed; }
+
+        .progress-container { width: 100%; height: 10px; border: 1px solid #33ff33; margin-top: 20px; display: none; }
+        .progress-bar { width: 0%; height: 100%; background: #33ff33; }
+
+        .footer { margin-top: 20px; font-size: 0.7rem; color: #1a551a; }
+    </style>
+</head>
+<body>
+
+<div class="crt-monitor">
+    <div class="header">
+        <h1>SYNTEC DIRECTORY & PRODUCTIVITY</h1>
+        <p>ACTIVE INTERN: [REDACTED] | ID: J13</p>
+    </div>
+
+    <div class="stat-bar">
+        <span>SECTOR: PEGASUS-04</span>
+        <span>CREDIT STARS: <span id="star-count" class="stars">0</span> / 5</span>
+    </div>
+
+    <div class="task-box">
+        <div id="task-display">
+            <p id="task-description">INITIALIZING TASK DATABASE...</p>
+            <button class="btn" id="work-btn" onclick="processTask()">START TASK</button>
+            
+            <div class="progress-container" id="prog-cont">
+                <div class="progress-bar" id="prog-bar"></div>
+            </div>
+            <p id="status-text" style="margin-top: 10px;"></p>
+        </div>
+    </div>
+
+    <div class="footer">
+        * NOTICE: STAR CREDITS ARE REQUIRED FOR ACCESS TO THE EMPLOYEE COMMISSARY.
+    </div>
+</div>
+
+<script>
+    let stars = 0;
+    const tasks = [
+        "ARCHIVE REAGENT BATCH #4409 DATA INTO CENTRAL CORE.",
+        "FILE WEEKLY RADIANCE VARIANCE REPORT FOR B. COBALT.",
+        "MANUALLY RE-INDEX THE PEGASUS-04 DIRECTORY FOLDERS.",
+        "LOG TEMPERATURE FLUCTUATIONS IN THE SOUTH CRY-CHAMBER.",
+        "TRANSCRIBE WESLEY NATHANIAL'S AUDIO MEMO #09-B.",
+        "CROSS-REFERENCE THE SEPTEMBER PSYCH-EVALS FOR INCONSISTENCIES.",
+        "INPUT STABILIZER DECAY RATES INTO SPREADSHEET 402.",
+        "CLEAN THE BUFFER LOGS FROM THE PREVIOUS 24-HOUR SCAN."
+    ];
+
+    const taskDesc = document.getElementById('task-description');
+    const statusText = document.getElementById('status-text');
+    const workBtn = document.getElementById('work-btn');
+    const progCont = document.getElementById('prog-cont');
+    const progBar = document.getElementById('prog-bar');
+    const starCount = document.getElementById('star-count');
+
+    function getRandomTask() {
+        const index = Math.floor(Math.random() * tasks.length);
+        taskDesc.innerText = "CURRENT ASSIGNMENT: " + tasks[index];
+        workBtn.style.display = "inline-block";
+        workBtn.innerText = "EXECUTE TASK";
+        statusText.innerText = "";
+    }
+
+    function processTask() {
+        workBtn.style.display = "none";
+        progCont.style.display = "block";
+        statusText.innerText = "PROCESSING...";
+        
+        let width = 0;
+        const interval = setInterval(() => {
+            if (width >= 100) {
+                clearInterval(interval);
+                completeTask();
+            } else {
+                width += 2; // Speed of task
+                progBar.style.width = width + '%';
+            }
+        }, 50);
+    }
+
+    function completeTask() {
+        stars++;
+        starCount.innerText = stars;
+        progCont.style.display = "none";
+        progBar.style.width = "0%";
+        statusText.innerText = "TASK COMPLETE. +1 STAR EARNED.";
+
+        if (stars >= 5) {
+            statusText.innerText = "ACCESS GRANTED. REDIRECTING TO COMMISSARY...";
+            setTimeout(() => {
+                window.location.href = "syntecstore.html";
+            }, 2000);
+        } else {
+            setTimeout(getRandomTask, 1500);
+        }
+    }
+
+    // Initial Start
+    window.onload = getRandomTask;
+</script>
+</body>
+</html>
