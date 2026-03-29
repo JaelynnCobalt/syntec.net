@@ -24,6 +24,7 @@
         .mail-item.active { background: rgba(51, 255, 51, 0.1); }
         .mail-sender { font-weight: bold; font-size: 0.85rem; display: block; color: #fff; }
         .mail-preview { font-size: 0.7rem; opacity: 0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 4px; }
+        .star-indicator { position: absolute; right: 10px; top: 15px; color: yellow; font-size: 0.8rem; }
 
         /* Message Viewer */
         .content-area { flex: 1; display: flex; flex-direction: column; padding: 40px; background: #080808; overflow-y: auto; border-left: 1px solid var(--border); }
@@ -68,10 +69,10 @@
 
 <div class="main">
     <div class="folder-sidebar">
-        <div class="folder-item active" onclick="setFolder('inbox', this)">INBOX</div>
-        <div class="folder-item" onclick="setFolder('starred', this)">STARRED</div>
-        <div class="folder-item" onclick="setFolder('sent', this)">SENT</div>
-        <div class="folder-item" onclick="setFolder('deleted', this)">DELETED</div>
+        <div class="folder-item active" id="f-inbox" onclick="setFolder('inbox', this)">INBOX</div>
+        <div class="folder-item" id="f-starred" onclick="setFolder('starred', this)">STARRED</div>
+        <div class="folder-item" id="f-sent" onclick="setFolder('sent', this)">SENT</div>
+        <div class="folder-item" id="f-deleted" onclick="setFolder('deleted', this)">DELETED</div>
     </div>
 
     <div class="inbox-sidebar" id="inbox-list"></div>
@@ -92,11 +93,9 @@ const myID = localStorage.getItem('syntec_id') || "GUEST";
 let myName = "UNKNOWN";
 let currentFolder = 'inbox';
 
-// --- Boring Office Emails (Mock Data) ---
 const boringMails = [
-    { sender_display_name: "HR-BOT", sender_name: "SYS", content: "REMINDER: Please ensure all breakroom surfaces are wiped with Level-3 disinfectant after use. Failure to comply will result in a deduction of your bio-credits.", created_at: new Date(Date.now()-86400000) },
-    { sender_display_name: "Facilities", sender_name: "FAC-01", content: "The coffee machine in Sector 4 is currently dispensing decaf only. A technician has been summoned. Estimated repair: 48 hours.", created_at: new Date(Date.now()-172800000) },
-    { sender_display_name: "Payroll", sender_name: "ACC-9", content: "Quarterly tax forms are now available for download. Please ignore the 'Hazardous Environment' surcharge on line 14.", created_at: new Date(Date.now()-259200000) }
+    { id: 0, sender_display_name: "HR-BOT", sender_name: "SYS", content: "REMINDER: Wipe Level-3 disinfectant on all surfaces.", created_at: new Date(Date.now()-86400000), is_starred: false, is_deleted: false },
+    { id: 1, sender_display_name: "Facilities", sender_name: "FAC-01", content: "Coffee machine Sector 4 repair in 48h.", created_at: new Date(Date.now()-172800000), is_starred: false, is_deleted: false }
 ];
 
 async function getProfile() {
@@ -117,22 +116,27 @@ async function sendMail() {
     const to = document.getElementById('mail-to').value.toUpperCase().trim();
     const body = document.getElementById('mail-body').value.trim();
     const status = document.getElementById('status-msg');
-
-    if (!to || !body) return alert("FIELDS EMPTY");
+    if (!to || !body) return;
 
     const { error } = await _supabase.from('internal_messages').insert([{
-        sender_name: myID, sender_display_name: myName,
-        content: body, receiver_id: to
+        sender_name: myID, sender_display_name: myName, content: body, receiver_id: to
     }]);
 
-    if (error) {
-        status.style.color = "red";
-        status.textContent = "TRANSMISSION ERROR: " + error.message;
-    } else {
+    if (!error) {
         status.style.color = "var(--neon)";
         status.textContent = ">>> TRANSMISSION SUCCESSFUL <<<";
-        setTimeout(closeCompose, 1500);
+        setTimeout(closeCompose, 1000);
     }
+}
+
+async function updateStatus(msgId, field, value) {
+    if (msgId === 0 || msgId === 1) return alert("System records cannot be modified.");
+    const updateObj = {};
+    updateObj[field] = value;
+    
+    await _supabase.from('internal_messages').update(updateObj).eq('id', msgId);
+    document.getElementById('mail-viewer').innerHTML = '<div style="margin: auto; text-align: center; opacity: 0.2;"><h2 style="letter-spacing: 10px;">PROCESSING...</h2></div>';
+    loadMail();
 }
 
 function setFolder(folder, el) {
@@ -146,18 +150,21 @@ async function loadMail() {
     const list = document.getElementById('inbox-list');
     list.innerHTML = '<div style="padding:20px; opacity:0.5;">DECRYPTING...</div>';
     
-    let mails = [];
+    let query = _supabase.from('internal_messages').select('*');
+
     if (currentFolder === 'inbox') {
-        const { data } = await _supabase.from('internal_messages').select('*').eq('receiver_id', myID).order('created_at', { ascending: false });
-        mails = [...(data || []), ...boringMails];
+        query = query.eq('receiver_id', myID).eq('is_deleted', false);
+    } else if (currentFolder === 'starred') {
+        query = query.eq('receiver_id', myID).eq('is_starred', true).eq('is_deleted', false);
     } else if (currentFolder === 'sent') {
-        const { data } = await _supabase.from('internal_messages').select('*').eq('sender_name', myID).order('created_at', { ascending: false });
-        mails = data || [];
-    } else {
-        // Starred/Deleted are empty for now (UI Mockup)
-        list.innerHTML = '<div style="padding:20px; opacity:0.3;">NO RECORDS IN THIS DIRECTORY</div>';
-        return;
+        query = query.eq('sender_name', myID);
+    } else if (currentFolder === 'deleted') {
+        query = query.eq('receiver_id', myID).eq('is_deleted', true);
     }
+
+    const { data } = await query.order('created_at', { ascending: false });
+    let mails = data || [];
+    if (currentFolder === 'inbox') mails = [...mails, ...boringMails];
 
     list.innerHTML = "";
     mails.forEach(msg => {
@@ -167,6 +174,7 @@ async function loadMail() {
         div.innerHTML = `
             <span class="mail-sender">${msg.sender_display_name}</span>
             <div class="mail-preview">${msg.content}</div>
+            ${msg.is_starred ? '<span class="star-indicator">★</span>' : ''}
         `;
         list.appendChild(div);
     });
@@ -176,18 +184,20 @@ function viewMail(msg, element) {
     document.querySelectorAll('.mail-item').forEach(i => i.classList.remove('active'));
     element.classList.add('active');
     const viewer = document.getElementById('mail-viewer');
+    
+    const starLabel = msg.is_starred ? "UNSTAR" : "STAR";
+    const deleteLabel = msg.is_deleted ? "RESTORE" : "DELETE";
+
     viewer.innerHTML = `
         <div class="email-header">
-            <div style="font-size:0.7rem; opacity:0.5; margin-bottom:10px;">SYNTEC ENCRYPTED HEADER // RE: SECURE_COMM</div>
             <div><strong>FROM:</strong> ${msg.sender_display_name} (${msg.sender_name})</div>
-            <div><strong>TO:</strong> ${myID}</div>
             <div><strong>DATE:</strong> ${new Date(msg.created_at).toLocaleString()}</div>
         </div>
         <div class="email-body">${msg.content}</div>
         <div style="margin-top:40px; border-top:1px solid #222; padding-top:20px; display:flex; gap:10px;">
-            <button class="btn-ghost" style="font-size:0.6rem;" onclick="openCompose('${msg.sender_name}')">REPLY</button>
-            <button class="btn-ghost" style="font-size:0.6rem; border-color:#555; color:#555;">STAR</button>
-            <button class="btn-ghost" style="font-size:0.6rem; border-color:#555; color:#555;">DELETE</button>
+            <button class="btn-ghost" onclick="openCompose('${msg.sender_name}')">REPLY</button>
+            <button class="btn-ghost" onclick="updateStatus(${msg.id}, 'is_starred', ${!msg.is_starred})">${starLabel}</button>
+            <button class="btn-ghost" style="border-color:#f33; color:#f33;" onclick="updateStatus(${msg.id}, 'is_deleted', ${!msg.is_deleted})">${deleteLabel}</button>
         </div>
     `;
 }
