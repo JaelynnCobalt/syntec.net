@@ -31,7 +31,6 @@
             overflow: hidden;
         }
 
-        /* Scanline Overlay */
         .crt-monitor::before {
             content: " ";
             display: block;
@@ -103,7 +102,6 @@
 
         .back-btn:hover { background: #33ff33; color: #000; }
 
-        /* Scrollbar styling */
         .screen-content::-webkit-scrollbar { width: 12px; }
         .screen-content::-webkit-scrollbar-track { background: #050505; border: 1px solid #33ff33; }
         .screen-content::-webkit-scrollbar-thumb { background: #33ff33; }
@@ -118,11 +116,11 @@
             <h1>SYNTEC PEGASUS OS V.2.0.1 (C) 1986</h1>
             <p>LOGGED IN AS: USER_J13 [LEVEL 1 ACCESS]</p>
             <p>--------------------------------------------------</p>
-            <button class="menu-item disabled">1. SYSTEM STATUS [OFFLINE]</button>
-            <button class="menu-item disabled">2. LOCAL DISK UTILITY</button>
-            <button class="menu-item" onclick="showMail()">3. S-MAIL INBOX (12)</button>
-            <button class="menu-item disabled">4. TERMINAL CONFIGURATION</button>
-            <button class="menu-item disabled">5. SECURITY PROTOCOLS</button>
+            <button class="menu-item" onclick="showMail()">1. S-MAIL INBOX (12)</button>
+            <button class="menu-item disabled">2. DOCUMENTS / LOGS [LOCKED]</button>
+            <button class="menu-item disabled">3. DIRECTORY LISTING [DRIVE A:]</button>
+            <button class="menu-item disabled">4. SYSTEM DIAGNOSTICS</button>
+            <button class="menu-item disabled">5. SECURITY OVERRIDE</button>
             <p style="margin-top: 50px;">MEM: 64K RAM FREE</p>
         </div>
 
@@ -148,73 +146,73 @@
 <script>
     const mails = [
         {
-            from: "IT_ADMIN",
+            from: "admin@syntec.net",
             date: "OCT-12-1986",
             subject: "PASSWORD EXPIRATION",
             body: "YOUR NETWORK PASSWORD WILL EXPIRE IN 3 DAYS. PLEASE UPDATE VIA THE TERMINAL SETTINGS ON LEVEL 2. FAILURE TO COMPLY WILL RESULT IN LOCKOUT."
         },
         {
-            from: "B_COBALT",
+            from: "b.cobalt@syntec.net",
             date: "OCT-10-1986",
             subject: "RE: CALIBRATION LOGS",
             body: "J13, THE SENSORS IN LAB 4 ARE DRIFTING AGAIN. PLEASE RE-RUN THE PEGASUS ALIGNMENT SCRIPT BEFORE END OF SHIFT. I DON'T WANT TO SEE ANOTHER ERROR REPORT TOMORROW."
         },
         {
-            from: "HR_DEPT",
+            from: "hr.dept@syntec.net",
             date: "OCT-09-1986",
             subject: "BENEFITS ENROLLMENT",
             body: "REMINDER TO ALL STAFF: THE DEADLINE FOR UPDATING YOUR MEDICAL INSURANCE SELECTIONS FOR 1987 IS THIS FRIDAY. COPIES OF THE FORMS ARE AVAILABLE AT THE FRONT DESK."
         },
         {
-            from: "FACILITIES",
+            from: "facilities@syntec.net",
             date: "OCT-08-1986",
             subject: "BREAKROOM CONDUCT",
             body: "REMINDER: ALL STAFF MUST LABEL THEIR PERSONAL REFRIGERATION ITEMS. AN UNIDENTIFIED LIQUID WAS REMOVED FROM THE DISPENSER YESTERDAY. COMPLIANCE IS MANDATORY."
         },
         {
-            from: "LAB_COORD",
+            from: "lab.coord@syntec.net",
             date: "OCT-07-1986",
             subject: "RE: REAGENT ORDER",
             body: "THE SHIPMENT OF SODIUM CHLORIDE HAS BEEN DELAYED. PLEASE ADJUST YOUR TESTING SCHEDULE ACCORDINGLY. CONTACT PROCUREMENT FOR EMERGENCY STOCKS."
         },
         {
-            from: "JANITORIAL",
+            from: "janitorial@syntec.net",
             date: "OCT-06-1986",
             subject: "FLOOR WAXING SCHEDULE",
             body: "LEVEL 3 CORRIDORS WILL BE CLOSED FOR MAINTENANCE STARTING AT 20:00 HOURS. PLEASE ENSURE ALL DESKS ARE CLEARED OF SENSITIVE DOCUMENTS."
         },
         {
-            from: "ACCOUNTING",
+            from: "accounting@syntec.net",
             date: "OCT-05-1986",
             subject: "REQUISITION #4409",
             body: "YOUR REQUEST FOR ADDITIONAL STATIONERY AND FLOPPY DISKS HAS BEEN DENIED. PLEASE UTILIZE EXISTING STOCKS UNTIL THE NEXT QUARTERLY REVIEW."
         },
         {
-            from: "W_NATHANIAL",
+            from: "w.nathanial@syntec.net",
             date: "OCT-04-1986",
             subject: "LOG FILING",
             body: "ENSURE ALL DAILY ACTIVITY LOGS ARE SAVED TO THE CENTRAL REPOSITORY. DO NOT LEAVE DATA ON LOCAL DISKS. N.S. IS MONITORING UPTIME RATIOS."
         },
         {
-            from: "SAFETY_OFFICER",
+            from: "safety.officer@syntec.net",
             date: "OCT-03-1986",
             subject: "EYEWASH STATION INSPECTION",
             body: "ANNUAL INSPECTION OF SAFETY EQUIPMENT COMPLETED. UNIT #12 (LAB 4) REQUIRES REPAIR. DO NOT USE CHEMICAL AGENTS IN THIS AREA UNTIL FURTHER NOTICE."
         },
         {
-            from: "PROCUREMENT",
+            from: "procurement@syntec.net",
             date: "OCT-02-1986",
             subject: "NEW BADGE PHOTOS",
             body: "WE ARE UPDATING ALL PERSONNEL BADGES TO THE NEW FORMAT. PLEASE VISIT SECURITY DURING YOUR LUNCH BREAK TO HAVE YOUR PHOTO TAKEN."
         },
         {
-            from: "IT_DEPT",
+            from: "it.dept@syntec.net",
             date: "SEP-30-1986",
             subject: "SYSTEM MAINTENANCE",
             body: "THE PEGASUS SERVER WILL BE OFFLINE FOR SCHEDULED BACKUPS FROM 01:00 TO 03:00 ON SATURDAY. SAVE YOUR WORK FREQUENTLY."
         },
         {
-            from: "N_SYPHUS_OFFICE",
+            from: "n.syphus@syntec.net",
             date: "SEP-28-1986",
             subject: "QUARTERLY MEMO",
             body: "A REMINDER THAT EXCELLENCE IS OUR PRIMARY DIRECTIVE. THE WORK WE DO AT SYNTEC LABS IS SHAPING THE FUTURE. DISCRETION IS EXPECTED FROM EVERYONE."
