@@ -159,13 +159,13 @@ input.addEventListener('keydown', async function(e) {
                 await typeLine("--- SYSTEM DIRECTORY ---", 20);
                 await typeLine("> [CLINICAL] - INTERN EVALUATION", 20);
                 await typeLine("> [HUB]      - PERSONNEL COMMUNICATIONS", 20);
-                await typeLine("> [MAIL]     - SMAIL TERMINAL", 20);
+                await typeLine("> [MAIL]     - "INBOX", 20);
             } else if (cmd === "hub") {
                 await showLoadingBar("mhub.html", "COMMUNICATIONS");
             } else if (cmd === "clinical") {
                 await showLoadingBar("clinical-practice.html", "CLINICAL");
             } else if (cmd === "mail") {
-                await showLoadingBar("smail.html", "SMAIL");
+                await showLoadingBar("mail.html", "INBOX");
             } else {
                 await typeLine("INVALID PROMPT", 20);
             }
