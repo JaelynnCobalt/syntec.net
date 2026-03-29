@@ -219,10 +219,10 @@
         if (isCorrect) {
             score++;
             document.getElementById('score').innerText = score;
-            feedback.innerText = "VALIDATED. DATA STORED.";
+            feedback.innerText = "VALIDATED. UPDATING PROGRESS.";
             if (score >= 10) {
-                feedback.innerText = "MODULE COMPLETE. ACCESSING STORE...";
-                setTimeout(() => window.location.href = "syntecstore.html", 2000);
+                feedback.innerText = "MODULE COMPLETE. ACCESSING INDEX...";
+                setTimeout(() => window.location.href = "index.html", 2000);
             } else {
                 setTimeout(loadNewCase, 1000);
             }
