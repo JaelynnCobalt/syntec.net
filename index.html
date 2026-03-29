@@ -1,143 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Syntec Terminal - Apple II</title>
-
-<style>
-body {
-background-color: #0a0a0a;
-color: #33ff33;
-font-family: 'Courier New', Courier, monospace;
-display: flex;
-justify-content: center;
-align-items: center;
-height: 100vh;
-margin: 0;
-overflow: hidden;
-text-shadow: 0 0 5px #33ff33;
-}
-
-.crt-overlay {
-position: fixed;
-top: 0; left: 0; width: 100%; height: 100%;
-background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-background-size: 100% 4px, 3px 100%;
-pointer-events: none;
-z-index: 10;
-}
-
-.screen {
-width: 80%;
-max-width: 800px;
-height: 600px;
-padding: 20px;
-border: 2px solid #33ff33;
-box-shadow: 0 0 20px rgba(51, 255, 51, 0.2);
-background: #050505;
-overflow-y: auto;
-position: relative;
-}
-
-.input-area {
-display: flex;
-margin-top: 20px;
-}
-
-#command-line {
-background: transparent;
-border: none;
-color: #33ff33;
-font-family: inherit;
-font-size: 1.2rem;
-outline: none;
-width: 100%;
-}
-
-.loading-container {
-margin-top: 20px;
-width: 100%;
-}
-
-.loading-bar {
-color: #33ff33;
-letter-spacing: 5px;
-font-size: 1.5rem;
-}
-
-.cursor {
-display: inline-block;
-width: 10px;
-height: 1.2rem;
-background: #33ff33;
-animation: blink 0.8s infinite;
-}
-
-@keyframes blink {
-0%, 100% { opacity: 1; }
-50% { opacity: 0; }
-}
-</style>
-</head>
-
-<body>
-
-<div class="crt-overlay"></div>
-
-<div class="screen">
-<div id="output">
-<p>SYNTEC(TM) PEGASUS OS v2.0.1</p>
-<p>COPYRIGHT 1986 SYNTEC LABS</p>
-<p>---------------------------</p>
-<p>PLEASE LOG IN TO PROCEED...</p>
-</div>
-
-<div class="input-area" id="input-zone">
-<span id="label">LOGIN:&nbsp;</span>
-<input type="text" id="command-line" autofocus autocomplete="off">
-</div>
-</div>
-
-<script>
-const input = document.getElementById('command-line');
-const output = document.getElementById('output');
-const label = document.getElementById('label');
-const inputZone = document.getElementById('input-zone');
-
-let stage = 0;
-let locked = false;
-
-function typeLine(text, speed = 25) {
-    return new Promise(resolve => {
-        const p = document.createElement('p');
-        output.appendChild(p);
-        let i = 0;
-        function type() {
-            if (i < text.length) {
-                p.textContent += text.charAt(i);
-                i++;
-                setTimeout(type, speed);
-            } else {
-                output.scrollTop = output.scrollHeight;
-                resolve();
-            }
-        }
-        type();
-    });
-}
-
-function normalize(str) {
-    return str.toLowerCase().replace(/[^\w\s]/g, '').trim();
-}
+// ... existing variables ...
+let lastCommand = ""; // Added to track which loading sequence to run
 
 async function showLoadingBar() {
     locked = true;
     inputZone.style.display = "none";
     output.innerHTML = "";
     
-    await typeLine("INITIALIZING CLINICAL INTERFACE...", 50);
-    await typeLine("MOUNTING DATABASE: J13-V8.4", 50);
+    // Check if we are loading clinical or the mountaineer file
+    const isMountaineer = (lastCommand === "mountaineer");
+    const initText = isMountaineer ? "ACCESSING HIDDEN DIRECTORY..." : "INITIALIZING CLINICAL INTERFACE...";
+    const dbText = isMountaineer ? "MOUNTING VOLUME: n3s.dsk" : "MOUNTING DATABASE: J13-V8.4";
+
+    await typeLine(initText, 50);
+    await typeLine(dbText, 50);
     await typeLine("ESTABLISHING SECURE UPLINK...", 80);
     
     const container = document.createElement('div');
@@ -150,17 +25,22 @@ async function showLoadingBar() {
 
     const segments = 20;
     for (let i = 0; i < segments; i++) {
-        await delay(250); 
+        await delay(200); 
         bar.textContent += "■";
         output.scrollTop = output.scrollHeight;
     }
     bar.textContent += "]";
     
     await delay(500);
-    await typeLine("CORE LOADED. REDIRECTING...", 30);
+    await typeLine("CONNECTION ESTABLISHED. REDIRECTING...", 30);
     await delay(1000);
-    // Updated redirect to clinical-practice.html
-    window.location.href = "clinical-practice.html";
+
+    // Conditional Redirect
+    if (isMountaineer) {
+        window.location.href = "n3s.dsk";
+    } else {
+        window.location.href = "clinical-practice.html";
+    }
 }
 
 input.addEventListener('keydown', async function(e) {
@@ -168,6 +48,7 @@ input.addEventListener('keydown', async function(e) {
         locked = true;
         const cmd = input.value.trim();
         const norm = normalize(input.value);
+        lastCommand = norm; // Store the command for the loading bar logic
         await typeLine("> " + cmd, 15);
         input.value = '';
         await processInput(cmd, norm);
@@ -200,6 +81,9 @@ async function processInput(cmd, norm) {
             else if (norm === "clinical") {
                 await showLoadingBar();
             }
+            else if (norm === "mountaineer") {
+                await showLoadingBar();
+            }
             else if (norm === "status") {
                 await typeLine("ACCESSING STATUS REPORTS...", 30);
                 await typeLine("LOG: THEYRE OUT OF CREAM IN THE BREAKROOM", 30);
@@ -226,7 +110,6 @@ async function processInput(cmd, norm) {
         case 3:
             if (norm === "hazelnut") {
                 await typeLine("ORDER CONFIRMED...", 30);
-                // Updated redirect to smail.html
                 window.location.href = "smail.html";
             }
             else if (norm === "peppermint") {
@@ -236,11 +119,3 @@ async function processInput(cmd, norm) {
             break;
     }
 }
-
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-</script>
-
-</body>
-</html>
