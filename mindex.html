@@ -2,29 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Syntec Terminal </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Syntec Terminaal </title>
 
     <style>
         :root {
-            --syntec-green: #33ff33;
+            --neon-green: #33ff33;
             --bg-black: #050505;
         }
 
         body {
-            background-color: #000;
-            color: var(--syntec-green);
+            background-color: #0a0a0a;
+            color: var(--neon-green);
             font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            padding: 0;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
+            margin: 0;
             overflow: hidden;
-            text-shadow: 0 0 5px rgba(51, 255, 51, 0.5);
+            text-shadow: 0 0 5px var(--neon-green);
         }
 
-        /* CRT Overlay - Subtle for Mobile */
+        /* CRT Scanline Effect optimized for mobile performance */
         .crt-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -35,59 +35,59 @@
         }
 
         .screen {
-            flex: 1;
+            width: 95%; /* Use more width on mobile */
+            height: 90vh;
             padding: 15px;
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 15px rgba(51, 255, 51, 0.2);
+            background: var(--bg-black);
+            overflow-y: auto;
+            position: relative;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
-            border: 1px solid var(--syntec-green);
-            margin: 5px;
-            box-sizing: border-box;
-            background: var(--bg-black);
         }
 
         #output {
             flex-grow: 1;
-            font-size: 0.95rem;
+            overflow-y: auto;
+            font-size: 1rem; /* Slightly smaller for mobile fitting */
             line-height: 1.4;
-            word-wrap: break-word;
+            margin-bottom: 10px;
         }
 
         .input-area {
             display: flex;
             align-items: center;
-            padding: 10px 0;
-            border-top: 1px solid var(--syntec-green);
-            background: var(--bg-black);
-        }
-
-        #label {
-            font-size: 1rem;
-            white-space: nowrap;
+            border-top: 1px solid var(--dark-green);
+            padding-top: 10px;
         }
 
         #command-line {
             background: transparent;
             border: none;
-            color: var(--syntec-green);
+            color: var(--neon-green);
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 1.1rem;
             outline: none;
             width: 100%;
-            caret-color: var(--syntec-green);
+            caret-color: var(--neon-green); /* Visual cursor */
         }
 
         .loading-bar {
-            margin-top: 10px;
+            color: var(--neon-green);
             word-break: break-all;
             font-size: 1.2rem;
+            margin-top: 10px;
         }
 
-        p { margin: 5px 0; }
+        /* Prevent auto-zoom on iPhone */
+        input:focus {
+            font-size: 16px !important;
+        }
 
-        /* Animation for loading */
-        .blink { animation: blink 0.8s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        #chat-log::-webkit-scrollbar { width: 3px; }
+        #chat-log::-webkit-scrollbar-thumb { background: var(--dark-green); }
     </style>
 </head>
 
@@ -97,15 +97,15 @@
 
 <div class="screen">
     <div id="output">
-        <p>SYNTEC(TM) PEGASUS OS v2.0.1m</p>
-        <p>MOBILE UPLINK ESTABLISHED</p>
+        <p>SYNTEC(TM) PEGASUS OS v2.0.1</p>
+        <p>USER DETECTED...</p>
         <p>---------------------------</p>
         <p>PLEASE LOG IN TO PROCEED...</p>
     </div>
 
     <div class="input-area" id="input-zone">
-        <span id="label">EMPLOYEE ID: </span>
-        <input type="text" id="command-line" autofocus autocomplete="off" inputmode="text">
+        <span id="label">ID: </span>
+        <input type="text" id="command-line" autofocus autocomplete="off" spellcheck="false">
     </div>
 </div>
 
@@ -115,7 +115,7 @@
     const label = document.getElementById('label');
     const inputZone = document.getElementById('input-zone');
 
-    let stage = 0; // 0: ID, 1: Command, 2: Status, 3: Choice
+    let stage = 0; // 0: ID, 1: Password, 2: Command, 3: Status, 4: Select
     let locked = false;
 
     function typeLine(text, speed = 20) {
@@ -141,113 +141,133 @@
         return str.toLowerCase().replace(/[^\w\s]/g, '').trim();
     }
 
-    async function showLoadingBar(type) {
+    // Function to check if input is purely alphanumeric (no special chars)
+    function isValid(str) {
+        return /^[a-zA-Z0-9]+$/.test(str);
+    }
+
+    async function showLoadingBar(type = "clinical") {
         locked = true;
         inputZone.style.display = "none";
         output.innerHTML = "";
         
         if (type === "mountaineer") {
-            await typeLine("ACCESSING n3s.dsk...", 40);
+            await typeLine("ACCESSING HIDDEN DIRECTORY...", 40);
+            await typeLine("MOUNTING VOLUME: n3s.dsk", 40);
         } else {
             await typeLine("INITIALIZING CLINICAL INTERFACE...", 40);
+            await typeLine("MOUNTING DATABASE: J13-V8.4", 40);
         }
+        
+        await typeLine("ESTABLISHING MOBILE UPLINK...", 60);
         
         const bar = document.createElement('div');
         bar.className = "loading-bar";
         bar.textContent = "[";
         output.appendChild(bar);
 
-        for (let i = 0; i < 15; i++) {
+        const segments = 15;
+        for (let i = 0; i < segments; i++) {
             await new Promise(r => setTimeout(r, 150));
             bar.textContent += "■";
             output.scrollTop = output.scrollHeight;
         }
         bar.textContent += "]";
         
-        await typeLine("REDIRECTING...", 30);
-        await new Promise(r => setTimeout(r, 800));
+        await new Promise(r => setTimeout(r, 500));
+        await typeLine("CONNECTION ESTABLISHED. REDIRECTING...", 30);
+        await new Promise(r => setTimeout(r, 1000));
         
-        // Redirecting to mobile versions or standard (ensure your other pages exist)
-        window.location.href = (type === "mountaineer") ? "n3s.html" : "clinical-practice.html";
+        window.location.href = (type === "mountaineer") ? "mn3s.html" : "mclinical-practice.html";
     }
 
     input.addEventListener('keydown', async function(e) {
         if (e.key === 'Enter' && !locked) {
             locked = true;
             const cmd = input.value.trim();
-            const norm = normalize(cmd);
+            const norm = normalize(input.value);
             
-            // Mask password if we were at a password stage (optional addition)
-            await typeLine("> " + (stage === 1.5 ? "****" : cmd), 10);
+            // Mask password in output
+            const displayCmd = (stage === 1) ? "****" : cmd;
+            await typeLine("> " + displayCmd, 10);
             input.value = '';
-            
+
             await processInput(cmd, norm);
             locked = false;
         }
     });
 
     async function processInput(cmd, norm) {
-        // Stage 0: Any 5-digit Employee ID
-        if (stage === 0) {
-            const idPattern = /^\d{5}$/;
-            if (idPattern.test(cmd)) {
-                await typeLine("ID VERIFIED. ENTER PASSWORD.", 30);
-                label.textContent = "PASSWORD: ";
-                input.type = "password";
-                stage = 1.5; // Intermediate password stage
-            } else {
-                await typeLine("ERROR: ID MUST BE 5 DIGITS.", 30);
-            }
-        } 
-        // Stage 1.5: Any Password accepts
-        else if (stage === 1.5) {
-            await typeLine("ACCESS GRANTED.", 30);
-            label.textContent = "COMMAND: ";
-            input.type = "text";
-            stage = 1;
-            await typeLine("WELCOME TO PEGASUS MOBILE.", 30);
-            await typeLine("TYPE 'DIR' FOR MODULES.", 30);
-        }
-        // Stage 1: Directory Commands
-        else if (stage === 1) {
-            if (norm === "dir" || norm === "directory") {
-                await typeLine("--- DIRECTORY ---", 20);
-                await typeLine("[CLINICAL]", 20);
-                await typeLine("[STATUS]", 20);
-            } 
-            else if (norm === "clinical") {
-                await showLoadingBar("clinical");
-            }
-            else if (norm === "mountaineer") {
-                await showLoadingBar("mountaineer");
-            }
-            else if (norm === "status") {
-                await typeLine("LOG: BREAKROOM REPLENISHMENT REQUIRED.", 30);
-                stage = 2;
-                label.textContent = "QUERY: ";
-            }
-            else {
-                await typeLine("ERROR: UNKNOWN COMMAND.", 30);
-            }
-        }
-        // Stage 2 & 3: The coffee/vanilla logic
-        else if (stage === 2) {
-            if (norm.includes("vanilla")) {
-                await typeLine("UNAVAILABLE. SELECT: [HAZELNUT] OR [PEPPERMINT]", 30);
-                stage = 3;
-                label.textContent = "SELECT: ";
-            } else {
-                await typeLine("INVALID QUERY.", 30);
-            }
-        }
-        else if (stage === 3) {
-            if (norm === "hazelnut") {
-                window.location.href = "smail.html";
-            } else if (norm === "peppermint") {
-                window.location.href = "863.html";
-            } else {
-                await typeLine("SELECTION NOT RECOGNIZED.", 30);
-            }
+        switch(stage) {
+            case 0: // Employee ID Stage
+                if (isValid(cmd)) {
+                    await typeLine("ID VERIFIED. REQUESTING ACCESS KEY...", 30);
+                    label.textContent = "PASSWORD: ";
+                    input.type = "password";
+                    stage = 1;
+                } else {
+                    await typeLine("ERROR: ID CONTAINS ILLEGAL CHARACTERS.", 30);
+                }
+                break;
+
+            case 1: // Password Stage
+                if (isValid(cmd)) {
+                    await typeLine("ACCESS GRANTED. WELCOME TO PEGASUS", 30);
+                    await typeLine("TYPE 'DIR' FOR MODULE LIST.", 30);
+                    label.textContent = "COMMAND: ";
+                    input.type = "text";
+                    stage = 2;
+                } else {
+                    await typeLine("ERROR: INVALID ACCESS KEY.", 30);
+                }
+                break;
+
+            case 2: // Directory Stage
+                if (norm === "dir" || norm === "directory") {
+                    await typeLine("--- SYSTEM DIRECTORY ---", 20);
+                    await typeLine("> [CLINICAL] - INTERN EVALUATION", 20);
+                    await typeLine("> [STATUS]   - FACILITY REPORT", 20);
+                    await typeLine("------------------------", 20);
+                } 
+                else if (norm === "clinical") {
+                    await showLoadingBar("clinical");
+                }
+                else if (norm === "mountaineer") {
+                    await showLoadingBar("mountaineer");
+                }
+                else if (norm === "status") {
+                    await typeLine("ACCESSING STATUS REPORTS...", 30);
+                    await typeLine("LOG: THEY'RE OUT OF CREAM IN THE BREAKROOM", 30);
+                    stage = 3;
+                    label.textContent = "QUERY: ";
+                }
+                else {
+                    await typeLine("ERROR: COMMAND NOT RECOGNIZED", 30);
+                }
+                break;
+
+            case 3: // Status Query Stage
+                if (norm.includes("regular") || norm.includes("vanilla")) {
+                    await typeLine("VANILLA UNAVAILABLE. SELECT ALTERNATE:", 30);
+                    await typeLine("> HAZELNUT", 30);
+                    await typeLine("> PEPPERMINT", 30);
+                    stage = 4;
+                    label.textContent = "SELECT: ";
+                } else {
+                    await typeLine("INVALID STATUS QUERY.", 30);
+                }
+                break;
+
+            case 4: // Coffee Choice Stage
+                if (norm === "hazelnut") {
+                    await typeLine("ORDER CONFIRMED. REDIRECTING TO S-MAIL...", 30);
+                    window.location.href = "msmail.html";
+                }
+                else if (norm === "peppermint") {
+                    await typeLine("ORDER CONFIRMED. REDIRECTING TO 863 SECURE...", 30);
+                    window.location.href = "863.html";
+                }
+                break;
         }
     }
 </script>
