@@ -1,108 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Syntec Terminal - Apple II</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta charset="UTF-8">
+    <title>Syntec Terminal .-. Apple II</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-body {
-background-color: #0a0a0a;
-color: #33ff33;
-font-family: 'Courier New', Courier, monospace;
-display: flex;
-justify-content: center;
-align-items: center;
-height: 100vh;
-margin: 0;
-overflow: hidden;
-text-shadow: 0 0 5px #33ff33;
-}
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #33ff33;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            text-shadow: 0 0 5px #33ff33;
+        }
 
-.crt-overlay {
-position: fixed;
-top: 0; left: 0; width: 100%; height: 100%;
-background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-background-size: 100% 4px, 3px 100%;
-pointer-events: none;
-z-index: 10;
-}
+        .crt-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+            linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
 
-.screen {
-width: 80%;
-max-width: 800px;
-height: 600px;
-padding: 20px;
-border: 2px solid #33ff33;
-box-shadow: 0 0 20px rgba(51, 255, 51, 0.2);
-background: #050505;
-overflow-y: auto;
-position: relative;
-}
+        .screen {
+            width: 80%;
+            max-width: 800px;
+            height: 600px;
+            padding: 20px;
+            border: 2px solid #33ff33;
+            box-shadow: 0 0 20px rgba(51, 255, 51, 0.2);
+            background: #050505;
+            overflow-y: auto;
+            position: relative;
+        }
 
-.input-area {
-display: flex;
-margin-top: 20px;
-}
+        .input-area {
+            display: flex;
+            margin-top: 20px;
+        }
 
-#command-line {
-background: transparent;
-border: none;
-color: #33ff33;
-font-family: inherit;
-font-size: 1.2rem;
-outline: none;
-width: 100%;
-}
+        #command-line {
+            background: transparent;
+            border: none;
+            color: #33ff33;
+            font-family: inherit;
+            font-size: 1.2rem;
+            outline: none;
+            width: 100%;
+            text-transform: uppercase;
+        }
 
-.loading-container {
-margin-top: 20px;
-width: 100%;
-}
-
-.loading-bar {
-color: #33ff33;
-letter-spacing: 5px;
-font-size: 1.5rem;
-}
-
-.cursor {
-display: inline-block;
-width: 10px;
-height: 1.2rem;
-background: #33ff33;
-animation: blink 0.8s infinite;
-}
-
-@keyframes blink {
-0%, 100% { opacity: 1; }
-50% { opacity: 0; }
-}
-</style>
+        .loading-container { margin-top: 20px; width: 100%; }
+        .loading-bar { color: #33ff33; letter-spacing: 5px; font-size: 1.5rem; }
+        .cursor { display: inline-block; width: 10px; height: 1.2rem; background: #33ff33; animation: blink 0.8s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    </style>
 </head>
 
 <body>
-
 <div class="crt-overlay"></div>
 
 <div class="screen">
-<div id="output">
-<p>SYNTEC(TM) PEGASUS OS v2.0.1</p>
-<p>COPYRIGHT 1986 SYNTEC LABS</p>
-<p>---------------------------</p>
-<p>PLEASE LOG IN TO PROCEED...</p>
-<p style="font-size: 0.8rem; color: #1a551a;">[ TYPE 'JOIN' TO APPLY FOR EMPLOYMENT ]</p>
-</div>
+    <div id="output">
+        <p>SYNTEC(TM) PEGASUS OS v2.0.1</p>
+        <p>COPYRIGHT 1986 SYNTEC LABS</p>
+        <p>---------------------------</p>
+        <p>PLEASE ENTER FIRST NAME TO PROCEED...</p>
+    </div>
 
-<div class="input-area" id="input-zone">
-<span id="label">LOGIN:&nbsp;</span>
-<input type="text" id="command-line" autofocus autocomplete="off">
-</div>
+    <div class="input-area" id="input-zone">
+        <span id="label">IDENTITY:&nbsp;</span>
+        <input type="text" id="command-line" autofocus autocomplete="off">
+    </div>
 </div>
 
 <script>
-// 2. INITIALIZE SUPABASE
+// --- 2. CONFIGURATION ---
 const S_URL = "https://ctrbkrwiwpojbzfpsxwl.supabase.co";
 const S_KEY = "sb_publishable_uK-ihohO48o6BPRW8rmDqQ_LbJnfTI7";
 const supabase = lib.createClient(S_URL, S_KEY);
@@ -112,12 +92,9 @@ const output = document.getElementById('output');
 const label = document.getElementById('label');
 const inputZone = document.getElementById('input-zone');
 
-let stage = 0;
+let stage = 0; // 0: Name, 1: BirthYear, 2: Terminal Commands
 let locked = false;
-
-// Registration Variables
 let tempName = "";
-let tempYear = "";
 
 function typeLine(text, speed = 25) {
     return new Promise(resolve => {
@@ -142,126 +119,67 @@ function normalize(str) {
     return str.toLowerCase().replace(/[^\w\s]/g, '').trim();
 }
 
-async function showLoadingBar(destination = "mhub.html") {
-    locked = true;
-    inputZone.style.display = "none";
-    output.innerHTML = "";
+async function handleLogin(fname, byear) {
+    await typeLine("SEARCHING PERSONNEL DATABASE...", 40);
     
-    await typeLine("INITIALIZING UPLINK...", 50);
-    await typeLine("VERIFYING PERSONNEL BIOMETRICS...", 50);
-    
-    const container = document.createElement('div');
-    container.className = "loading-container";
-    const bar = document.createElement('div');
-    bar.className = "loading-bar";
-    bar.textContent = "[";
-    container.appendChild(bar);
-    output.appendChild(container);
+    // Check Supabase
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('first_name', fname.toUpperCase())
+        .eq('year_of_birth', parseInt(byear))
+        .single();
 
-    const segments = 20;
-    for (let i = 0; i < segments; i++) {
-        await delay(100); 
-        bar.textContent += "■";
-        output.scrollTop = output.scrollHeight;
+    if (data) {
+        await typeLine("IDENTITY VERIFIED: " + data.employee_id, 30);
+        localStorage.setItem('syntec_id', data.employee_id);
+    } else {
+        await typeLine("IDENTITY NOT FOUND. GENERATING APPLICATION...", 40);
+        const newID = `${fname[0].toUpperCase()}${byear}-${Math.floor(100 + Math.random() * 900)}`;
+        
+        const { error: insError } = await supabase
+            .from('profiles')
+            .insert([{ first_name: fname.toUpperCase(), year_of_birth: parseInt(byear), employee_id: newID }]);
+        
+        if(!insError) {
+            await typeLine("APPLICATION APPROVED.", 50);
+            await typeLine("WELCOME TO SYNTEC. YOUR ID IS: " + newID, 50);
+            localStorage.setItem('syntec_id', newID);
+        }
     }
-    bar.textContent += "]";
     
-    await delay(500);
-    await typeLine("IDENTITY CONFIRMED. REDIRECTING...", 30);
     await delay(1000);
-    window.location.href = destination;
+    await typeLine("INITIALIZING HUB INTERFACE...", 30);
+    await delay(1000);
+    window.location.href = "mhub.html"; // Redirect to your Hub/Chat page
 }
 
 input.addEventListener('keydown', async function(e) {
     if (e.key === 'Enter' && !locked) {
-        locked = true;
         const cmd = input.value.trim();
-        const norm = normalize(input.value);
-        await typeLine("> " + cmd, 15);
+        if (!cmd) return;
+        
+        locked = true;
         input.value = '';
-        await processInput(cmd, norm);
+        await typeLine("> " + cmd, 15);
+        
+        if (stage === 0) {
+            tempName = cmd;
+            stage = 1;
+            label.textContent = "BIRTH YEAR (YYYY): ";
+        } else if (stage === 1) {
+            if (!/^\d{4}$/.test(cmd)) {
+                await typeLine("ERROR: INVALID YEAR FORMAT.", 30);
+            } else {
+                inputZone.style.display = "none";
+                await handleLogin(tempName, cmd);
+            }
+        }
         locked = false;
     }
 });
 
-async function processInput(cmd, norm) {
-    switch(stage) {
-        case 0: // Main Login
-            if (norm === 'join' || norm === 'apply') {
-                await typeLine("--- EMPLOYMENT APPLICATION ---", 30);
-                await typeLine("ENTER FIRST NAME:", 30);
-                label.textContent = "NAME: ";
-                stage = 10; // Jump to registration flow
-            } 
-            else if (cmd.toUpperCase() === 'W015' || cmd.toUpperCase() === 'J13') {
-                await typeLine("MASTER ACCESS GRANTED...", 30);
-                localStorage.setItem('syntec_id', cmd.toUpperCase());
-                await showLoadingBar();
-            } else {
-                await typeLine("ERROR: INVALID CREDENTIALS", 30);
-            }
-            break;
-
-        case 10: // Reg Stage: Get Name
-            tempName = cmd.toUpperCase();
-            await typeLine("ENTER YEAR OF BIRTH (YYYY):", 30);
-            label.textContent = "YEAR: ";
-            stage = 11;
-            break;
-
-        case 11: // Reg Stage: Process Auth
-            tempYear = cmd;
-            if(!/^\d{4}$/.test(tempYear)) {
-                await typeLine("ERROR: INVALID DATE FORMAT.", 30);
-                await typeLine("RE-ENTER YEAR OF BIRTH:", 30);
-                return;
-            }
-
-            await typeLine("SEARCHING PERSONNEL DATABASE...", 50);
-
-            // Check if user exists
-            const { data: existingUser } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('first_name', tempName)
-                .eq('year_of_birth', parseInt(tempYear))
-                .single();
-
-            if (existingUser) {
-                await typeLine("IDENTITY VERIFIED. WELCOME BACK.", 30);
-                localStorage.setItem('syntec_id', existingUser.employee_id);
-                await showLoadingBar();
-            } else {
-                // Generate and Insert New User
-                const generatedID = `${tempName[0]}${tempYear}-${Math.floor(100 + Math.random() * 900)}`;
-                
-                const { error } = await supabase
-                    .from('profiles')
-                    .insert([{ 
-                        first_name: tempName, 
-                        year_of_birth: parseInt(tempYear), 
-                        employee_id: generatedID 
-                    }]);
-
-                if(!error) {
-                    await typeLine("APPLICATION APPROVED.", 30);
-                    await typeLine("ID ASSIGNED: " + generatedID, 50);
-                    localStorage.setItem('syntec_id', generatedID);
-                    await showLoadingBar();
-                } else {
-                    await typeLine("SYSTEM ERROR: REGISTRATION DENIED.", 30);
-                    stage = 0;
-                    label.textContent = "LOGIN: ";
-                }
-            }
-            break;
-    }
-}
-
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 </script>
-
 </body>
 </html>
