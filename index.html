@@ -158,13 +158,16 @@ input.addEventListener('keydown', async function(e) {
                 await typeLine("--- SYSTEM DIRECTORY ---", 20);
                 await typeLine("> [CLINICAL] - INTERN EVALUATION", 20);
                 await typeLine("> [HUB]      - PERSONNEL COMMUNICATIONS", 20);
-                await typeLine("> [MAIL]     - ENCRYPTED INBOX", 20); // Fixed quote error here
+                await typeLine("> [MAIL]     - ENCRYPTED INBOX", 20); 
+                await typeLine("> [SIMULATOR] - SIMULATOR", 20); // Fixed quote error here
             } else if (cmd === "hub") {
                 await showLoadingBar("mhub.html", "COMMUNICATIONS");
             } else if (cmd === "clinical") {
                 await showLoadingBar("clinical-practice.html", "CLINICAL");
             } else if (cmd === "mail") {
                 await showLoadingBar("mail.html", "INBOX");
+                 } else if (cmd === "simulator") {
+                await showLoadingBar("compound-synthesis-simulator.html", "SIMULATOR");
             } else {
                 await typeLine("INVALID PROMPT", 20);
             }
