@@ -2,115 +2,179 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title> n3s.dsk</title>
+    <title>n3s.dsk - NEURAL UPLINK</title>
     <style>
+        :root {
+            --neon-red: #ff0000;
+            --dark-red: #330000;
+            --bg-black: #050000;
+        }
+
         body {
-            background-color: #000; color: #33ff33;
+            background-color: #000; color: var(--neon-red);
             font-family: 'Courier New', Courier, monospace;
             display: flex; justify-content: center; align-items: center;
             height: 100vh; margin: 0; text-transform: uppercase; overflow: hidden;
         }
+
         .crt-monitor {
             width: 90vw; max-width: 800px; height: 85vh;
-            border: 10px solid #2a2a2a; border-radius: 20px;
-            background: #050505; padding: 20px;
+            border: 5px solid var(--dark-red); border-radius: 10px;
+            background: var(--bg-black); padding: 25px;
             display: flex; flex-direction: column;
-            box-shadow: inset 0 0 50px #000, 0 0 20px rgba(51, 255, 51, 0.2);
+            box-shadow: inset 0 0 60px #000, 0 0 30px rgba(255, 0, 0, 0.2);
+            position: relative;
         }
+
+        /* Scanline Effect */
+        .crt-monitor::after {
+            content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px; z-index: 10; pointer-events: none;
+        }
+
         #chat-log {
             flex-grow: 1; overflow-y: auto; margin-bottom: 20px;
-            padding-right: 10px; border-bottom: 1px solid #1a551a;
+            padding-right: 10px; border-bottom: 1px solid var(--dark-red);
         }
-        .msg { margin-bottom: 10px; line-height: 1.4; }
-        .nelson { color: #fff; text-shadow: 0 0 8px #fff; }
-        .user { color: #33ff33; }
-        .system { color: #1a551a; font-style: italic; }
+
+        .msg { margin-bottom: 12px; line-height: 1.5; font-size: 1.1rem; }
+        .nelson { color: var(--neon-red); text-shadow: 0 0 10px var(--neon-red); font-weight: bold; }
+        .user { color: #880000; }
+        .system { color: var(--dark-red); font-style: italic; font-size: 0.9rem; }
+
         .input-line { display: flex; align-items: center; }
         #user-input {
-            background: transparent; border: none; color: #33ff33;
+            background: transparent; border: none; color: var(--neon-red);
             font-family: inherit; font-size: 1.1rem; width: 100%; outline: none;
         }
-        /* Scrollbar Styling */
-        #chat-log::-webkit-scrollbar { width: 5px; }
-        #chat-log::-webkit-scrollbar-thumb { background: #1a551a; }
+
+        .hidden { display: none !important; }
+
+        /* Login Screen Styling */
+        #login-screen { text-align: center; }
+        .glitch { animation: jitter 4s infinite; }
+        @keyframes jitter {
+            0% { transform: translate(0); }
+            2% { transform: translate(2px, -1px); }
+            4% { transform: translate(-1px, 2px); }
+            6% { transform: translate(0); }
+        }
+
+        #chat-log::-webkit-scrollbar { width: 4px; }
+        #chat-log::-webkit-scrollbar-thumb { background: var(--dark-red); }
     </style>
 </head>
 <body>
 
 <div class="crt-monitor">
-    <div id="chat-log">
-        <p class="system">[UPLINK ESTABLISHED: REMOTE NODE 013-S]</p>
-        <p class="system">[USER IDENTIFIED AS: GUEST_MOUNTAINEER]</p>
-        <p class="nelson">NELSON: WHO IS THIS? WHY ARE YOU ACCESSING MY PRIVATE DIRECTORY?</p>
+    <div id="login-screen" class="glitch">
+        <h2 style="border-bottom: 1px solid var(--neon-red); padding-bottom: 10px;">RESTRICTED DIRECTORY: N3S</h2>
+        <p>UNAUTHORIZED ACCESS IS A TERMINABLE OFFENSE</p>
+        <br>
+        <div style="text-align: left; width: 250px; margin: 0 auto;">
+            <label>EMPLOYEE ID:</label><br>
+            <input type="text" id="login-id" style="background:transparent; border:1px solid var(--dark-red); color:var(--neon-red); width:100%; margin-bottom:15px;" autofocus><br>
+            <label>PASSWORD:</label><br>
+            <input type="password" id="login-pass" style="background:transparent; border:1px solid var(--dark-red); color:var(--neon-red); width:100%;">
+            <p style="font-size: 0.7rem; color: #440000; margin-top: 20px;">[PRESS ENTER TO VERIFY]</p>
+        </div>
     </div>
-    <div class="input-line">
-        <span>>&nbsp;</span>
-        <input type="text" id="user-input" autofocus autocomplete="off">
+
+    <div id="chat-interface" class="hidden" style="display:flex; flex-direction:column; height:100%;">
+        <div id="chat-log"></div>
+        <div class="input-line">
+            <span>>&nbsp;</span>
+            <input type="text" id="user-input" autocomplete="off">
+        </div>
     </div>
 </div>
 
 <script>
+    const loginScreen = document.getElementById('login-screen');
+    const chatInterface = document.getElementById('chat-interface');
     const chatLog = document.getElementById('chat-log');
     const userInput = document.getElementById('user-input');
+    
+    // Login Logic (Accepts anything)
+    document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !loginScreen.classList.contains('hidden')) {
+            const id = document.getElementById('login-id').value;
+            if (id.length > 0) {
+                loginScreen.classList.add('hidden');
+                chatInterface.classList.remove('hidden');
+                initiateChat();
+            }
+        }
+    });
 
-    // Brain bank for Nelson Syphus
     const responses = {
         "WHO ARE YOU": "I AM THE FOUNDER. THE VISIONARY. THE ONE WHO SACRIFICED EVERYTHING FOR PROGRESS.",
-         "WHO IS NELSON": "I AM THE FOUNDER. THE VISIONARY. THE ONE WHO SACRIFICED EVERYTHING FOR PROGRESS.",
         "SYNTEC": "SYNTEC WAS MERELY THE VESSEL. THE MISSION IS WHAT MATTERS.",
         "SERUM": "IT IS NOT A LIQUID. IT IS LIFE. IT IS THE CURE FOR HUMAN FRAILTY.",
-        "LIFE": "LIFE IS BLOOD. BLOOD IS BIOLOGY. BIOLOGY IS TECHNOLOGY.",
         "863": "THE SUBJECTS... THEY WERE NECESSARY. EVOLUTION REQUIRES COLLATERAL DAMAGE.",
-        "DEBORAH": "D3B? A TRAITOR. SHE THOUGHT SHE COULD STOP THE INEVITABLE.",
-        "WES": "WESLEY LACKED THE STOMACH FOR WHAT HAD TO BE DONE.",
+        "DEBORAH": "DEB? A TRAITOR. SHE THOUGHT SHE COULD STOP THE INEVITABLE.",
+        "DEB": "DEB? A TRAITOR. SHE THOUGHT SHE COULD STOP THE INEVITABLE.",
         "WESLEY": "WESLEY LACKED THE STOMACH FOR WHAT HAD TO BE DONE.",
+        "WES": "WESLEY LACKED THE STOMACH FOR WHAT HAD TO BE DONE.", 
         "MOUNTAINEER": "A QUAINT NAME. DO YOU THINK YOU ARE SCALING A PEAK? YOU ARE DROWNING IN THE DEEP.",
-        "HELP": "I DO NOT OFFER HELP. I OFFER PURPOSE.",
-        "DIE": "DEATH IS A LIMITATION I HAVE LONG SINCE SURPASSED.",
-        "WHERE": "I AM EVERYWHERE. IN THE DATA. IN THE WALLS. IN THE BLOOD.",
-        "HELLO": "GREETINGS ARE FOR THE WEAK. STATE YOUR INTENT.",
-        "SMAIL": "SMAIL... A RELIC. OLD CORRESPONDENCE FROM A TIME BEFORE TOTAL CLARITY.",
-        "J13": "A LOYAL INTERN. OR AT LEAST, THEY WERE SUPPOSED TO BE.",
-        "PEGASUS": "PROJECT PEGASUS WAS ONLY THE BEGINNING. THE HORIZON IS MUCH DARKER.",
-        "N3S": "YOU ARE SPEAKING TO THE CORE ARCHIVE. I AM NELSON.",
-        "FAIL": "FAILURE IS FOR THOSE WHO STOP. I NEVER STOP.",
-        "FUTURE": "THE FUTURE BELONGS TO THOSE WHO CAN ENDURE THE PAIN OF CHANGE.",
-        "PAIN": "PAIN IS JUST DATA. LEARN TO READ IT.",
-        "ELIORA": "THIS UNIT HAS TIMED OUT.",
-        "DEFAULT": "THAT IS IRRELEVANT. FOCUS ON THE MISSION OR LEAVE MY TERMINAL."
+        "ELIORA": "THIS UNIT HAS TIMED OUT",
+        "DEFAULT": "INVALID PROMPT"
     };
 
-    function addMessage(sender, text, className) {
+    async function typeWriter(sender, text, className) {
         const p = document.createElement('p');
         p.className = `msg ${className}`;
-        p.innerHTML = `${sender}: ${text}`;
+        p.innerHTML = `<span class="label">${sender}: </span><span class="content"></span>`;
         chatLog.appendChild(p);
-        chatLog.scrollTop = chatLog.scrollHeight;
+        
+        const contentSpan = p.querySelector('.content');
+        for (let i = 0; i < text.length; i++) {
+            contentSpan.textContent += text.charAt(i);
+            chatLog.scrollTop = chatLog.scrollHeight;
+            await new Promise(r => setTimeout(r, 40)); // Speed of Nelson's typing
+        }
     }
 
-    userInput.addEventListener('keypress', (e) => {
+    function addSystemMsg(text) {
+        const p = document.createElement('p');
+        p.className = "msg system";
+        p.innerText = text;
+        chatLog.appendChild(p);
+    }
+
+    async function initiateChat() {
+        userInput.focus();
+        addSystemMsg("[UPLINK ESTABLISHED: REMOTE NODE 013-S]");
+        addSystemMsg("[SYNCING CONSCIOUSNESS ARCHIVE...]");
+        await new Promise(r => setTimeout(r, 1000));
+        await typeWriter("NELSON", "WHO IS THIS? WHY ARE YOU ACCESSING MY PRIVATE DIRECTORY?", "nelson");
+    }
+
+    userInput.addEventListener('keypress', async (e) => {
         if (e.key === 'Enter') {
             const val = userInput.value.trim().toUpperCase();
             if (!val) return;
 
-            // User message
-            addMessage("YOU", val, "user");
+            // Immediate User Entry
+            const p = document.createElement('p');
+            p.className = "msg user";
+            p.innerHTML = `YOU: ${val}`;
+            chatLog.appendChild(p);
             userInput.value = "";
+            chatLog.scrollTop = chatLog.scrollHeight;
 
-            // System lag simulation
-            setTimeout(() => {
-                let reply = responses["DEFAULT"];
-                
-                // Keyword matching
-                for (let key in responses) {
-                    if (val.includes(key)) {
-                        reply = responses[key];
-                        break;
-                    }
+            // Thinking Delay
+            await new Promise(r => setTimeout(r, 1500));
+
+            let reply = responses["DEFAULT"];
+            for (let key in responses) {
+                if (val.includes(key)) {
+                    reply = responses[key];
+                    break;
                 }
-
-                addMessage("NELSON", reply, "nelson");
-            }, 600 + Math.random() * 1000);
+            }
+            await typeWriter("NELSON", reply, "nelson");
         }
     });
 </script>
