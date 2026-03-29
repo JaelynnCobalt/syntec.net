@@ -1,1 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Syntec Terminal - Mobile</title>
 
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #33ff33;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            text-shadow: 0 0 5px #33ff33;
+        }
+
+        .crt-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+            background-size: 100% 3px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .screen {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background: #050505;
+            /* Added margin for the touch interface */
+            padding-bottom: 80px; 
+        }
+
+        #output {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .input-area {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #050505;
+            border-top: 1px solid #1a551a;
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            box-sizing: border-box;
+            z-index: 5;
+        }
+
+        #command-line {
+            background: transparent;
+            border: none;
+            color: #33ff33;
+            font-family: inherit;
+            /* 16px font-size prevents mobile browsers from zooming in on focus */
+            font-size: 16px; 
+            outline: none;
+            flex: 1;
+        }
+
+        #label {
+            font-size: 16px;
+            white-space: nowrap;
+        }
+
+        .loading-bar {
+            color: #33ff33;
+            letter-spacing: 2px;
+            font-size: 1.2rem;
+            word-break: break-all;
+        }
+
+        /* Scanline effect for mobile */
+        .scanline {
+            width: 100%; height: 2px;
+            background: rgba(51, 255, 51, 0.1);
+            position: absolute;
+            animation: scan 4s linear infinite;
+            z-index: 11;
+        }
+
+        @keyframes scan {
+            0% { top: -10%; }
+            100% { top: 110%; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="crt-overlay"></div>
+<div class="scanline"></div>
+
+<div class="screen" id="screen-container">
+    <div id="output">
+        <p>SYNTEC(TM) PEGASUS OS v2.0.1m</p>
+        <p>COPYRIGHT 1986 SYNTEC LABS</p>
+        <p>MOBILE UPLINK ACTIVE</p>
+        <p>---------------------------</p>
+        <p>PLEASE LOG IN TO PROCEED...</p>
+    </div>
+</div>
+
+<div class="input-area" id="input-zone">
+    <span id="label">LOGIN:&nbsp;</span>
+    <input type="text" id="command-line" autofocus autocomplete="off" spellcheck="false">
+</div>
+
+<script>
+    const input = document.getElementById('command-line');
+    const output = document.getElementById('output');
+    const label = document.getElementById('label');
+    const inputZone = document.getElementById('input-zone');
+    const screenContainer = document.getElementById('screen-container');
+
+    let stage = 0;
+    let locked = false;
+
+    // Helper for mobile scrolling
+    function scrollToBottom() {
+        screenContainer.scrollTop = screenContainer.scrollHeight;
+    }
+
+    function typeLine(text, speed = 25) {
+        return new Promise(resolve => {
+            const p = document.createElement('p');
+            output.appendChild(p);
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    p.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    scrollToBottom();
+                    resolve();
+                }
+            }
+            type();
+        });
+    }
+
+    function normalize(str) {
+        return str.toLowerCase().replace(/[^\w\s]/g, '').trim();
+    }
+
+    async function showLoadingBar(type = "clinical") {
+        locked = true;
+        inputZone.style.display = "none";
+        output.innerHTML = "";
+        
+        if (type === "mountaineer") {
+            await typeLine("ACCESSING HIDDEN DIRECTORY...", 40);
+            await typeLine("MOUNTING VOLUME: n3s.dsk", 40);
+        } else {
+            await typeLine("INITIALIZING INTERFACE...", 40);
+            await typeLine("MOUNTING DATABASE: J13-V8.4", 40);
+        }
+        
+        await typeLine("ESTABLISHING UPLINK...", 60);
+        
+        const bar = document.createElement('div');
+        bar.className = "loading-bar";
+        bar.textContent = "[";
+        output.appendChild(bar);
+
+        const segments = 15; // Slightly fewer for mobile width
+        for (let i = 0; i < segments; i++) {
+            await delay(150); 
+            bar.textContent += "■";
+            scrollToBottom();
+        }
+        bar.textContent += "]";
+        
+        await delay(500);
+        await typeLine("CONNECTION ESTABLISHED.", 30);
+        await delay(800);
+        
+        // Use m-versions of the next pages if they exist
+        if (type === "mountaineer") {
+            window.location.href = "mn3s.html"; 
+        } else {
+            window.location.href = "mclinical-practice.html";
+        }
+    }
+
+    input.addEventListener('keydown', async function(e) {
+        if (e.key === 'Enter' && !locked) {
+            locked = true;
+            const cmd = input.value.trim();
+            const norm = normalize(input.value);
+            await typeLine("> " + cmd, 15);
+            input.value = '';
+            await processInput(cmd, norm);
+            locked = false;
+            // Keep focus for mobile keyboard
+            input.focus(); 
+        }
+    });
+
+    async function processInput(cmd, norm) {
+        switch(stage) {
+            case 0:
+                if (cmd.toUpperCase() === 'W015' || cmd.toUpperCase() === 'J13') {
+                    await typeLine("ACCESS GRANTED...", 30);
+                    stage = 1;
+                    label.textContent = "CMD: ";
+                    await typeLine("WELCOME, " + cmd.toUpperCase(), 30);
+                    await typeLine("TYPE 'DIR' FOR LIST.", 30);
+                } else {
+                    await typeLine("ERROR: INVALID CREDENTIALS", 30);
+                }
+                break;
+
+            case 1:
+                if (norm === "dir" || norm === "directory") {
+                    await typeLine("--- SYSTEM DIRECTORY ---", 20);
+                    await typeLine("> [CLINICAL] - EVALUATION", 20);
+                    await typeLine("> [STATUS]   - FACILITY", 20);
+                } 
+                else if (norm === "clinical") {
+                    await showLoadingBar("clinical");
+                }
+                else if (norm === "mountaineer") {
+                    await showLoadingBar("mountaineer");
+                }
+                else if (norm === "status") {
+                    await typeLine("ACCESSING STATUS...", 30);
+                    await typeLine("LOG: CREAMER DEPLETED IN BREAKROOM.", 30);
+                    stage = 2;
+                    label.textContent = "QUERY: ";
+                }
+                else {
+                    await typeLine("ERROR: UNKNOWN COMMAND", 30);
+                }
+                break;
+
+            case 2:
+                if (norm === "regular or vanilla") {
+                    await typeLine("VANILLA UNAVAILABLE.", 30);
+                    await typeLine("> HAZELNUT", 30);
+                    await typeLine("> PEPPERMINT", 30);
+                    stage = 3;
+                    label.textContent = "SELECT: ";
+                } else {
+                    await typeLine("INVALID QUERY.", 30);
+                }
+                break;
+
+            case 3:
+                if (norm === "hazelnut") {
+                    await typeLine("REDIRECTING TO MAIL...", 30);
+                    window.location.href = "msmail.html";
+                }
+                else if (norm === "peppermint") {
+                    await typeLine("REDIRECTING TO 863...", 30);
+                    window.location.href = "m863.html";
+                }
+                break;
+        }
+    }
+
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Force focus on click for better mobile feel
+    document.addEventListener('click', () => {
+        if (!locked) input.focus();
+    });
+</script>
+
+</body>
+</html>
