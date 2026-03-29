@@ -119,8 +119,32 @@ function formatRetroDate(timestamp) {
     return `${d.getDate()} ${months[d.getMonth()]} 1982`;
 }
 
+// --- GLOBAL MUNDANE EMAILS (VISIBLE TO ALL) ---
 const boringMails = [
-    { id: 999, sender_display_name: "HR-BOT", sender_name: "SYS", subject: "PROTOCOL UPDATE", content: "REMINDER: Wipe Level-3 disinfectant on all surfaces.", created_at: "1982-10-12", is_starred: false, is_deleted: false, cc_list: "" }
+    { id: 901, sender_display_name: "D. Sharpe", sender_name: "D3B", subject: "CLINICAL TRIAL: PHASE II PROTOCOL", content: "All lab assistants are reminded that Phase II trials require dual-signature verification. No exceptions. Efficiency is secondary to accuracy.", created_at: "1982-10-25", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 902, sender_display_name: "D. Sharpe", sender_name: "D3B", subject: "GUEST SPEAKER: DR. V. KHAN", content: "Dr. Khan will be presenting her findings on neuro-regeneration this Friday in the Main Auditorium at 09:00. Mandatory for all Level 3 staff.", created_at: "1982-10-22", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 903, sender_display_name: "D. Sharpe", sender_name: "D3B", subject: "EQUIPMENT CALIBRATION", content: "The centrifuges in Wing B are overdue for service. Please schedule your batch processing accordingly for Tuesday maintenance.", created_at: "1982-10-18", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 904, sender_display_name: "D. Sharpe", sender_name: "D3B", subject: "UNAUTHORIZED BREAKS", content: "It has come to my attention that staff are congregating in the loading docks. This is a security risk. Use the designated breakrooms.", created_at: "1982-10-10", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 905, sender_display_name: "D. Sharpe", sender_name: "D3B", subject: "FINAL QUARTER TARGETS", content: "We are 4% behind our projected data-set goals for the year. I expect everyone to prioritize the 863-series trials this month.", created_at: "1982-10-01", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 906, sender_display_name: "D. Sharpe", sender_name: "D3B", subject: "HOLIDAY SCHEDULE", content: "Syntec does not observe the upcoming civic holiday. Labs will remain fully operational. Bonus credits will be applied to overtime hours.", created_at: "1982-09-28", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 907, sender_display_name: "HR-BOT", sender_name: "SYS", subject: "DRESS CODE REMINDER", content: "Lab coats must be buttoned at all times. Personal protective equipment is not optional.", created_at: "1982-10-24", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 908, sender_display_name: "HR-BOT", sender_name: "SYS", subject: "BENEFITS UPDATE", content: "The Syntec Life Insurance policy has been updated to include Level 4 hazardous environment coverage. Please sign the rider in the HR office.", created_at: "1982-10-20", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 909, sender_display_name: "HR-BOT", sender_name: "SYS", subject: "STAFF SURVEY", content: "Please complete the 'Company Loyalty and Work-Life Integration' survey by EOD Friday.", created_at: "1982-10-15", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 910, sender_display_name: "HR-BOT", sender_name: "SYS", subject: "PARKING PERMITS", content: "New blue permits are required for the North Lot. Old permits will result in vehicle impoundment.", created_at: "1982-10-05", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 911, sender_display_name: "HR-BOT", sender_name: "SYS", subject: "LOST KEYCARD", content: "A Level 1 keycard was found in the cafeteria. Contact security to verify ownership.", created_at: "1982-09-30", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 912, sender_display_name: "HR-BOT", sender_name: "SYS", subject: "MANDATORY RE-TRAINING", content: "All employees must watch the 'Safe Handling of Bio-Organic Compounds' film in the lounge this week.", created_at: "1982-09-22", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 913, sender_display_name: "Facilities", sender_name: "FAC-01", subject: "HVAC MAINTENANCE", content: "The climate control in Sector 4 will be disabled for 4 hours starting at midnight. Secure all temperature-sensitive samples.", created_at: "1982-10-23", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 914, sender_display_name: "Facilities", sender_name: "FAC-01", subject: "WATER QUALITY REPORT", content: "Routine testing complete. The slight discoloration in the Sub-Level water is within Syntec safety margins.", created_at: "1982-10-19", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 915, sender_display_name: "Facilities", sender_name: "FAC-01", subject: "ELEVATOR OUTAGE", content: "Freight Elevator #3 is out of service. Please use the stairs for any loads under 50kg.", created_at: "1982-10-14", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 916, sender_display_name: "Facilities", sender_name: "FAC-01", subject: "JANITORIAL SCHEDULE", content: "Floors in the Clinical Wing will be waxed tonight. Do not enter between 20:00 and 04:00.", created_at: "1982-10-02", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 917, sender_display_name: "Facilities", sender_name: "FAC-01", subject: "LIGHTING UPGRADE", content: "Fluorescent tubes are being replaced with higher-intensity bulbs to improve staff alertness.", created_at: "1982-09-25", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 918, sender_display_name: "Facilities", sender_name: "FAC-01", subject: "PEST CONTROL", content: "The annual fumigation of the archives is scheduled for Saturday. Access is prohibited.", created_at: "1982-09-18", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 919, sender_display_name: "Cafeteria", sender_name: "CAF-A", subject: "MENU CHANGE", content: "Due to supply chain issues, Thursday will now be Meatloaf Day instead of Taco Day. We apologize for the inconvenience.", created_at: "1982-10-21", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 920, sender_display_name: "Cafeteria", sender_name: "CAF-A", subject: "VENDING MACHINES", content: "The vending machine in Sector 2 is no longer accepting 1980 quarters. Use newer coins or exact change only.", created_at: "1982-10-11", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 921, sender_display_name: "Syntec Social", sender_name: "SOC-1", subject: "ANNUAL PICNIC PHOTOS", content: "Photos from the company picnic are available in the lobby. See if you can spot Nelson in the dunk tank!", created_at: "1982-10-08", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 922, sender_display_name: "Syntec Social", sender_name: "SOC-1", subject: "BOWL-A-RAMA", content: "Join the Syntec Strikers this Friday at the local lanes. Sign-up sheet in the breakroom.", created_at: "1982-10-03", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 923, sender_display_name: "Cafeteria", sender_name: "CAF-A", subject: "REUSABLE CUPS", content: "Please stop taking the mugs home. We are missing 42 units since the start of the month.", created_at: "1982-09-20", is_starred: false, is_deleted: false, cc_list: "" },
+    { id: 924, sender_display_name: "Syntec Social", sender_name: "SOC-1", subject: "RETIREMENT PARTY", content: "Join us in wishing Arthur a happy retirement after 20 years in the records department. Cake will be served.", created_at: "1982-09-15", is_starred: false, is_deleted: false, cc_list: "" }
 ];
 
 function showTerminalNotify(text, isError = false) {
@@ -157,23 +181,18 @@ async function sendMail() {
 
     if (!toRaw || !body) { showTerminalNotify("ERR: PRIMARY RECIPIENT REQUIRED", true); return; }
 
-    // Parse IDs (supports comma separated)
     const toList = toRaw.split(',').map(s => s.trim()).filter(s => s);
     const ccList = ccRaw.split(',').map(s => s.trim()).filter(s => s);
     const bccList = bccRaw.split(',').map(s => s.trim()).filter(s => s);
-
-    // Combine all unique recipients for insertion
     const allRecipients = [...new Set([...toList, ...ccList, ...bccList])];
     
-    // In our simplified table, we store one row per recipient so they each see it in their inbox.
-    // We store the 'cc_list' so recipients know who else was on the thread.
     const entries = allRecipients.map(recipientID => ({
         sender_name: myID,
         sender_display_name: myName,
         receiver_id: recipientID,
         subject: sub,
         content: body,
-        cc_list: ccRaw // Recipients see the CC list, but NOT the BCC list
+        cc_list: ccRaw 
     }));
 
     const { error } = await _supabase.from('internal_messages').insert(entries);
@@ -188,7 +207,7 @@ async function sendMail() {
 }
 
 async function updateStatus(msgId, field, value) {
-    if (msgId >= 998) { showTerminalNotify("ERR: ACCESS DENIED", true); return; }
+    if (msgId >= 900) { showTerminalNotify("ERR: ACCESS DENIED - SYSTEM RECORD", true); return; }
     const { error } = await _supabase.from('internal_messages').update({ [field]: value }).eq('id', msgId);
     if (!error) { showTerminalNotify("RECORD UPDATED"); loadMail(); }
 }
@@ -212,7 +231,10 @@ async function loadMail() {
 
     const { data } = await query.order('created_at', { ascending: false });
     let mails = data || [];
-    if (currentFolder === 'inbox') mails = [...mails, ...boringMails];
+    if (currentFolder === 'inbox') {
+        // Merge mundane mails and sort by date
+        mails = [...mails, ...boringMails].sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+    }
 
     list.innerHTML = "";
     mails.forEach(msg => {
@@ -237,7 +259,7 @@ function viewMail(msg, element) {
     viewer.innerHTML = `
         <div class="email-header">
             <div><strong>FROM:</strong> ${msg.sender_display_name} (${msg.sender_name})</div>
-            <div><strong>TO:</strong> ${msg.receiver_id}</div>
+            <div><strong>TO:</strong> ${msg.receiver_id || 'STATION_BROADCAST'}</div>
             ${msg.cc_list ? `<div><strong>CC:</strong> ${msg.cc_list}</div>` : ''}
             <div><strong>SUBJECT:</strong> ${msg.subject || 'SECURE TRANSMISSION'}</div>
             <div><strong>DATE:</strong> ${formatRetroDate(msg.created_at)}</div>
