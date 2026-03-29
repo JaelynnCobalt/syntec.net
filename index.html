@@ -4,10 +4,9 @@
 <meta charset="UTF-8">
 <title>Syntec Terminal - Apple II</title>
 <style>
-/* Retro Apple II / Syntec Aesthetic */
 body {
 background-color: #0a0a0a;
-color: #33ff33; /* Classic Phosphor Green */
+color: #33ff33;
 font-family: 'Courier New', Courier, monospace;
 display: flex;
 justify-content: center;
@@ -18,7 +17,6 @@ overflow: hidden;
 text-shadow: 0 0 5px #33ff33;
 }
 
-/* CRT Scanline & Flicker Effect */
 .crt-overlay {
 position: fixed;
 top: 0; left: 0; width: 100%; height: 100%;
@@ -38,6 +36,7 @@ border: 2px solid #33ff33;
 box-shadow: 0 0 20px rgba(51, 255, 51, 0.2);
 position: relative;
 background: #050505;
+overflow-y: auto;
 }
 
 .input-area {
@@ -55,9 +54,6 @@ outline: none;
 width: 100%;
 }
 
-.hidden { display: none; }
-
-/* Cursor Blink */
 .cursor {
 display: inline-block;
 width: 10px;
@@ -78,11 +74,11 @@ animation: blink 0.8s infinite;
 <p>SYNTEC(TM) PEGASUS OS v2.0.1</p>
 <p>COPYRIGHT 1986 SYNTEC LABS</p>
 <p>---------------------------</p>
-<p id="login-prompt">PLEASE LOG IN TO PROCEED...</p>
+<p id="prompt">PLEASE LOG IN TO PROCEED...</p>
 </div>
 
 <div class="input-area">
-<span>LOGIN:&nbsp;</span>
+<span id="input-label">LOGIN:&nbsp;</span>
 <input type="text" id="command-line" autofocus autocomplete="off">
 </div>
 </div>
@@ -90,11 +86,15 @@ animation: blink 0.8s infinite;
 <script>
 const input = document.getElementById('command-line');
 const output = document.getElementById('output');
+const label = document.getElementById('input-label');
+const promptText = document.getElementById('prompt');
+
+let stage = 0; // 0 = login, 1 = status report, 2 = flavor
 
 input.addEventListener('keydown', function(e) {
 if (e.key === 'Enter') {
-const val = input.value.trim().toUpperCase();
-processCommand(val);
+const val = input.value.trim();
+processInput(val);
 input.value = '';
 }
 });
@@ -103,19 +103,55 @@ function addLine(text) {
 const p = document.createElement('p');
 p.textContent = text;
 output.appendChild(p);
+output.scrollTop = output.scrollHeight;
 }
 
-function processCommand(cmd) {
-if (cmd === 'W015') {
-addLine("> ACCESS GRANTED: USER W015");
-addLine("> INITIALIZING PROJECT 863 DIRECTORY...");
-setTimeout(() => {
-addLine("> WARNING: CORRUPTED FILES DETECTED IN LABORATORY V-01");
-addLine("> TYPE 'WORK' TO BEGIN DATA RECLAMATION.");
-}, 1000);
+function processInput(cmd) {
+
+switch(stage) {
+
+// LOGIN STAGE
+case 0:
+if (cmd.toUpperCase() === 'W015' || cmd.toUpperCase() === 'J13') {
+addLine("> ACCESS GRANTED");
+stage = 1;
+label.textContent = "";
+addLine("> Status report");
 } else {
-addLine(`> ERROR: INVALID CREDENTIALS [${cmd}]`);
-addLine("> UNAUTHORIZED ACCESS ATTEMPT LOGGED.");
+addLine("> ERROR: INVALID CREDENTIALS");
+}
+break;
+
+// STATUS REPORT STAGE
+case 1:
+if (cmd === "Theyre out of cream in the breakroom") {
+addLine("> Regular or vanilla?");
+stage = 2;
+} else {
+addLine("> invalid prompt");
+}
+break;
+
+// FLAVOR STAGE
+case 2:
+const choice = cmd.toLowerCase();
+
+if (choice === "hazelnut") {
+addLine("> order confirmed");
+setTimeout(() => window.location.href = "pegasus.html", 1000);
+}
+else if (choice === "peppermint") {
+addLine("> order confirmed");
+setTimeout(() => window.location.href = "863.html", 1000);
+}
+else if (choice === "vanilla") {
+addLine("> invalid prompt");
+}
+else {
+addLine("> invalid prompt");
+}
+break;
+
 }
 }
 </script>
