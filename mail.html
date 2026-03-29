@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Syntec Mail - Encrypted Communication</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --neon: #33ff33; --bg: #050505; --panel: #0d0d0d; --border: #1a3a1a; }
+        body { background-color: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        .top-bar { padding: 10px 20px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; background: #000; font-weight: bold; }
+        .main { display: flex; flex: 1; overflow: hidden; }
+
+        /* Inbox List */
+        .inbox-sidebar { width: 350px; border-right: 1px solid var(--border); overflow-y: auto; background: var(--panel); }
+        .mail-item { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; position: relative; }
+        .mail-item:hover { background: rgba(51, 255, 51, 0.05); }
+        .mail-item.active { background: rgba(51, 255, 51, 0.1); border-left: 4px solid var(--neon); }
+        .mail-sender { font-weight: bold; font-size: 0.9rem; margin-bottom: 4px; display: block; }
+        .mail-preview { font-size: 0.75rem; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mail-date { font-size: 0.6rem; position: absolute; top: 15px; right: 10px; opacity: 0.5; }
+
+        /* Message Viewer */
+        .content-area { flex: 1; display: flex; flex-direction: column; padding: 40px; background: #080808; overflow-y: auto; }
+        .email-header { border-bottom: 1px solid var(--border); margin-bottom: 20px; padding-bottom: 20px; }
+        .email-meta { font-size: 0.85rem; margin-bottom: 5px; }
+        .email-body { line-height: 1.6; font-size: 0.95rem; white-space: pre-wrap; }
+
+        /* Compose Modal */
+        #compose-btn { background: var(--neon); color: #000; border: none; padding: 10px 20px; font-family: inherit; font-weight: bold; cursor: pointer; margin-right: 20px; }
+        .btn-ghost { background: transparent; color: var(--neon); border: 1px solid var(--neon); padding: 5px 15px; cursor: pointer; font-family: inherit; }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <span>SYNTEC ENCRYPTED MAIL v4.0</span>
+    <div>
+        <button id="compose-btn" onclick="alert('System restriction: Direct outbound mail disabled for Interns.')">NEW MESSAGE</button>
+        <button class="btn-ghost" onclick="location.href='mhub.html'">RETURN TO HUB</button>
+    </div>
+</div>
+
+<div class="main">
+    <div class="inbox-sidebar" id="inbox-list">
+        <div style="padding: 20px; text-align: center; opacity: 0.5;">DECRYPTING INBOX...</div>
+    </div>
+
+    <div class="content-area" id="mail-viewer">
+        <div style="margin: auto; text-align: center; opacity: 0.3;">
+            <h2 style="letter-spacing: 5px;">SELECT A COMMUNICATION</h2>
+            <p>End-to-end encryption active</p>
+        </div>
+    </div>
+</div>
+
+<script>
+const S_URL = "https://zefaapnmutxgnabpxoog.supabase.co";
+const S_KEY = "sb_publishable_zI-xgDNT8kQciUQ-j_EFsw_89a_CyGM";
+const _supabase = supabase.createClient(S_URL, S_KEY);
+
+const myID = localStorage.getItem('syntec_id') || "GUEST";
+
+async function loadInbox() {
+    const { data, error } = await _supabase
+        .from('internal_messages')
+        .select('*')
+        .eq('receiver_id', myID)
+        .order('created_at', { ascending: false });
+
+    const list = document.getElementById('inbox-list');
+    list.innerHTML = "";
+
+    if (data && data.length > 0) {
+        data.forEach(msg => {
+            const date = new Date(msg.created_at).toLocaleDateString();
+            const div = document.createElement('div');
+            div.className = 'mail-item';
+            div.onclick = () => viewMail(msg, div);
+            div.innerHTML = `
+                <span class="mail-date">${date}</span>
+                <span class="mail-sender">${msg.sender_display_name || msg.sender_name}</span>
+                <div class="mail-preview">${msg.content}</div>
+            `;
+            list.appendChild(div);
+        });
+    } else {
+        list.innerHTML = '<div style="padding:20px; opacity:0.5;">NO INCOMING TRANSMISSIONS</div>';
+    }
+}
+
+function viewMail(msg, element) {
+    // UI Update
+    document.querySelectorAll('.mail-item').forEach(i => i.classList.remove('active'));
+    element.classList.add('active');
+
+    const viewer = document.getElementById('mail-viewer');
+    const dateStr = new Date(msg.created_at).toLocaleString();
+    
+    viewer.innerHTML = `
+        <div class="email-header">
+            <div class="email-meta"><strong>FROM:</strong> ${msg.sender_display_name} (${msg.sender_name})</div>
+            <div class="email-meta"><strong>TO:</strong> Intern Profile ${myID}</div>
+            <div class="email-meta"><strong>DATE:</strong> ${dateStr}</div>
+            <div class="email-meta"><strong>SUBJECT:</strong> SECURE TRANSMISSION</div>
+        </div>
+        <div class="email-body">${msg.content}</div>
+        <div style="margin-top: 50px; border-top: 1px solid #222; padding-top: 20px;">
+            <button class="btn-ghost" style="font-size: 0.7rem;" onclick="alert('Error: Forwarding restricted by Overseer.')">FORWARD</button>
+            <button class="btn-ghost" style="font-size: 0.7rem; margin-left: 10px;" onclick="alert('Reply function disabled for security level 1.')">REPLY</button>
+        </div>
+    `;
+}
+
+// Initialize
+loadInbox();
+</script>
+</body>
+</html>
