@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>HoM3</title>
+    <title>PEGASUS SYSTEM</title>
     <style>
         body {
             background-color: #000;
@@ -43,13 +43,12 @@
         }
 
         .header { border-bottom: 2px solid #33ff33; padding-bottom: 5px; margin-bottom: 10px; flex-shrink: 0; }
-        
         .main-layout { display: flex; flex-grow: 1; overflow: hidden; }
 
         .sidebar { width: 180px; border-right: 1px solid #1a551a; padding-right: 10px; flex-shrink: 0; }
         .nav-item { padding: 8px; cursor: pointer; display: block; width: 100%; text-align: left; background: transparent; color: #33ff33; border: none; font-family: inherit; }
         .nav-item:hover { background: #33ff33; color: #000; }
-        .nav-item.active { border: 1px solid #33ff33; }
+        .nav-item.active { border: 1px solid #33ff33; background: rgba(51, 255, 51, 0.1); }
 
         .content-view { flex-grow: 1; padding-left: 15px; overflow-y: auto; position: relative; }
         .hidden { display: none; }
@@ -65,9 +64,9 @@
         .back-btn { border: 1px solid #33ff33; color: #33ff33; background: transparent; padding: 5px 10px; cursor: pointer; font-family: inherit; }
         .back-btn:hover { background: #33ff33; color: #000; }
 
-        .content-view::-webkit-scrollbar { width: 8px; }
-        .content-view::-webkit-scrollbar-track { background: #000; }
-        .content-view::-webkit-scrollbar-thumb { background: #33ff33; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #33ff33; }
     </style>
 </head>
 <body>
@@ -75,16 +74,15 @@
 <div class="crt-monitor">
     <div class="header">
         <h1>SYNTEC S-MAIL V4.1</h1>
-        <small>USER: JAELYNN COBALT [INT-LEVEL-3] | DEPT: PEGASUS-A</small>
+        <small>USER: J. =13 [INT-LEVEL-3] | SECURE CONNECTION</small>
     </div>
 
     <div class="main-layout">
-        <div class="sidebar">
-            <button class="nav-item active" id="btn-inbox" onclick="setFolder('inbox')">01. INBOX</button>
-            <button class="nav-item" id="btn-starred" onclick="setFolder('starred')">02. STARRED</button>
-            <button class="nav-item" id="btn-sent" onclick="setFolder('sent')">03. SENT</button>
-            <button class="nav-item" id="btn-trash" onclick="setFolder('trash')">04. TRASH</button>
-            <button class="nav-item" style="margin-top:20px" onclick="location.reload()">[ LOGOFF ]</button>
+        <div class="sidebar" id="sidebar-nav">
+            <button class="nav-item active" onclick="setFolder('inbox')">01. INBOX</button>
+            <button class="nav-item" onclick="setFolder('starred')">02. IMPORTANT</button>
+            <button class="nav-item" onclick="setFolder('sent')">03. SENT</button>
+            <button class="nav-item" onclick="setFolder('trash')">04. TRASH</button>
         </div>
 
         <div class="content-view" id="list-view">
@@ -100,7 +98,7 @@
             <div class="message-body" id="m-body"></div>
             <div class="btn-row">
                 <button class="back-btn" onclick="closeMessage()">[ ESC ] BACK</button>
-                <button class="dead-btn">REPLY [LOCKED]</button>
+                <button class="dead-btn">REPLY]</button>
             </div>
         </div>
     </div>
@@ -108,42 +106,50 @@
 
 <script>
     const mails = [
-        // STARRED
-        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-28-1986", subject: "RE: EVALUATION RECORDS", starred: true, body: "JAELYNN, I HAVE RETRIEVED THE PSYCHOMETRIC FILINGS FROM 1982. YOUR PROFILE REMAINS STABLE. 'FIXATION ON SYSTEMIC LOGIC' IS LISTED AS A STRENGTH IN THE PEGASUS PROJECT CONTEXT. DO NOT LET THE HR ASSESSMENT OF 'SOCIAL DEFICIT' DISTRACT YOU. LOGIC IS OUR VIRTUE. \n\n- ABBA" },
-        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-26-1986", subject: "PEGASUS ALIGNMENT DATA", starred: true, body: "THE SENSORS ARE WITHIN 0.003 PERCENT VARIANCE. YOUR PRECISION IS UNMATCHED BY THE OTHER INTERNS. I HAVE STARRED THIS FOR YOUR REVIEW. \n\n- ABBA" },
-        { folder: 'inbox', from: "it.admin@syntec.net", date: "OCT-15-1986", subject: "ENCRYPTION KEY OVERRIDE", starred: true, body: "KEEP THIS KEY SECURE: 863-B-COBALT. THIS ALLOWS BYPASS OF THE SUB-SYSTEM LOCKOUT IN LAB 4." },
-        { folder: 'inbox', from: "w.nathanial@syntec.net", date: "OCT-01-1986", subject: "PROMOTION NOTICE", starred: true, body: "JAELYNN, BASED ON YOUR EFFICIENCY WITH THE LOG SYSTEMS, YOU ARE MOVED TO LEVEL 3 INTERN STATUS EFFECTIVE IMMEDIATELY." },
+        // PSYCH EVAL CHAIN (LORE FOCUS)
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-28-1986", subject: "RE: PSYCH EVALUATION RESULTS", starred: true, body: "[REDACTED], I HAVE REVIEWED THE CLINICAL SUMMARY FROM DR. HILL. \n\nNOTES: 'SUBJECT EXHIBITS SIGNIFICANT HYPER-FIXATION ON COMPUTATIONAL LOGIC. SOCIAL WITHDRAWAL IS NOTED AS A DEFICIT, BUT FUNCTIONAL FOR SYNTEC ENVIRONMENTS.' \n\nWE WILL DISCUSS THE ADJUSTMENT TO YOUR WORK HOURS TONIGHT. \n\n- -B27" },
+        { folder: 'sent', from: "j.13@syntec.net", date: "OCT-28-1986", subject: "RE: PSYCH EVALUATION RESULTS", body: "DOES THIS MEAN I CAN STAY IN THE PEGASUS LAB LONGER? I FIND THE CALIBRATION TASKS MORE LOGICAL THAN THE SOCIAL ROTATIONS IN HR." },
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-27-1986", subject: "PSYCH EVALUATION RESULTS", body: "THE EVALUATION IS MERELY TO ENSURE PROPER PLACEMENT WITHIN SYNTEC. DO NOT OVER-ANALYZE THE TERMINOLOGY REGARDING 'ATYPICAL COGNITION.' IT IS AN ASSET HERE." },
+        { folder: 'sent', from: "j.13@syntec.net", date: "OCT-27-1986", subject: "PSYCH EVALUATION RESULTS", body: "DR. HILL ASKED MANY REPETITIVE QUESTIONS. I FOUND IT INEFFICIENT. WILL THIS AFFECT MY LEVEL 3 STATUS?" },
 
-        // INBOX CHAINS
-        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-28-1986", subject: "RE: RE: RE: NOISE LEVELS", body: "I AGREE. THE VENTILATION IN SECTOR B IS AT 45 DECIBELS. I HAVE FILED A WORK ORDER TO HAVE THE FAN LUBRICATED. IT IS INTERFERING WITH CONCENTRATION. \n\n- ABBA" },
-        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-27-1986", subject: "NOISE LEVELS", body: "ARE YOU FINDING THE LAB NOISE TOLERABLE TODAY? I NOTICED YOU WERE WEARING YOUR EAR DEFLECTORS EARLY. \n\n- ABBA" },
-        { folder: 'inbox', from: "hr.dept@syntec.net", date: "OCT-25-1986", subject: "MANDATORY SOCIAL MIXER", body: "ATTENDANCE IS REQUESTED FOR THE QUARTERLY INTERN LUNCHEON. PLEASE PREPARE A 2-MINUTE SPEECH ON YOUR WORK." },
-        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-25-1986", subject: "RE: LUNCHEON", body: "IF THE LUNCHEON IS TOO STIMULATING, YOU MAY USE THE CALIBRATION ROOM AS AN EXCUSE TO LEAVE EARLY. I WILL SIGN THE PERMISSION SLIP. \n\n- ABBA" },
-        { folder: 'inbox', from: "w.nathanial@syntec.net", date: "OCT-24-1986", subject: "LOG DISCREPANCY", body: "YOU LOGGED 402 ENTRIES TODAY. THE AVERAGE IS 150. PLEASE ENSURE YOU ARE NOT OVER-SPECIFYING THE DATA." },
-        { folder: 'inbox', from: "facilities@syntec.net", date: "OCT-23-1986", subject: "LAB LIGHTING", body: "THE REQUEST TO DIM THE LIGHTS IN LAB 3 HAS BEEN DENIED DUE TO SAFETY REGULATIONS." },
-        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-22-1986", subject: "EVALUATION PREP", body: "DR. SYPHUS IS LOOKING AT THE COGNITIVE PROFILES AGAIN. STAY FOCUSED ON THE DATA. THE DATA IS SAFE. \n\n- ABBA" },
-        { folder: 'inbox', from: "it.admin@syntec.net", date: "OCT-20-1986", subject: "TERMINAL REBOOT", body: "SYSTEM MAINTENANCE IN 10 MINUTES. SAVE ALL ACTIVE BUFFERS." },
-        { folder: 'inbox', from: "lab.coord@syntec.net", date: "OCT-19-1986", subject: "RE: REAGENT 4", body: "PLEASE STOP COLOR-CODING THE BEAKERS. IT IS NOT PART OF THE STANDARD OPERATING PROCEDURE." },
-        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-18-1986", subject: "DINNER SEQUENCE", body: "MONDAY: FISH. TUESDAY: PASTA. WEDNESDAY: CHICKEN. WE WILL NOT DEVIATE THIS WEEK. \n\n- ABBA" },
+        // WORK / MUNDANE
+        { folder: 'inbox', from: "it.admin@syntec.net", date: "OCT-26-1986", subject: "DISK DRIVE ERROR - TERMINAL 04", body: "SYSTEM DETECTED A READ/WRITE ERROR ON DRIVE B. PLEASE SUBMIT YOUR FLOPPY DISKS FOR DE-MAGNETIZATION CHECK." },
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-25-1986", subject: "STAIRWELL ACCESS", starred: true, body: "REMINDER: THE NORTH STAIRWELL IS FOR LEVEL 4 CLEARANCE ONLY. EVEN IF THE PATH IS MATHEMATICALLY SHORTER TO THE COMMISSARY, YOU MUST USE THE MAIN HALLWAY." },
+        { folder: 'inbox', from: "w.nathanial@syntec.net", date: "OCT-24-1986", subject: "LOG COMPLETION", body: "JAELYNN, ENSURE ALL TEMPERATURE READINGS ARE RECORDED TO THE FOURTH DECIMAL POINT. PRECISION IS NOT OPTIONAL." },
+        { folder: 'inbox', from: "hr.dept@syntec.net", date: "OCT-23-1986", subject: "INTERN WORKSHOP", body: "MANDATORY WORKSHOP: 'EFFECTIVE TEAM COMMUNICATION'. 14:00 HOURS. ROOM 2B." },
+        { folder: 'sent', from: "j.13@syntec.net", date: "OCT-23-1986", subject: "RE: INTERN WORKSHOP", body: "W. NATHANIAL, I HAVE A CONFLICT WITH THE PEGASUS COOLANT CYCLE. I CANNOT ATTEND THE COMMUNICATION WORKSHOP." },
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-22-1986", subject: "RE: COOLANT CYCLE", body: "I HAVE HANDLED THE WORKSHOP EXEMPTION. FOCUS ON THE COOLANT. IT IS A BETTER USE OF YOUR TEMPERAMENT." },
         
-        // SENT
-        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-28-1986", subject: "RE: RE: NOISE LEVELS", body: "THANK YOU. THE CLICKING SOUND FROM THE FAN WAS OCCURRING EVERY 4.2 SECONDS. IT MADE DATA ENTRY DIFFICULT." },
-        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-28-1986", subject: "EVALUATION RECORDS", body: "ABBA, CAN YOU FIND MY 1982 PSYCH EVAL? I NEED TO SEE THE NOTES ON 'OBJECT PERMANENCE' FOR MY PROJECT." },
-        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-25-1986", subject: "LUNCHEON", body: "ABBA, THE LUNCHEON HAS TOO MANY PEOPLE. I WOULD PREFER TO STAY IN THE LAB." },
-        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-20-1986", subject: "BEAKER CODING", body: "THE COLORS MAKE THE RETRIEVAL PROCESS 12% FASTER. I DO NOT UNDERSTAND THE OBJECTION." },
+        // STARRED / PERSONAL
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "SEP-12-1986", subject: "SUPPLY UPDATE", starred: true, body: "[REDACTED], I HAVE DEPOSITED ADDITIONAL CREDITS INTO YOUR COMMISSARY ACCOUNT. THE NEW GRAPHING CALCULATOR YOU REQUESTED HAS ARRIVED AT MY OFFICE. \n\n- "-B27 },
         
-        // TRASH
-        { folder: 'trash', from: "marketing@syntec.net", date: "OCT-05-1986", subject: "SYNTEC BRANDING", body: "NEW POSTERS ARE BEING INSTALLED IN THE LOBBY." },
-        { folder: 'trash', from: "hr.dept@syntec.net", date: "SEP-30-1986", subject: "TEAM BUILDING EXERCISE", body: "JOIN US FOR A GROUP HIKE ON SATURDAY." }
+        // ADDITIONAL MUNDANE (15-25 range)
+        { folder: 'inbox', from: "facilities@syntec.net", date: "OCT-20-1986", subject: "LAB COAT LAUNDRY", body: "LAB COATS DROPPED OFF AFTER WEDNESDAY WILL NOT BE READY UNTIL THE FOLLOWING MONDAY." },
+        { folder: 'inbox', from: "it.admin@syntec.net", date: "OCT-18-1986", subject: "TERMINAL TIME-OUTS", body: "IDLE TERMINALS WILL BE LOGGED OFF AFTER 5 MINUTES TO CONSERVE MAINFRAME POWER." },
+        { folder: 'sent', from: "j.13@syntec.net", date: "OCT-15-1986", subject: "REQUISITION: NEW PENCILS", body: "THE CURRENT PENCILS PROVIDED ARE 2H. I REQUIRE 4H FOR FINER LOG DETAIL. PLEASE ADVISE." },
+        { folder: 'inbox', from: "procurement@syntec.net", date: "OCT-16-1986", subject: "RE: REQUISITION: NEW PENCILS", body: "4H PENCILS ARE SPECIAL ORDER. EXPECT DELIVERY IN 14 DAYS." },
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-12-1986", subject: "DATA REVIEW", body: "YOUR DATA ENTRY ON THE SODIUM TRIALS WAS FLAWLESS. NO ERRORS. EXCELLENT WORK." },
+        { folder: 'inbox', from: "security@syntec.net", date: "OCT-10-1986", subject: "UNAUTHORIZED DISKETTE", body: "A NON-SYNTEC BRAND DISKETTE WAS FOUND NEAR YOUR STATION. PLEASE REPORT TO SECURITY FOR IDENTIFICATION." },
+        { folder: 'sent', from: "j.13@syntec.net", date: "OCT-10-1986", subject: "RE: UNAUTHORIZED DISKETTE", body: "THAT WAS MY MATHEMATICAL THEOREM DISK. IT IS NOT UNAUTHORIZED. I WILL RETRIEVE IT." },
+        { folder: 'inbox', from: "facilities@syntec.net", date: "OCT-05-1986", subject: "VENDING MACHINE UPDATE", body: "THE VENDING MACHINE IN SECTOR B NOW CARRIES PROTEIN BARS. NO REFUNDS FOR JAMMED ITEMS." },
+        { folder: 'trash', from: "newsletter@syntec.net", date: "OCT-01-1986", subject: "OCTOBER NEWS", body: "WELCOME TO THE NEW QUARTER... [REMOVED]" },
+        { folder: 'trash', from: "it.admin@syntec.net", date: "SEP-25-1986", subject: "TEST MESSAGE", body: "IGNORE THIS MESSAGE. SYSTEM TEST." },
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "SEP-20-1986", subject: "DESK ORGANIZATION", body: "I NOTICED YOUR WORKSTATION. THE PERPENDICULAR ALIGNMENT OF YOUR EQUIPMENT IS IMPROVING EFFICIENCY. CONTINUE THIS." }
     ];
 
     let currentFolder = 'inbox';
 
     function setFolder(folder) {
         currentFolder = folder;
+        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+        // Find the button and make it active
+        const navs = document.querySelectorAll('.nav-item');
+        if(folder==='inbox') navs[0].classList.add('active');
+        if(folder==='starred') navs[1].classList.add('active');
+        if(folder==='sent') navs[2].classList.add('active');
+        if(folder==='trash') navs[3].classList.add('active');
+        
         closeMessage();
-        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-        document.getElementById('btn-' + folder).classList.add('active');
         renderList();
     }
 
@@ -152,13 +158,13 @@
         list.innerHTML = "";
         
         let filtered = mails;
-        if (currentFolder === 'starred') {
+        if(currentFolder === 'starred') {
             filtered = mails.filter(m => m.starred === true);
         } else {
             filtered = mails.filter(m => m.folder === currentFolder);
         }
 
-        filtered.forEach((m) => {
+        filtered.forEach((m, i) => {
             const row = document.createElement('div');
             row.className = "mail-row";
             const star = m.starred ? "[*]" : "[ ]";
@@ -169,7 +175,7 @@
         });
 
         if(filtered.length === 0) {
-            list.innerHTML = "<p style='color:#114411'>-- NO RECORDS FOUND --</p>";
+            list.innerHTML = "<p style='color:#114411; padding: 20px;'>-- NO DATA IN DIRECTORY --</p>";
         }
     }
 
