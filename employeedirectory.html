@@ -2,242 +2,173 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CLINICAL MODULE - J13</title>
+    <title>CLINICAL MODULES - J13</title>
     <style>
         body {
-            background-color: #000;
-            color: #33ff33;
+            background-color: #000; color: #33ff33;
             font-family: 'Courier New', Courier, monospace;
             display: flex; justify-content: center; align-items: center;
             height: 100vh; margin: 0; text-transform: uppercase; overflow: hidden;
         }
-
         .crt-monitor {
             position: relative; width: 95vw; max-width: 850px; height: 90vh;
             padding: 25px; border: 15px solid #2a2a2a; border-radius: 40px;
             background: #050505; box-shadow: inset 0 0 80px #000;
             display: flex; flex-direction: column;
         }
-
-        .crt-monitor::after {
-            content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-            z-index: 10; background-size: 100% 3px; pointer-events: none;
-        }
-
         .header { border-bottom: 2px solid #33ff33; padding-bottom: 10px; margin-bottom: 15px; }
-        .module-box { border: 1px solid #33ff33; padding: 20px; flex-grow: 1; overflow-y: auto; }
-        
-        .patient-file { background: rgba(51, 255, 51, 0.05); padding: 15px; margin-bottom: 20px; border-left: 4px solid #33ff33; }
-        .input-area { margin-top: 20px; }
-        
+        .module-box { border: 1px solid #33ff33; padding: 20px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .hidden { display: none !important; }
+        .menu-btn { 
+            background: transparent; color: #33ff33; border: 1px solid #33ff33; 
+            padding: 15px; margin: 10px 0; cursor: pointer; text-align: left; font-family: inherit;
+        }
+        .menu-btn:hover:not(:disabled) { background: #33ff33; color: #000; }
+        .menu-btn:disabled { color: #1a551a; border-color: #1a551a; cursor: not-allowed; }
+        .patient-file { background: rgba(51, 255, 51, 0.05); padding: 15px; border-left: 4px solid #33ff33; margin-bottom: 20px; }
         input[type="text"] {
             background: transparent; border: none; border-bottom: 2px solid #33ff33;
-            color: #33ff33; font-family: inherit; font-size: 1.1rem; width: 100%;
-            outline: none; padding: 5px;
+            color: #33ff33; font-family: inherit; font-size: 1.1rem; width: 100%; outline: none;
         }
-
         .progress-container { width: 100%; height: 12px; border: 1px solid #33ff33; margin: 20px 0; display: none; }
         .progress-bar { width: 0%; height: 100%; background: #33ff33; }
-        
-        .score-board { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 10px; color: #1a551a; }
-        .correct { color: #33ff33; font-weight: bold; }
-        .flash { animation: blink 0.2s 3; }
-        @keyframes blink { 50% { opacity: 0; } }
+        .score-board { display: flex; justify-content: space-between; font-size: 0.9rem; color: #1a551a; }
     </style>
 </head>
 <body>
 
 <div class="crt-monitor">
     <div class="header">
-        <h1>CLINICAL EVALUATION MODULE v.8.4</h1>
+        <h1 id="module-title">SYSTEM SELECTION MENU</h1>
         <div class="score-board">
-            <span>ASSIGNED: INTERN_J13</span>
-            <span>VALIDATED SAMPLES: <span id="score" class="correct">0</span> / 10</span>
+            <span>USER: INTERN_J13</span>
+            <span id="progress-text">MODULE PROGRESS: 0 / 10</span>
         </div>
     </div>
 
-    <div class="module-box" id="work-area">
-        <div id="case-display"></div>
+    <div id="menu-view" class="module-box">
+        <p>SELECT TRAINING TRACK:</p>
+        <button class="menu-btn" id="btn-general" onclick="startModule('general')">01. GENERAL MEDICINE [INCOMPLETE]</button>
+        <button class="menu-btn" id="btn-psych" onclick="startModule('psychiatry')">02. PSYCHIATRY (CLINICAL REFS) [INCOMPLETE]</button>
+        <button class="menu-btn" id="btn-er" onclick="startModule('emergency')">03. EMERGENCY DEPARTMENT [INCOMPLETE]</button>
+    </div>
 
+    <div id="work-view" class="module-box hidden">
+        <div id="case-display"></div>
         <div class="input-area">
             <p id="prompt-text">TYPE DIAGNOSIS AND PRESS ENTER:</p>
             <input type="text" id="user-input" autocomplete="off">
-            
-            <div class="progress-container" id="prog-cont">
-                <div class="progress-bar" id="prog-bar"></div>
-            </div>
-            <p id="feedback" style="margin-top: 10px;"></p>
+            <div class="progress-container" id="prog-cont"><div class="progress-bar" id="prog-bar"></div></div>
+            <p id="feedback"></p>
         </div>
     </div>
 </div>
 
 <script>
+    let currentModule = "";
     let score = 0;
     let currentAnswer = "";
-    
-    // Merged all cases into one single array
-    const cases = [
-        {
-            type: "DIAGNOSIS",
-            data: "AGE: 45 | SEX: M | MEDS: NONE | HISTORY: CHRONIC SMOKER | SYMPTOMS: PERSISTENT COUGH, WEIGHT LOSS, CLUBBING OF FINGERS.",
-            answer: "LUNG CANCER"
-        },
-        {
-            type: "TEST",
-            data: "AGE: 22 | SEX: F | MEDS: ORAL CONTRACEPTIVES | HISTORY: RECENT LONG-HAUL FLIGHT | SYMPTOMS: UNILATERAL LEG SWELLING, TENDERNESS.",
-            prompt: "WHAT TEST SHOULD BE ORDERED? (D-DIMER / ULTRASOUND / X-RAY)",
-            answer: "ULTRASOUND"
-        },
-        {
-            type: "BLOOD",
-            data: "AGE: 30 | SEX: M | BLOOD WORK: WBC: 18,000 (HIGH), NEUTROPHILS: 85% | SYMPTOMS: ACUTE RIGHT LOWER QUADRANT PAIN, REBOUND TENDERNESS.",
-            answer: "APPENDICITIS"
-        },
-        {
-            type: "DIAGNOSIS",
-            data: "AGE: 62 | SEX: M | MEDS: DIGOXIN | HISTORY: HYPERTENSION | SYMPTOMS: CRUSHING SUBSTERNAL CHEST PAIN RADIATING TO LEFT JAW.",
-            answer: "MYOCARDIAL INFARCTION"
-        },
-        {
-            type: "TEST",
-            data: "AGE: 19 | SEX: F | SYMPTOMS: EXTREME FATIGUE, SORE THROAT, SWOLLEN LYMPH NODES, SPLENOMEGALY.",
-            prompt: "WHICH TEST CONFIRMS THE DIAGNOSIS? (MONOSPOT / STREP / MRI)",
-            answer: "MONOSPOT"
-        },
-        {
-            type: "DIAGNOSIS",
-            data: "AGE: 8 | SEX: M | HISTORY: RECENT VIRAL INFECTION | SYMPTOMS: LETHARGY, RECURRENT VOMITING, CONFUSION. ASPIRIN WAS ADMINISTERED FOR FEVER 4 DAYS AGO.",
-            answer: "REYE SYNDROME"
-        },
-        {
-            type: "TEST",
-            data: "AGE: 55 | SEX: F | SYMPTOMS: POLYURIA, POLYDIPSIA, UNEXPLAINED WEIGHT LOSS. PATIENT COMPLAINS OF 'FRUITY' BREATH ODOR.",
-            prompt: "WHICH URINE COMPONENT SHOULD BE TESTED IMMEDIATELY? (KETONES / ALBUMIN / CALCIUM)",
-            answer: "KETONES"
-        },
-        {
-            type: "BLOOD",
-            data: "AGE: 29 | SEX: F | BLOOD WORK: HGB: 8.2 (LOW), MCV: 72 (LOW), FERRITIN: 10 (LOW) | SYMPTOMS: PICA, PALLOR, FATIGUE.",
-            answer: "IRON DEFICIENCY ANEMIA"
-        },
-        {
-            type: "DIAGNOSIS",
-            data: "AGE: 14 | SEX: M | SYMPTOMS: SUDDEN LOSS OF CONSCIOUSNESS, VIOLENT MUSCULAR CONTRACTIONS, TONGUE BITING, POST-ICTAL CONFUSION.",
-            answer: "GRAND MAL SEIZURE"
-        },
-        {
-            type: "TEST",
-            data: "AGE: 68 | SEX: M | HISTORY: ATRIAL FIBRILLATION | SYMPTOMS: SUDDEN ONSET APHASIA, RIGHT-SIDED HEMIPLEGIA.",
-            prompt: "WHICH IMAGING IS REQUIRED TO RULE OUT HEMORRHAGE? (CT SCAN / ULTRASOUND / EKG)",
-            answer: "CT SCAN"
-        },
-        {
-            type: "BLOOD",
-            data: "AGE: 40 | SEX: F | BLOOD WORK: TSH: 12.5 (HIGH), FREE T4: 0.5 (LOW) | SYMPTOMS: COLD INTOLERANCE, BRADYCARDIA, DRY SKIN.",
-            answer: "HYPOTHYROIDISM"
-        },
-        {
-            type: "DIAGNOSIS",
-            data: "AGE: 5 | SEX: F | SYMPTOMS: HIGH FEVER, DROOLING, STRIDOR, PATIENT SITTING IN 'TRIPOD POSITION'.",
-            answer: "EPIGLOTTITIS"
-        },
-        {
-            type: "TEST",
-            data: "AGE: 34 | SEX: M | SYMPTOMS: SEVERE HEADACHE, NUCHAL RIGIDITY (STIFF NECK), PHOTOPHOBIA, FEVER.",
-            prompt: "WHICH PROCEDURE IS NECESSARY FOR CSF ANALYSIS? (LUMBAR PUNCTURE / BIOPSY / X-RAY)",
-            answer: "LUMBAR PUNCTURE"
-        },
-        {
-            type: "DIAGNOSIS",
-            data: "AGE: 50 | SEX: F | SYMPTOMS: BONE PAIN, FRACTURE AFTER MINOR FALL. HISTORY: POST-MENOPAUSAL, LOW CALCIUM INTAKE.",
-            answer: "OSTEOPOROSIS"
-        },
-        {
-            type: "BLOOD",
-            data: "AGE: 60 | SEX: M | BLOOD WORK: GLUCOSE (FASTING): 240 MG/DL (HIGH) | SYMPTOMS: BLURRED VISION, SLOW-HEALING SORE ON FOOT.",
-            answer: "DIABETES MELLITUS"
-        }
-    ];
+    let completedModules = { general: false, psychiatry: false, emergency: false };
 
-    const inputField = document.getElementById('user-input');
-    const caseDisplay = document.getElementById('case-display');
-    const progCont = document.getElementById('prog-cont');
-    const progBar = document.getElementById('prog-bar');
-    const feedback = document.getElementById('feedback');
-    const promptText = document.getElementById('prompt-text');
+    const database = {
+        general: [
+            { data: "AGE: 45 | SEX: M | SYMPTOMS: PERSISTENT COUGH, CLUBBING OF FINGERS, WEIGHT LOSS.", answer: "LUNG CANCER" },
+            { data: "AGE: 30 | SEX: M | BLOOD: WBC 18,000 | SYMPTOMS: RLQ PAIN, REBOUND TENDERNESS.", answer: "APPENDICITIS" },
+            { data: "AGE: 60 | SEX: M | BLOOD: FASTING GLUCOSE 240 MG/DL | SYMPTOMS: BLURRED VISION.", answer: "DIABETES MELLITUS" },
+            { data: "AGE: 29 | SEX: F | BLOOD: HGB 8.2, FERRITIN 10 | SYMPTOMS: PICA, PALLOR.", answer: "IRON DEFICIENCY ANEMIA" },
+            { data: "AGE: 40 | SEX: F | BLOOD: TSH 12.5 (HIGH) | SYMPTOMS: BRADYCARDIA, COLD INTOLERANCE.", answer: "HYPOTHYROIDISM" },
+            // Add more to reach 10-20
+        ],
+        psychiatry: [
+            { data: "AGE: 34 | SEX: F | HISTORY: ALTERNATING PERIODS OF MANIC EUPHORIA AND DEEP STUPOR.", answer: "MANIC DEPRESSION" },
+            { data: "AGE: 19 | SEX: M | SYMPTOMS: AUDITORY HALLUCINATIONS, FLAT AFFECT, WORD SALAD.", answer: "SCHIZOPHRENIA" },
+            { data: "AGE: 25 | SEX: F | SYMPTOMS: RECURRENT PANIC ATTACKS, FEAR OF OPEN SPACES.", answer: "AGORAPHOBIA" },
+            { data: "AGE: 40 | SEX: M | SYMPTOMS: OBSESSIVE HAND WASHING, RIGID ADHERENCE TO RULES.", answer: "NEUROSIS" },
+            { data: "AGE: 30 | SEX: F | HISTORY: RECENT TRAUMA | SYMPTOMS: AMNESIA, UNEXPLAINED PARALYSIS.", answer: "HYSTERIA" },
+        ],
+        emergency: [
+            { data: "AGE: 50 | SEX: M | SYMPTOMS: CRUSHING CHEST PAIN, JAW PAIN, DIAPHORESIS.", answer: "MYOCARDIAL INFARCTION" },
+            { data: "AGE: 5 | SEX: F | SYMPTOMS: STRIDOR, DROOLING, TRIPOD POSITIONING.", answer: "EPIGLOTTITIS" },
+            { data: "AGE: 22 | SEX: F | SYMPTOMS: UNILATERAL LEG SWELLING AFTER LONG FLIGHT.", prompt: "ORDER TEST?", answer: "ULTRASOUND" },
+            { data: "AGE: 18 | SEX: M | SYMPTOMS: NUCHAL RIGIDITY, PHOTOPHOBIA, PURPURIC RASH.", answer: "MENINGITIS" },
+            { data: "AGE: 45 | SEX: M | SYMPTOMS: TRAUMA TO CHEST, TRACHEAL DEVIATION, ABSENT BREATH SOUNDS.", answer: "TENSION PNEUMOTHORAX" },
+        ]
+    };
 
-    function loadNewCase() {
-        const c = cases[Math.floor(Math.random() * cases.length)];
-        currentAnswer = c.answer;
-        
-        caseDisplay.innerHTML = `
-            <div class="patient-file">
-                <strong>[MODULE: ${c.type}]</strong><br><br>
-                ${c.data}
-            </div>
-        `;
-        promptText.innerText = c.prompt || "TYPE PRIMARY DIAGNOSIS AND PRESS ENTER:";
-        inputField.value = "";
-        inputField.disabled = false;
-        inputField.focus();
-        feedback.innerText = "";
+    function startModule(mod) {
+        currentModule = mod;
+        score = 0;
+        document.getElementById('menu-view').classList.add('hidden');
+        document.getElementById('work-view').classList.remove('hidden');
+        document.getElementById('module-title').innerText = "MODULE: " + mod.toUpperCase();
+        updateScoreDisplay();
+        loadNewCase();
     }
 
-    inputField.addEventListener('keypress', function (e) {
+    function loadNewCase() {
+        const modCases = database[currentModule];
+        const c = modCases[Math.floor(Math.random() * modCases.length)];
+        currentAnswer = c.answer;
+        document.getElementById('case-display').innerHTML = `<div class="patient-file"><strong>[DATA_FILE]</strong><br><br>${c.data}</div>`;
+        document.getElementById('prompt-text').innerText = c.prompt || "TYPE DIAGNOSIS AND PRESS ENTER:";
+        const input = document.getElementById('user-input');
+        input.value = ""; input.disabled = false; input.focus();
+        document.getElementById('feedback').innerText = "";
+    }
+
+    document.getElementById('user-input').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
-            const val = inputField.value.trim().toUpperCase();
-            if (val === currentAnswer) {
-                runProgressBar(true);
-            } else {
-                runProgressBar(false);
-            }
+            const val = this.value.trim().toUpperCase();
+            runProgressBar(val === currentAnswer);
         }
     });
 
     function runProgressBar(isCorrect) {
-        inputField.disabled = true;
-        progCont.style.display = "block";
-        feedback.innerText = "UPLOADING TO SYNTEC MAINFRAME...";
-        
+        document.getElementById('user-input').disabled = true;
+        document.getElementById('prog-cont').style.display = "block";
         let width = 0;
         const interval = setInterval(() => {
             if (width >= 100) {
                 clearInterval(interval);
                 finalize(isCorrect);
-            } else {
-                width += 5;
-                progBar.style.width = width + '%';
-            }
-        }, 40);
+            } else { width += 10; document.getElementById('prog-bar').style.width = width + '%'; }
+        }, 50);
     }
 
     function finalize(isCorrect) {
-        progCont.style.display = "none";
-        progBar.style.width = "0%";
-        
+        document.getElementById('prog-cont').style.display = "none";
+        document.getElementById('prog-bar').style.width = "0%";
         if (isCorrect) {
             score++;
-            document.getElementById('score').innerText = score;
-            feedback.innerText = "VALIDATED. UPDATING PROGRESS.";
+            updateScoreDisplay();
             if (score >= 10) {
-                feedback.innerText = "MODULE COMPLETE. ACCESSING INDEX...";
-                setTimeout(() => window.location.href = "index.html", 2000);
-            } else {
-                setTimeout(loadNewCase, 1000);
-            }
+                completedModules[currentModule] = true;
+                checkTotalProgression();
+            } else { loadNewCase(); }
         } else {
-            feedback.innerText = "INCORRECT DATA ENTRY. RE-EVALUATE.";
-            setTimeout(() => {
-                inputField.disabled = false;
-                inputField.value = "";
-                inputField.focus();
-                feedback.innerText = "";
-            }, 1500);
+            document.getElementById('feedback').innerText = "INCORRECT DATA. RE-TRY.";
+            document.getElementById('user-input').disabled = false;
+            document.getElementById('user-input').focus();
         }
     }
 
-    window.onload = loadNewCase;
+    function updateScoreDisplay() {
+        document.getElementById('progress-text').innerText = `MODULE PROGRESS: ${score} / 10`;
+    }
+
+    function checkTotalProgression() {
+        document.getElementById('btn-' + currentModule.substring(0,5)).innerText = currentModule.toUpperCase() + " [COMPLETE]";
+        document.getElementById('btn-' + currentModule.substring(0,5)).disabled = true;
+
+        if (completedModules.general && completedModules.psychiatry && completedModules.emergency) {
+            document.getElementById('feedback').innerText = "ALL MODULES VALIDATED. RETURNING TO INDEX...";
+            setTimeout(() => window.location.href = "index.html", 3000);
+        } else {
+            document.getElementById('work-view').classList.add('hidden');
+            document.getElementById('menu-view').classList.remove('hidden');
+            document.getElementById('module-title').innerText = "SYSTEM SELECTION MENU";
+        }
+    }
 </script>
 </body>
 </html>
