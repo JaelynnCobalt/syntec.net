@@ -55,15 +55,24 @@ outline: none;
 width: 100%;
 }
 
-.loading-container {
-margin-top: 20px;
-width: 100%;
+/* Retro Loading Bar Styling */
+#loading-zone {
+    margin-top: 40px;
+    display: none;
 }
 
-.loading-bar {
-color: #33ff33;
-letter-spacing: 5px;
-font-size: 1.5rem;
+.progress-border {
+    width: 100%;
+    height: 30px;
+    border: 2px solid #33ff33;
+    padding: 3px;
+    box-sizing: border-box;
+}
+
+#progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #33ff33;
 }
 
 .cursor {
@@ -93,7 +102,15 @@ animation: blink 0.8s infinite;
 <p>PLEASE LOG IN TO PROCEED...</p>
 </div>
 
-<div class="input-area" id="input-zone">
+<div id="loading-zone">
+    <p id="loading-msg">INITIALIZING VIRTUAL ENVIRONMENT...</p>
+    <div class="progress-border">
+        <div id="progress-fill"></div>
+    </div>
+    <p id="loading-percent">0%</p>
+</div>
+
+<div class="input-area" id="input-container">
 <span id="label">LOGIN:&nbsp;</span>
 <input type="text" id="command-line" autofocus autocomplete="off">
 </div>
@@ -103,120 +120,131 @@ animation: blink 0.8s infinite;
 const input = document.getElementById('command-line');
 const output = document.getElementById('output');
 const label = document.getElementById('label');
-const inputZone = document.getElementById('input-zone');
+const inputCont = document.getElementById('input-container');
+const loadingZone = document.getElementById('loading-zone');
+const progressFill = document.getElementById('progress-fill');
+const loadingPercent = document.getElementById('loading-percent');
 
 let stage = 0;
 let locked = false;
 
+// TYPEWRITER EFFECT
 function typeLine(text, speed = 25) {
-    return new Promise(resolve => {
-        const p = document.createElement('p');
-        output.appendChild(p);
-        let i = 0;
-        function type() {
-            if (i < text.length) {
-                p.textContent += text.charAt(i);
-                i++;
-                setTimeout(type, speed);
-            } else {
-                output.scrollTop = output.scrollHeight;
-                resolve();
-            }
-        }
-        type();
-    });
+return new Promise(resolve => {
+const p = document.createElement('p');
+output.appendChild(p);
+
+let i = 0;
+function type() {
+if (i < text.length) {
+p.textContent += text.charAt(i);
+i++;
+setTimeout(type, speed);
+} else {
+output.scrollTop = output.scrollHeight;
+resolve();
+}
+}
+type();
+});
 }
 
+// NORMALIZE INPUT
 function normalize(str) {
-    return str.toLowerCase().replace(/[^\w\s]/g, '').trim();
+return str.toLowerCase().replace(/[^\w\s]/g, '').trim();
 }
 
-async function showLoadingBar() {
+// RETRO LOADING SEQUENCE
+function startLoading(targetUrl) {
     locked = true;
-    inputZone.style.display = "none";
-    output.innerHTML = "";
-    
-    await typeLine("INITIALIZING CLINICAL INTERFACE...", 50);
-    await typeLine("MOUNTING DATABASE: J13-V8.4", 50);
-    await typeLine("ESTABLISHING SECURE UPLINK...", 80);
-    
-    const container = document.createElement('div');
-    container.className = "loading-container";
-    const bar = document.createElement('div');
-    bar.className = "loading-bar";
-    bar.textContent = "[";
-    container.appendChild(bar);
-    output.appendChild(container);
+    inputCont.style.display = "none";
+    output.style.display = "none";
+    loadingZone.style.display = "block";
 
-    const segments = 20;
-    for (let i = 0; i < segments; i++) {
-        await delay(250); // Control the speed here (250ms per block)
-        bar.textContent += "■";
-        output.scrollTop = output.scrollHeight;
-    }
-    bar.textContent += "]";
-    
-    await delay(500);
-    await typeLine("CORE LOADED. REDIRECTING...", 30);
-    await delay(1000);
-    window.location.href = "clinical-modules.html";
+    let width = 0;
+    // Slow interval for immersion (approx 4 seconds total)
+    const interval = setInterval(() => {
+        if (width >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 500);
+        } else {
+            // Random jitter in loading speed for realism
+            let increment = Math.floor(Math.random() * 3) + 1;
+            width += increment;
+            if (width > 100) width = 100;
+            progressFill.style.width = width + '%';
+            loadingPercent.textContent = width + '%';
+        }
+    }, 100);
 }
 
+// HANDLE INPUT
 input.addEventListener('keydown', async function(e) {
-    if (e.key === 'Enter' && !locked) {
-        locked = true;
-        const cmd = input.value.trim();
-        const norm = normalize(input.value);
-        await typeLine("> " + cmd, 15);
-        input.value = '';
-        await processInput(cmd, norm);
-        locked = false;
-    }
+if (e.key === 'Enter' && !locked) {
+locked = true;
+const cmd = input.value.trim();
+const norm = normalize(input.value);
+
+await typeLine("> " + cmd, 15);
+input.value = '';
+
+await processInput(cmd, norm);
+locked = false;
+}
 });
 
 async function processInput(cmd, norm) {
     switch(stage) {
+        // LOGIN
         case 0:
             if (cmd.toUpperCase() === 'W015' || cmd.toUpperCase() === 'J13') {
                 await typeLine("ACCESS GRANTED...", 30);
                 await delay(400);
+                await typeLine("INITIALIZING USER INTERFACE...", 30);
+                await delay(500);
                 stage = 1;
-                label.textContent = "COMMAND: ";
+                label.innerHTML = "COMMAND:&nbsp;";
                 await typeLine("WELCOME, " + cmd.toUpperCase(), 30);
-                await typeLine("TYPE 'DIR' FOR MODULE LIST.", 30);
+                await typeLine("TYPE 'DIR' TO VIEW ACCESSIBLE MODULES.", 30);
             } else {
                 await typeLine("ERROR: INVALID CREDENTIALS", 30);
             }
             break;
 
+        // MAIN COMMAND LINE
         case 1:
             if (norm === "dir" || norm === "directory") {
                 await typeLine("--- SYSTEM DIRECTORY ---", 20);
-                await typeLine("> [CLINICAL] - INTERN EVALUATION", 20);
-                await typeLine("> [STATUS]   - FACILITY REPORT", 20);
+                await typeLine("> [CLINICAL] - INTERN EVALUATION TRACK", 20);
+                await typeLine("> [STATUS]   - FACILITY STATUS REPORT", 20);
                 await typeLine("------------------------", 20);
             } 
             else if (norm === "clinical") {
-                await showLoadingBar();
+                await typeLine("PREPARING CLINICAL EVALUATION ENVIRONMENT...", 40);
+                await delay(800);
+                startLoading("clinical-modules.html");
             }
             else if (norm === "status") {
                 await typeLine("ACCESSING STATUS REPORTS...", 30);
                 await typeLine("LOG: THEYRE OUT OF CREAM IN THE BREAKROOM", 30);
                 stage = 2;
-                label.textContent = "QUERY: ";
+                label.innerHTML = "QUERY:&nbsp;";
             }
             else {
                 await typeLine("ERROR: COMMAND NOT RECOGNIZED", 30);
             }
             break;
 
+        // BREAKROOM FLOW
         case 2:
             if (norm === "regular or vanilla") {
                 await typeLine("VANILLA UNAVAILABLE. SELECT ALTERNATE:", 30);
                 await typeLine("> HAZELNUT", 30);
                 await typeLine("> PEPPERMINT", 30);
                 stage = 3;
-                label.textContent = "SELECT: ";
+                label.innerHTML = "SELECT:&nbsp;";
             } else {
                 await typeLine("INVALID STATUS QUERY.", 30);
             }
@@ -224,12 +252,17 @@ async function processInput(cmd, norm) {
 
         case 3:
             if (norm === "hazelnut") {
-                await typeLine("ORDER CONFIRMED...", 30);
-                window.location.href = "pegasus.html";
+                await typeLine("ORDER CONFIRMED. REDIRECTING...", 30);
+                await delay(700);
+                startLoading("pegasus.html");
             }
             else if (norm === "peppermint") {
-                await typeLine("ORDER CONFIRMED...", 30);
-                window.location.href = "863.html";
+                await typeLine("ORDER CONFIRMED. REDIRECTING...", 30);
+                await delay(700);
+                startLoading("863.html");
+            }
+            else {
+                await typeLine("FLAVOR PROFILE NOT FOUND.", 30);
             }
             break;
     }
