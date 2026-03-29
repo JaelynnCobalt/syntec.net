@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>HOME</title>
+    <title>SYNTEC PEGASUS SYSTEM</title>
     <style>
         body {
             background-color: #000;
@@ -43,51 +43,46 @@
         }
 
         .header { border-bottom: 2px solid #33ff33; padding-bottom: 5px; margin-bottom: 10px; flex-shrink: 0; }
-        
         .main-layout { display: flex; flex-grow: 1; overflow: hidden; }
 
-        /* Sidebar */
         .sidebar { width: 180px; border-right: 1px solid #1a551a; padding-right: 10px; flex-shrink: 0; }
-        .nav-item { padding: 8px; cursor: pointer; display: block; width: 100%; text-align: left; background: transparent; color: #33ff33; border: none; font-family: inherit; }
+        .nav-item { padding: 8px; cursor: pointer; display: block; width: 100%; text-align: left; background: transparent; color: #33ff33; border: none; font-family: inherit; font-size: 0.85rem;}
         .nav-item:hover { background: #33ff33; color: #000; }
-        .nav-item.active { border: 1px solid #33ff33; }
+        .nav-item.active { background: #1a551a; color: #33ff33; border: 1px solid #33ff33; }
 
-        /* Content Areas */
         .content-view { flex-grow: 1; padding-left: 15px; overflow-y: auto; position: relative; }
         .hidden { display: none; }
 
-        .mail-row { border-bottom: 1px solid #1a551a; padding: 10px 5px; cursor: pointer; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mail-row { border-bottom: 1px solid #1a551a; padding: 10px 5px; cursor: pointer; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .mail-row:hover { background: rgba(51, 255, 51, 0.1); }
 
-        /* Message Styles */
-        .message-head { font-size: 0.9rem; margin-bottom: 15px; }
-        .message-body { line-height: 1.4; white-space: pre-wrap; font-size: 0.9rem; border-top: 1px dashed #33ff33; padding-top: 10px; }
+        .message-head { font-size: 0.85rem; margin-bottom: 15px; }
+        .message-body { line-height: 1.4; white-space: pre-wrap; font-size: 0.85rem; border-top: 1px dashed #33ff33; padding-top: 10px; color: #aaffaa; }
         
         .btn-row { margin-top: 20px; display: flex; gap: 10px; }
-        .dead-btn { border: 1px solid #114411; color: #114411; padding: 5px 10px; cursor: not-allowed; font-size: 0.8rem; }
-        .back-btn { border: 1px solid #33ff33; color: #33ff33; background: transparent; padding: 5px 10px; cursor: pointer; font-family: inherit; }
+        .dead-btn { border: 1px solid #114411; color: #114411; padding: 5px 10px; cursor: not-allowed; font-size: 0.7rem; }
+        .back-btn { border: 1px solid #33ff33; color: #33ff33; background: transparent; padding: 5px 10px; cursor: pointer; font-family: inherit; font-size: 0.7rem;}
         .back-btn:hover { background: #33ff33; color: #000; }
 
-        /* Scrollbar */
-        .content-view::-webkit-scrollbar { width: 8px; }
-        .content-view::-webkit-scrollbar-track { background: #000; }
-        .content-view::-webkit-scrollbar-thumb { background: #33ff33; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #33ff33; }
     </style>
 </head>
 <body>
 
 <div class="crt-monitor">
     <div class="header">
-        <h1>SYNTEC S-MAIL V4.1</h1>
-        <small>USER: JAELYNN COBALT [INT-LEVEL-3] | TERMINAL: PEGASUS-04</small>
+        <h1>SYNTEC S-MAIL V4.2</h1>
+        <small>USER: JAELYNN COBALT [INT-LEVEL-3] | SECURE CONNECTION</small>
     </div>
 
     <div class="main-layout">
         <div class="sidebar" id="sidebar-nav">
-            <button class="nav-item active" onclick="filterMail('inbox')">01. INBOX</button>
-            <button class="nav-item" onclick="filterMail('starred')">02. STARRED</button>
-            <button class="nav-item" onclick="filterMail('sent')">03. SENT</button>
-            <button class="nav-item" onclick="filterMail('trash')">04. TRASH</button>
+            <button id="btn-inbox" class="nav-item active" onclick="setView('inbox')">01. INBOX</button>
+            <button id="btn-starred" class="nav-item" onclick="setView('starred')">02. STARRED</button>
+            <button id="btn-sent" class="nav-item" onclick="setView('sent')">03. SENT</button>
+            <button id="btn-trash" class="nav-item" onclick="setView('trash')">04. TRASH</button>
             <button class="nav-item" style="margin-top:20px" onclick="location.reload()">[ LOGOUT ]</button>
         </div>
 
@@ -98,15 +93,14 @@
         <div class="content-view hidden" id="message-view">
             <div class="message-head">
                 <p id="m-from"></p>
-                <p id="m-to">TO: j.cobalt@syntec.net</p>
                 <p id="m-subj"></p>
                 <p id="m-date"></p>
             </div>
             <div class="message-body" id="m-body"></div>
             <div class="btn-row">
                 <button class="back-btn" onclick="closeMessage()">[ ESC ] BACK</button>
-                <button class="dead-btn">REPLY [LOCKED]</button>
-                <button class="dead-btn">FORWARD [LOCKED]</button>
+                <button class="dead-btn">REPLY</button>
+                <button class="dead-btn">ARCHIVE</button>
             </div>
         </div>
     </div>
@@ -114,35 +108,42 @@
 
 <script>
     const mails = [
-        // INBOX
-        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-28-1986", subject: "RE: DINNER TONIGHT", starred: true, body: "JAELYNN, I'LL BE LATE LEAVING LAB 4. DON'T WAIT UP. PLEASE FINISH YOUR FILING TASKS BEFORE YOU LEAVE THE WORKSTATION. \n\n- DAD" },
-        { folder: 'inbox', from: "it.admin@syntec.net", date: "OCT-27-1986", subject: "INTERN ACCESS LEVEL 3", body: "YOUR REQUEST FOR SECONDARY DRIVE ACCESS HAS BEEN APPROVED. DO NOT SHARE YOUR CREDENTIALS WITH OTHER INTERNS." },
-        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-26-1986", subject: "STAY AWAY FROM LEVEL 4", body: "I SAW YOUR BADGE LOGGED IN THE NORTH WING STAIRWELL. THERE IS NO REASON FOR AN INTERN TO BE IN THAT SECTOR. STAY IN THE PEGASUS LABS." },
-        { folder: 'inbox', from: "hr.dept@syntec.net", date: "OCT-25-1986", subject: "QUARTERLY REVIEW", body: "PLEASE SUBMIT YOUR INTERNSHIP PROGRESS REPORT TO MR. NATHANIAL BY FRIDAY." },
-        { folder: 'inbox', from: "w.nathanial@syntec.net", date: "OCT-24-1986", subject: "LOG ENTRIES", body: "JAELYNN, YOUR LAST THREE LOG ENTRIES WERE INCOMPLETE. SYNTEC REQUIRES FULL DOCUMENTATION OF REAGENT TEMPERATURES." },
+        // INBOX & STARRED
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-28-1986", subject: "RE: DINNER", starred: false, body: "JAELYNN, DO NOT WAIT UP. THE CALIBRATION IN SECTOR 4 IS REQUIRING MY FULL ATTENTION. ENSURE YOUR LOGS ARE SUBMITTED BEFORE MIDNIGHT.\n\n- VATER" },
+        { folder: 'inbox', from: "it.admin@syntec.net", date: "OCT-27-1986", subject: "ACCESS LEVEL 3 GRANTED", starred: false, body: "YOUR CREDENTIALS HAVE BEEN UPDATED TO INTERN LEVEL 3. ACCESS TO PEGASUS SYSTEM ARCHIVES IS NOW ACTIVE." },
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-26-1986", subject: "DISAPPOINTMENT", starred: true, body: "I WAS INFORMED YOU WERE FOUND IN THE RESTRICTED WING. YOU ARE HERE TO LEARN, NOT TO WANDER. DO NOT EMBARRASS ME AGAIN.\n\n- VATER" },
+        { folder: 'inbox', from: "w.nathanial@syntec.net", date: "OCT-25-1986", subject: "LOG DEFICIENCIES", starred: false, body: "JAELYNN, YOUR REAGENT DATA FOR BATCH 863 IS INCOMPLETE. FIX THIS IMMEDIATELY." },
+        { folder: 'inbox', from: "hr.dept@syntec.net", date: "OCT-24-1986", subject: "INTERNSHIP STATUS", starred: false, body: "PLEASE CONFIRM YOUR PARTICIPATION IN THE SPRING ROTATION BY FRIDAY." },
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-20-1986", subject: "PEGASUS PROGRESS", starred: true, body: "YOUR WORK ON THE RECOVERY ALGORITHM WAS ADEQUATE. PERHAPS THERE IS POTENTIAL IN YOU YET. KEEP WORKING.\n\n- VATER" },
+        { folder: 'inbox', from: "facilities@syntec.net", date: "OCT-18-1986", subject: "BADGE MALFUNCTION", starred: false, body: "REPORT TO SECURITY IF YOUR BADGE FAILS TO TRIGGER THE LEVEL 3 SCANNERS." },
+        { folder: 'inbox', from: "lab.coord@syntec.net", date: "OCT-15-1986", subject: "LAB 4 CLEANUP", starred: false, body: "INTERNS ARE RESPONSIBLE FOR RE-SHELVING ALL DISKS AFTER THE 18:00 SHIFT." },
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "SEP-30-1986", subject: "ACADEMIC TRANSCRIPTS", starred: false, body: "SEND ME YOUR LATEST UNIVERSITY RESULTS. SYNTEC ONLY ACCEPTS THE HIGHEST CALIBER.\n\n- VATER" },
+        { folder: 'inbox', from: "n.syphus@syntec.net", date: "SEP-25-1986", subject: "A NEW ERA", starred: true, body: "TO ALL PERSONNEL: THE WORK WE DO IN THE PEGASUS INITIATIVE WILL BE REMEMBERED FOR GENERATIONS. DISCRETION IS OUR STRENGTH." },
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "SEP-12-1986", subject: "GEBURTSTAG", starred: true, body: "ANOTHER YEAR HAS PASSED. I EXPECT SIGNIFICANT PROFESSIONAL GROWTH FROM YOU IN THIS NEW AGE. DO NOT WASTE YOUR TIME.\n\n- VATER" },
+        { folder: 'inbox', from: "it.admin@syntec.net", date: "SEP-05-1986", subject: "TERMINAL ASSIGNMENT", starred: false, body: "YOU HAVE BEEN ASSIGNED TO TERMINAL PEGASUS-04. DO NOT SHARE PASSWORDS." },
+        { folder: 'inbox', from: "accounting@syntec.net", date: "SEP-01-1986", subject: "STIPEND UPDATE", starred: false, body: "INTERN STIPENDS WILL BE DISBURSED ON THE 15TH OF THE MONTH." },
         
         // SENT
-        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-28-1986", subject: "RE: DINNER TONIGHT", body: "OKAY. I'M FINISHING THE PEGASUS LOGS NOW. SEE YOU AT HOME." },
-        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-26-1986", subject: "RE: STAIRWELL", body: "I WAS JUST TAKING THE SHORTCUT TO THE BREAKROOM. I WON'T DO IT AGAIN." },
-        
-        // STARRED
-        { folder: 'starred', from: "b.cobalt@syntec.net", date: "SEP-12-1986", subject: "HAPPY BIRTHDAY", body: "PROUD OF THE WORK YOU ARE DOING HERE. JUST KEEP YOUR HEAD DOWN AND FOLLOW PROTOCOL. \n\n- DAD" },
+        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-28-1986", subject: "RE: DINNER", starred: false, body: "VATER, I HAVE SUBMITTED THE LOGS. I WILL BE AT THE DORM IF YOU NEED ME." },
+        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-26-1986", subject: "RE: DISAPPOINTMENT", starred: false, body: "I APOLOGIZE. IT WAS AN ERROR IN NAVIGATION. IT WON'T HAPPEN AGAIN." },
+        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-12-1986", subject: "LOG SUBMISSION BATCH 4", starred: false, body: "ALL DATA ENTRIES FOR THE 12:00 SHIFT COMPLETED." },
+        { folder: 'sent', from: "j.cobalt@syntec.net", date: "SEP-15-1986", subject: "QUESTION REGARDING LAB 4", starred: false, body: "VATER, WHY ARE THE SYPHUS SAMPLES KEPT IN A SEPARATE REFRIGERATION UNIT?" },
         
         // TRASH
-        { folder: 'trash', from: "newsletter@syntec.net", date: "OCT-10-1986", subject: "SYNTEC SOCIAL MIXER", body: "JOIN US FOR THE BI-ANNUAL SOCIAL. (REMOVED BY USER)" },
-        { folder: 'trash', from: "it.admin@syntec.net", date: "OCT-01-1986", subject: "DISK QUOTA EXCEEDED", body: "PLEASE CLEAR YOUR TEMP FILES IMMEDIATELY." }
+        { folder: 'trash', from: "cafeteria@syntec.net", date: "OCT-10-1986", subject: "MENU UPDATE", starred: false, body: "THURSDAY IS NOW TACO DAY." },
+        { folder: 'trash', from: "it.admin@syntec.net", date: "SEP-20-1986", subject: "SYSTEM REBOOT", starred: false, body: "THE MAINFRAME WILL BE DOWN FOR 10 MINUTES." },
+        { folder: 'trash', from: "newsletter@syntec.net", date: "SEP-01-1986", subject: "WELCOME TO SYNTEC", starred: false, body: "WE ARE GLAD TO HAVE YOU ON THE TEAM." },
+        { folder: 'trash', from: "w.nathanial@syntec.net", date: "AUG-28-1986", subject: "LATE ENTRY", starred: false, body: "YOU MISSED THE CUTOFF FOR THE ORIENTATION LOG." },
+        { folder: 'trash', from: "facilities@syntec.net", date: "AUG-25-1986", subject: "LOCKER ASSIGNMENT", starred: false, body: "YOUR LOCKER IS #404." }
     ];
 
-    let currentFolder = 'inbox';
+    let currentView = 'inbox';
 
-    function filterMail(folder) {
-        currentFolder = folder;
+    function setView(view) {
+        currentView = view;
         closeMessage();
-        
-        // Update Sidebar UI
-        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-' + view).classList.add('active');
         renderList();
     }
 
@@ -150,32 +151,30 @@
         const list = document.getElementById('mail-list');
         list.innerHTML = "";
         
-        const filtered = mails.filter(m => m.folder === folderMapper(currentFolder));
+        let filtered = mails;
+        if (currentView === 'starred') {
+            filtered = mails.filter(m => m.starred);
+        } else {
+            filtered = mails.filter(m => m.folder === currentView);
+        }
 
         filtered.forEach((m, i) => {
             const row = document.createElement('div');
             row.className = "mail-row";
-            const prefix = m.starred ? "[*]" : "[ ]";
-            row.innerHTML = `${prefix} ${m.date} | ${m.from.split('@')[0]} | ${m.subject}`;
+            const star = m.starred ? "[*]" : "[ ]";
+            row.innerHTML = `${star} ${m.date} | ${m.from.split('@')[0]} | ${m.subject}`;
             row.onclick = () => openMessage(m);
             list.appendChild(row);
         });
 
         if(filtered.length === 0) {
-            list.innerHTML = "<p style='color:#114411'>-- NO MESSAGES FOUND --</p>";
+            list.innerHTML = "<p style='color:#114411; padding: 10px;'>-- NO DATA IN DIRECTORY --</p>";
         }
-    }
-
-    // Maps UI buttons to data folders
-    function folderMapper(nav) {
-        if(nav === 'starred') return 'inbox'; // Starred are usually in inbox
-        return nav;
     }
 
     function openMessage(msg) {
         document.getElementById('list-view').classList.add('hidden');
         document.getElementById('message-view').classList.remove('hidden');
-        
         document.getElementById('m-from').textContent = "FROM: " + msg.from;
         document.getElementById('m-subj').textContent = "SUBJ: " + msg.subject;
         document.getElementById('m-date').textContent = "DATE: " + msg.date;
@@ -187,7 +186,6 @@
         document.getElementById('list-view').classList.remove('hidden');
     }
 
-    // Initial Load
     renderList();
 </script>
 </body>
