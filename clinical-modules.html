@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CLINICAL MODULES </title>
+    <style>
+        body {
+            background-color: #000; color: #33ff33;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; margin: 0; text-transform: uppercase; overflow: hidden;
+        }
+        .crt-monitor {
+            position: relative; width: 95vw; max-width: 850px; height: 95vh;
+            padding: 25px; border: 15px solid #2a2a2a; border-radius: 40px;
+            background: #050505; box-shadow: inset 0 0 80px #000;
+            display: flex; flex-direction: column;
+        }
+        .header { border-bottom: 2px solid #33ff33; padding-bottom: 10px; margin-bottom: 15px; }
+        .module-box { border: 1px solid #33ff33; padding: 20px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .hidden { display: none !important; }
+        .menu-btn { 
+            background: transparent; color: #33ff33; border: 1px solid #33ff33; 
+            padding: 15px; margin: 10px 0; cursor: pointer; text-align: left; font-family: inherit;
+        }
+        .menu-btn:hover:not(:disabled) { background: #33ff33; color: #000; }
+        .menu-btn:disabled { color: #1a551a; border-color: #1a551a; cursor: not-allowed; }
+        .patient-file { background: rgba(51, 255, 51, 0.05); padding: 15px; border-left: 4px solid #33ff33; margin-bottom: 20px; line-height: 1.4; }
+        input[type="text"] {
+            background: transparent; border: none; border-bottom: 2px solid #33ff33;
+            color: #33ff33; font-family: inherit; font-size: 1.1rem; width: 100%; outline: none;
+        }
+        .progress-container { width: 100%; height: 12px; border: 1px solid #33ff33; margin: 20px 0; display: none; }
+        .progress-bar { width: 0%; height: 100%; background: #33ff33; }
+        .score-board { display: flex; justify-content: space-between; font-size: 0.9rem; color: #1a551a; }
+        .hint-btn { 
+            background: #1a551a; color: #33ff33; border: none; padding: 5px 10px; 
+            margin-top: 10px; cursor: pointer; font-family: inherit; font-size: 0.7rem; 
+        }
+        .hint-btn:hover { background: #33ff33; color: #000; }
+    </style>
+</head>
+<body>
+
+<div class="crt-monitor">
+    <div class="header">
+        <h1 id="module-title">SYSTEM SELECTION MENU</h1>
+        <div class="score-board">
+            <span>USER: INTERN_J13</span>
+            <span id="progress-text">MODULE PROGRESS: 0 / 10</span>
+        </div>
+    </div>
+
+    <div id="menu-view" class="module-box">
+        <p>SELECT TRAINING TRACK:</p>
+        <button class="menu-btn" id="btn-general" onclick="startModule('general')">01. GENERAL MEDICINE [INCOMPLETE]</button>
+        <button class="menu-btn" id="btn-psych" onclick="startModule('psychiatry')">02. PSYCHIATRY [INCOMPLETE]</button>
+        <button class="menu-btn" id="btn-er" onclick="startModule('emergency')">03. EMERGENCY DEPARTMENT [INCOMPLETE]</button>
+    </div>
+
+    <div id="work-view" class="module-box hidden">
+        <div id="case-display"></div>
+        <div class="input-area">
+            <p id="prompt-text">TYPE DIAGNOSIS AND PRESS ENTER:</p>
+            <input type="text" id="user-input" autocomplete="off">
+            <button class="hint-btn" id="hint-btn" onclick="showHint()">[ HINT ]</button>
+            <div class="progress-container" id="prog-cont"><div class="progress-bar" id="prog-bar"></div></div>
+            <p id="feedback"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentModule = "";
+    let score = 0;
+    let currentAnswer = "";
+    let currentHint = "";
+    let completedModules = { general: false, psychiatry: false, emergency: false };
+
+    const database = {
+        general: [
+            { data: "AGE: 45 | SEX: M | HISTORY: 20-PACK-YEAR SMOKER. WORKS IN ASBESTOS REMOVAL. | SYMPTOMS: PERSISTENT COUGH, CLUBBING OF FINGERS, WEIGHT LOSS.", answer: "LUNG CANCER", hint: "NEOPLASM OF THE PULMONARY SYSTEM." },
+            { data: "AGE: 30 | SEX: M | HISTORY: SUDDEN ONSET. NO PRIOR SURGERIES. | BLOOD: WBC 18,000 | SYMPTOMS: RLQ PAIN, REBOUND TENDERNESS.", answer: "APPENDICITIS", hint: "INFLAMMATION OF THE VESTIGIAL ORGAN." },
+            { data: "AGE: 60 | SEX: M | HISTORY: SEDENTARY LIFESTYLE. | BLOOD: FASTING GLUCOSE 240 MG/DL | SYMPTOMS: BLURRED VISION, POLYURIA.", answer: "DIABETES MELLITUS", hint: "PANCREATIC INSULIN DEFICIENCY OR RESISTANCE." },
+            { data: "AGE: 29 | SEX: F | HISTORY: VEGETARIAN DIET. HEAVY MENSES. | BLOOD: HGB 8.2, FERRITIN 10 | SYMPTOMS: PICA, PALLOR, FATIGUE.", answer: "IRON DEFICIENCY ANEMIA", hint: "MICROCYTIC, HYPOCHROMIC BLOOD CONDITION." },
+            { data: "AGE: 40 | SEX: F | HISTORY: FAMILY HISTORY OF AUTOIMMUNE DISEASE. | BLOOD: TSH 12.5 (HIGH) | SYMPTOMS: BRADYCARDIA, COLD INTOLERANCE.", answer: "HYPOTHYROIDISM", hint: "UNDERACTIVE ENDOCRINE GLAND IN THE NECK." },
+            { data: "AGE: 55 | SEX: M | HISTORY: RECENT TRAVEL TO SOUTH AMERICA. | SYMPTOMS: YELLOWING OF SCLERA, DARK URINE, RUQ TENDERNESS.", answer: "HEPATITIS", hint: "INFLAMMATION OF THE LIVER." },
+            { data: "AGE: 70 | SEX: F | HISTORY: RECENT HIP FRACTURE. | SYMPTOMS: PROGRESSIVE MEMORY LOSS, DISORIENTATION, ANOMIA.", answer: "ALZHEIMERS", hint: "NEURODEGENERATIVE AMYLOID PLAQUES." },
+            { data: "AGE: 12 | SEX: M | HISTORY: SEASONAL ALLERGIES. | SYMPTOMS: WHEEZING, CHEST TIGHTNESS, USE OF ACCESSORY MUSCLES TO BREATHE.", answer: "ASTHMA", hint: "REVERSIBLE AIRWAY OBSTRUCTION." },
+            { data: "AGE: 38 | SEX: F | HISTORY: MULTIPAROUS. | SYMPTOMS: POSTPRANDIAL RUQ PAIN RADIATING TO SCAPULA, NAUSEA.", answer: "CHOLECYSTITIS", hint: "INFLAMMATION OF THE GALLBLADDER." },
+            { data: "AGE: 25 | SEX: M | HISTORY: RECENT UNPROTECTED CONTACT. | SYMPTOMS: PAINLESS CHANCRE ON GENITALIA, SWOLLEN INGUINAL NODES.", answer: "SYPHILIS", hint: "TREPONEMA PALLIDUM INFECTION." }
+        ],
+        psychiatry: [
+            { data: "AGE: 34 | SEX: F | HISTORY: PERIODS OF INTENSE ENERGY FOLLOWED BY WEEKS OF BED-RIDDEN SADNESS. | SYMPTOMS: MANIC EUPHORIA, LOGORRHEA.", answer: "MANIC DEPRESSION", hint: "MODERN TERM: BIPOLAR DISORDER." },
+            { data: "AGE: 19 | SEX: M | HISTORY: WITHDRAWAL FROM SOCIAL CIRCLES AT COLLEGE. | SYMPTOMS: AUDITORY HALLUCINATIONS, FLAT AFFECT, WORD SALAD.", answer: "SCHIZOPHRENIA", hint: "DOPAMINE HYPOTHESIS-RELATED PSYCHOSIS." },
+            { data: "AGE: 25 | SEX: F | HISTORY: REFUSES TO LEAVE THE HOUSE FOR 6 MONTHS. | SYMPTOMS: RECURRENT PANIC ATTACKS IN OPEN SPACES.", answer: "AGORAPHOBIA", hint: "FEAR OF THE MARKETPLACE." },
+            { data: "AGE: 40 | SEX: M | HISTORY: MUST TOUCH DOOR KNOB 13 TIMES BEFORE EXITING. | SYMPTOMS: OBSESSIVE COMPULSIONS, RIGIDITY.", answer: "NEUROSIS", hint: "ANXIOUS ATTACHMENT TO REPETITIVE RITUALS." },
+            { data: "AGE: 30 | SEX: F | HISTORY: WITNESSED FACTORY ACCIDENT. | SYMPTOMS: UNEXPLAINED BLINDNESS DESPITE INTACT OPTIC NERVE.", answer: "HYSTERIA", hint: "CONVERSION DISORDER." },
+            { data: "AGE: 45 | SEX: M | HISTORY: CHRONIC ALCOHOLISM. | SYMPTOMS: CONFABULATION, SEVERE ANTEROGRADE AMNESIA, ATAXIA.", answer: "KORSAKOFF SYNDROME", hint: "THIAMINE DEFICIENCY IN BRAIN." },
+            { data: "AGE: 22 | SEX: F | HISTORY: DISTORTED BODY IMAGE. | SYMPTOMS: AMENORRHEA, LANUGO, WEIGHT IS 15% BELOW NORMAL.", answer: "ANOREXIA NERVOSA", hint: "SELF-STARVATION DISORDER." },
+            { data: "AGE: 28 | SEX: M | HISTORY: COMBAT VETERAN. | SYMPTOMS: HYPERVIGILANCE, NIGHTMARES, EXAGGERATED STARTLE RESPONSE.", answer: "PTSD", hint: "POST-TRAUMATIC STRESS." },
+            { data: "AGE: 50 | SEX: F | HISTORY: RECENT BEREAVEMENT. | SYMPTOMS: PSYCHOMOTOR RETARDATION, ANHEDONIA, INSOMNIA FOR 3 MONTHS.", answer: "CLINICAL DEPRESSION", hint: "UNREMITTING MELANCHOLIA." },
+            { data: "AGE: 35 | SEX: M | HISTORY: FREQUENT ENCOUNTERS WITH LAW. | SYMPTOMS: LACK OF REMORSE, PATHOLOGICAL LYING, CHARMING BUT MANIPULATIVE.", answer: "SOCIOPATHY", hint: "ANTISOCIAL PERSONALITY STRUCTURE." }
+        ],
+        emergency: [
+            { data: "AGE: 50 | SEX: M | HISTORY: HTN, OBESITY. | SYMPTOMS: CRUSHING CHEST PAIN, JAW PAIN, DIAPHORESIS.", answer: "MYOCARDIAL INFARCTION", hint: "CORONARY ARTERY OCCLUSION." },
+            { data: "AGE: 5 | SEX: F | HISTORY: NO IMMUNIZATIONS. | SYMPTOMS: STRIDOR, DROOLING, TRIPOD POSITIONING.", answer: "EPIGLOTTITIS", hint: "HAEMOPHILUS INFLUENZAE TYPE B." },
+            { data: "AGE: 22 | SEX: F | HISTORY: TAKES ORAL CONTRACEPTIVES. RECENT TRAVEL. | SYMPTOMS: UNILATERAL LEG SWELLING, CALF PAIN.", answer: "ULTRASOUND", prompt: "WHAT TEST TO ORDER?", hint: "NON-INVASIVE VASCULAR IMAGING." },
+            { data: "AGE: 18 | SEX: M | HISTORY: COLLEGE DORM RESIDENT. | SYMPTOMS: NUCHAL RIGIDITY, PHOTOPHOBIA, PURPURIC RASH.", answer: "MENINGITIS", hint: "INFLAMMATION OF THE MENINGES." },
+            { data: "AGE: 45 | SEX: M | HISTORY: BLUNT FORCE TRAUMA TO CHEST. | SYMPTOMS: TRACHEAL DEVIATION, ABSENT BREATH SOUNDS, HYPOTENSION.", answer: "TENSION PNEUMOTHORAX", hint: "AIR TRAPPED IN THE PLEURAL SPACE." },
+            { data: "AGE: 65 | SEX: F | HISTORY: AFIB, NOT ON THINNERS. | SYMPTOMS: SUDDEN FACE DROOP, ARM WEAKNESS, SLURRED SPEECH.", answer: "STROKE", hint: "CEREBROVASCULAR ACCIDENT." },
+            { data: "AGE: 10 | SEX: M | HISTORY: STUNG BY A WASP. | SYMPTOMS: URTICARIA, LARYNGEAL EDEMA, RAPID DROP IN BLOOD PRESSURE.", answer: "ANAPHYLAXIS", hint: "SEVERE TYPE I HYPERSENSITIVITY." },
+            { data: "AGE: 28 | SEX: F | HISTORY: ECTOPIC PREGNANCY RISK. | SYMPTOMS: SHARP LOWER ABDOMINAL PAIN, VAGINAL BLEEDING, SYNCOPE.", answer: "ECTOPIC PREGNANCY", hint: "EXTRAUTERINE GESTATION." },
+            { data: "AGE: 55 | SEX: M | HISTORY: CHRONIC SMOKER. | SYMPTOMS: SUDDEN SEVERE 'TEARING' BACK PAIN, DIFFERING BP IN ARMS.", answer: "AORTIC DISSECTION", hint: "INTIMAL TEAR OF THE GREAT VESSEL." },
+            { data: "AGE: 40 | SEX: M | HISTORY: FOUND IN THE SNOW. | SYMPTOMS: CORE TEMP 88F, BRADYCARDIA, J-WAVES ON EKG.", answer: "HYPOTHERMIA", hint: "DANGEROUS DECREASE IN BODY TEMPERATURE." }
+        ]
+    };
+
+    function startModule(mod) {
+        currentModule = mod;
+        score = 0;
+        document.getElementById('menu-view').classList.add('hidden');
+        document.getElementById('work-view').classList.remove('hidden');
+        document.getElementById('module-title').innerText = "MODULE: " + mod.toUpperCase();
+        updateScoreDisplay();
+        loadNewCase();
+    }
+
+    function loadNewCase() {
+        const modCases = database[currentModule];
+        const c = modCases[score % modCases.length]; // Cycle through sequentially
+        currentAnswer = c.answer;
+        currentHint = c.hint;
+        document.getElementById('case-display').innerHTML = `<div class="patient-file"><strong>[PATIENT_HISTORY_LOG]</strong><br><br>${c.data}</div>`;
+        document.getElementById('prompt-text').innerText = c.prompt || "TYPE PRIMARY DIAGNOSIS AND PRESS ENTER:";
+        const input = document.getElementById('user-input');
+        input.value = ""; input.disabled = false; input.focus();
+        document.getElementById('feedback').innerText = "";
+        document.getElementById('hint-btn').classList.remove('hidden');
+    }
+
+    function showHint() {
+        document.getElementById('feedback').innerText = "HINT: " + currentHint;
+    }
+
+    document.getElementById('user-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            const val = this.value.trim().toUpperCase();
+            runProgressBar(val === currentAnswer);
+        }
+    });
+
+    function runProgressBar(isCorrect) {
+        document.getElementById('user-input').disabled = true;
+        document.getElementById('hint-btn').classList.add('hidden');
+        document.getElementById('prog-cont').style.display = "block";
+        let width = 0;
+        const interval = setInterval(() => {
+            if (width >= 100) {
+                clearInterval(interval);
+                finalize(isCorrect);
+            } else { width += 5; document.getElementById('prog-bar').style.width = width + '%'; }
+        }, 40);
+    }
+
+    function finalize(isCorrect) {
+        document.getElementById('prog-cont').style.display = "none";
+        document.getElementById('prog-bar').style.width = "0%";
+        if (isCorrect) {
+            score++;
+            updateScoreDisplay();
+            if (score >= 10) {
+                completedModules[currentModule] = true;
+                checkTotalProgression();
+            } else { loadNewCase(); }
+        } else {
+            document.getElementById('feedback').innerText = "INCORRECT. DATA MISMATCH. RE-ENTRY REQUIRED.";
+            document.getElementById('user-input').disabled = false;
+            document.getElementById('user-input').focus();
+            document.getElementById('hint-btn').classList.remove('hidden');
+        }
+    }
+
+    function updateScoreDisplay() {
+        document.getElementById('progress-text').innerText = `MODULE PROGRESS: ${score} / 10`;
+    }
+
+    function checkTotalProgression() {
+        document.getElementById('btn-' + currentModule.substring(0,currentModule.length > 5 ? 5 : currentModule.length)).innerText = currentModule.toUpperCase() + " [COMPLETE]";
+        document.getElementById('btn-' + currentModule.substring(0,currentModule.length > 5 ? 5 : currentModule.length)).disabled = true;
+
+        if (completedModules.general && completedModules.psychiatry && completedModules.emergency) {
+            document.getElementById('feedback').innerText = "CURRICULUM COMPLETE. RETURNING TO INDEX...";
+            setTimeout(() => window.location.href = "index.html", 3000);
+        } else {
+            document.getElementById('work-view').classList.add('hidden');
+            document.getElementById('menu-view').classList.remove('hidden');
+            document.getElementById('module-title').innerText = "SYSTEM SELECTION MENU";
+        }
+    }
+</script>
+</body>
+</html>
