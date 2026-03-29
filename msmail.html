@@ -1,1 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>S-MAIL SERVER</title>
+    <style>
+        :root {
+            --neon-green: #33ff33;
+            --dark-green: #1a551a;
+            --bg-black: #050505;
+        }
 
+        body {
+            background-color: #000;
+            color: var(--neon-green);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-transform: uppercase;
+            overflow: hidden;
+        }
+
+        .crt-monitor {
+            position: relative;
+            width: 96vw;
+            height: 94vh;
+            padding: 10px;
+            border: 4px solid #2a2a2a;
+            border-radius: 15px;
+            background: var(--bg-black);
+            box-shadow: inset 0 0 40px rgba(0,0,0,1);
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+
+        /* Retro Scanline Overlay */
+        .crt-monitor::before {
+            content: " ";
+            display: block;
+            position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            z-index: 10;
+            background-size: 100% 3px;
+            pointer-events: none;
+        }
+
+        .header { 
+            border-bottom: 2px solid var(--neon-green); 
+            padding-bottom: 5px; 
+            margin-bottom: 10px; 
+            flex-shrink: 0; 
+        }
+
+        .header h1 { font-size: 1rem; margin: 0; }
+        .header small { font-size: 0.65rem; color: var(--dark-green); }
+
+        .main-layout { 
+            display: flex; 
+            flex-direction: column; /* Stacked for mobile */
+            flex-grow: 1; 
+            overflow: hidden; 
+        }
+
+        /* Horizontal Scrollable Nav for Mobile */
+        .sidebar { 
+            width: 100%; 
+            display: flex;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--dark-green);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-item { 
+            padding: 10px 15px; 
+            cursor: pointer; 
+            white-space: nowrap;
+            background: transparent; 
+            color: var(--neon-green); 
+            border: 1px solid transparent; 
+            font-family: inherit;
+            font-size: 0.8rem;
+        }
+        
+        .nav-item.active { 
+            border: 1px solid var(--neon-green);
+            background: rgba(51, 255, 51, 0.1);
+        }
+
+        .content-view { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            position: relative; 
+        }
+
+        .hidden { display: none !important; }
+
+        .mail-row { 
+            border-bottom: 1px solid var(--dark-green); 
+            padding: 12px 5px; 
+            cursor: pointer; 
+            font-size: 0.75rem; 
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .mail-row:active { background: var(--neon-green); color: #000; }
+
+        .message-head { font-size: 0.8rem; margin-bottom: 10px; }
+        .message-head p { margin: 3px 0; }
+
+        .message-body { 
+            line-height: 1.5; 
+            white-space: pre-wrap; 
+            font-size: 0.85rem; 
+            border-top: 1px dashed var(--neon-green); 
+            padding-top: 10px;
+            padding-bottom: 80px; /* Space for buttons */
+        }
+
+        .btn-row { 
+            position: sticky;
+            bottom: 0;
+            background: var(--bg-black);
+            padding: 15px 0; 
+            display: flex; 
+            flex-wrap: wrap;
+            gap: 8px; 
+            width: 100%;
+        }
+
+        .dead-btn { border: 1px solid #114411; color: #114411; padding: 8px; font-size: 0.7rem; flex-grow: 1; text-align: center; }
+        .back-btn { border: 1px solid var(--neon-green); color: var(--neon-green); background: transparent; padding: 8px; cursor: pointer; font-family: inherit; font-size: 0.7rem; flex-grow: 1; }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--neon-green); }
+    </style>
+</head>
+<body>
+
+<div class="crt-monitor">
+    <div class="header">
+        <h1>PEGASUS MAIL v4.1</h1>
+        <small>ID: USER_J13 | DRIVE: OPTIMAL</small>
+    </div>
+
+    <div class="main-layout">
+        <div class="sidebar">
+            <button class="nav-item active" onclick="renderList('inbox', this)">INBOX</button>
+            <button class="nav-item" onclick="renderList('starred', this)">STARRED</button>
+            <button class="nav-item" onclick="renderList('sent', this)">SENT</button>
+            <button class="nav-item" onclick="renderList('trash', this)">TRASH</button>
+        </div>
+
+        <div class="content-view" id="list-view">
+            <div id="mail-list"></div>
+        </div>
+
+        <div class="content-view hidden" id="message-view">
+            <div class="message-head">
+                <p id="m-from"></p>
+                <p id="m-subj"></p>
+                <p id="m-date"></p>
+            </div>
+            <div class="message-body" id="m-body"></div>
+            <div class="btn-row">
+                <button class="back-btn" onclick="closeMessage()">[ ESC ] BACK</button>
+                <button class="dead-btn">REPLY</button>
+                <button class="dead-btn">DELETE</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const mails = [
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "NOV-02-1986", subject: "RE: EVALUATION RESULTS", body: "THE CLINICAL SUMMARY NOTES 'MARKED DEFICITS IN SOCIAL RECIPROCITY' BUT CONFIRMS 'SUPERIOR IQ IN NON-VERBAL DOMAINS.' THEY ARE USING THE TERM ASPERGER'S SYNDROME. \n\n- PAPPAS", starred: true },
+        { folder: 'sent', from: "j.13@syntec.net", date: "NOV-01-1986", subject: "RE: EVALUATION RESULTS", body: "THE EVALUATOR KEPT TABBING HIS PEN. IT WAS 72 BEATS PER MINUTE. I COULD NOT FOCUS ON THE PATTERN RECOGNITION BLOCK TEST BECAUSE OF THE SOUND. I BELIEVE MY SCORE WOULD HAVE BEEN 4% HIGHER WITHOUT THE DISTRACTION." },
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-31-1986", subject: "EVALUATION RESULTS", body: "I HAVE THE PRELIMINARY PSYCH-EVALS FROM THE INTERN POOL. YOURS IS HIGHLIGHTED. THEY WANT TO MONITOR YOUR 'REPETITIVE BEHAVIORS' IN THE LAB. I WILL ENSURE THEY LEAVE YOU TO YOUR WORK. \n\n- PAPPAS", starred: true },
+        { folder: 'inbox', from: "w.nathanial@syntec.net", date: "NOV-04-1986", subject: "GREAT JOB ON THE BUFFER LOGS", body: "[REDACTED], JUST WANTED TO DROP A LINE AND SAY WE'RE REALLY IMPRESSED WITH THE SPEED OF YOUR ARCHIVING. YOU'RE PUTTING THE OTHER INTERNS TO SHAME! LET'S CHAT ON MONDAY ABOUT EXPANDING YOUR ROLE IN THE PEGASUS WING. KEEP IT UP!" },
+        { folder: 'inbox', from: "w.nathanial@syntec.net", date: "OCT-28-1986", subject: "LOG DISCREPANCY", body: "HEY THERE, JUST NOTICED A GAP IN THE 03:00 SCAN. PROBABLY  A GLITCH, BUT COULD YOU TAKE A QUICK LOOK AND SEE WHERE THOSE FILES LANDED? THANKS." },
+        { folder: 'inbox', from: "w.nathanial@syntec.net", date: "OCT-15-1986", subject: "LUNCH MIXER?", body: "THE TEAM IS HEADING DOWN TO THE LOBBY FOR A QUICK MIXER TO CELEBRATE THE Q3 WINS. WOULD LOVE TO SEE YOU THERE IF YOU CAN TEAR YOURSELF AWAY FROM THE TERMINAL FOR A BIT!" },
+        { folder: 'starred', from: "b.cobalt@syntec.net", date: "OCT-20-1986", subject: "CORE ALIGNMENT", body: "ENSURE YOU ARE UTILIZING THE 1982 RADIANCE STANDARDS. THE 1986 REVISION HAS AN UNACCEPTABLE MARGIN OF ERROR IN THE THIRD DECIMAL PLACE. DO NOT COMPROMISE THE DATA SET.", starred: true },
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-12-1986", subject: "LUNCH BATCH", body: "THE PREPARED MEAL IS IN THE FRIDGE. I HAVE SEPARATED THE PROTEIN FROM THE CELLULOSE TO ENSURE THE TEXTURES REMAIN DISTINCT. DO NOT FORGET TO EAT AT 12:00 PRECISELY." },
+        { folder: 'inbox', from: "it.admin@syntec.net", date: "NOV-03-1986", subject: "TERMINAL UPDATE", body: "YOUR WORKSTATION WILL REBOOT AT MIDNIGHT. SAVE ALL PROGRESS." },
+        { folder: 'inbox', from: "hr.dept@syntec.net", date: "OCT-27-1986", subject: "BENEFITS FORM #44", body: "PLEASE SIGN THE ATTACHED DISCLOSURE REGARDING LAB SAFETY PROTOCOLS." },
+        { folder: 'inbox', from: "it.admin@syntec.net", date: "OCT-20-1986", subject: "OVERRIDE KEY", body: "USER_J13 TEMPORARY KEY: 8-6-3. VALID FOR 24 HOURS.", starred: true },
+        { folder: 'sent', from: "j.13@syntec.net", date: "NOV-04-1986", subject: "RE: LOG DISCREPANCY", body: "THE SCAN WAS NOT MISSING. THE AUTOMATED NAMING CONVENTION FAILED. I HAVE MANUALLY RE-INDEXED IT UNDER PEGASUS_0300_A." },
+        { folder: 'trash', from: "hr.dept@syntec.net", date: "OCT-02-1986", subject: "SURVEY", body: "HOW ARE WE DOING? TAKE THE EMPLOYEE SATISFACTION SURVEY." }
+    ];
+
+    function renderList(folderName, element) {
+        const list = document.getElementById('mail-list');
+        list.innerHTML = "";
+        
+        // Handle nav active states
+        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+        if(element) element.classList.add('active');
+
+        const filtered = mails.filter(m => {
+            if(folderName === 'starred') return m.starred === true;
+            return m.folder === folderName;
+        });
+
+        filtered.forEach((m) => {
+            const row = document.createElement('div');
+            row.className = "mail-row";
+            const star = m.starred ? "[*]" : "[ ]";
+            const sender = m.from.split('@')[0];
+            // Truncate subject for mobile screens
+            const displaySub = m.subject.length > 18 ? m.subject.substring(0, 15) + ".." : m.subject;
+            
+            row.innerHTML = `<span>${star} ${sender}</span> <span>${m.date}</span>`;
+            row.onclick = () => openMessage(m);
+            list.appendChild(row);
+        });
+        
+        closeMessage();
+    }
+
+    function openMessage(msg) {
+        document.getElementById('list-view').classList.add('hidden');
+        document.getElementById('message-view').classList.remove('hidden');
+        document.getElementById('m-from').textContent = "FROM: " + msg.from;
+        document.getElementById('m-subj').textContent = "SUBJ: " + msg.subject;
+        document.getElementById('m-date').textContent = "DATE: " + msg.date;
+        document.getElementById('m-body').textContent = msg.body;
+        document.querySelector('.sidebar').classList.add('hidden');
+    }
+
+    function closeMessage() {
+        document.getElementById('message-view').classList.add('hidden');
+        document.getElementById('list-view').classList.remove('hidden');
+        document.querySelector('.sidebar').classList.remove('hidden');
+    }
+
+    // Initialize
+    renderList('inbox', document.querySelector('.nav-item'));
+</script>
+</body>
+</html>
