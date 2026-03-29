@@ -1,3 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Syntec(TM) Terminal - Pegasus OS</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background-color: #0a0a0a; color: #33ff33; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; text-shadow: 0 0 5px #33ff33; }
+        .crt-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); background-size: 100% 4px, 3px 100%; pointer-events: none; z-index: 10; }
+        .screen { width: 80%; max-width: 800px; height: 600px; padding: 20px; border: 2px solid #33ff33; background: #050505; overflow-y: auto; position: relative; }
+        .input-area { display: flex; margin-top: 20px; }
+        #command-line { background: transparent; border: none; color: #33ff33; font-family: inherit; font-size: 1.2rem; outline: none; width: 100%; text-transform: uppercase; }
+        .loading-container { margin: 15px 0; width: 100%; }
+        .loading-bar { color: #33ff33; letter-spacing: 2px; font-size: 1.2rem; font-weight: bold; }
+    </style>
+</head>
+<body onclick="document.getElementById('command-line').focus()">
+<div class="crt-overlay"></div>
+<div class="screen">
+    <div id="output">
+        <p>SYNTEC(TM) PEGASUS OS v2.0.1</p>
+        <p>COPYRIGHT 1976 SYNTEC LABS</p>
+        <p>---------------------------</p>
+        <p>PLEASE LOG IN TO PROCEED...</p>
+    </div>
+    <div class="input-area" id="input-zone">
+        <span id="label">NAME: </span>
+        <input type="text" id="command-line" autofocus autocomplete="off">
+    </div>
+</div>
+
+<script>
 // Project Credentials
 const S_URL = "https://zefaapnmutxgnabpxoog.supabase.co";
 const S_KEY = "sb_publishable_zI-xgDNT8kQciUQ-j_EFsw_89a_CyGM";
@@ -63,7 +95,10 @@ async function handleAuth(fname, byear) {
             .eq('year_of_birth', parseInt(byear))
             .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+            await typeLine("DB ERROR: " + error.message, 10);
+            throw error;
+        }
 
         if (data) {
             await typeLine("IDENTITY VERIFIED. WELCOME BACK, " + data.employee_id, 30);
@@ -139,3 +174,6 @@ input.addEventListener('keydown', async function(e) {
         }
     }
 });
+</script>
+</body>
+</html>
