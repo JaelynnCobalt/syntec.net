@@ -10,17 +10,23 @@
         .header { padding: 10px; border-bottom: 2px solid var(--neon); text-align: center; font-weight: bold; letter-spacing: 2px; }
         .main-container { display: flex; flex: 1; overflow: hidden; }
         .side-panel { width: 280px; border-right: 2px solid var(--neon); padding: 15px; display: flex; flex-direction: column; background: var(--panel); overflow-y: auto; }
-        .right-panel { width: 300px; border-left: 2px solid var(--neon); padding: 15px; background: var(--panel); }
-        .section-title { border-bottom: 1px solid var(--neon); margin-bottom: 10px; font-size: 0.9rem; padding-bottom: 3px; display: block; }
-        .data-point { margin-bottom: 15px; font-size: 0.85rem; line-height: 1.4; }
-        .data-label { color: #88ff88; font-size: 0.7rem; display: block; }
+        .right-panel { width: 250px; border-left: 2px solid var(--neon); padding: 15px; background: var(--panel); }
+        .section-title { border-bottom: 1px solid var(--neon); margin-bottom: 10px; font-size: 0.8rem; padding-bottom: 3px; display: block; opacity: 0.8; }
+        
+        /* Chat Area */
         .chat-area { flex: 1; display: flex; flex-direction: column; padding: 10px; background: #050505; }
-        #messages { flex: 1; overflow-y: auto; border: 1px solid var(--neon); padding: 10px; margin-bottom: 10px; font-size: 0.9rem; }
+        .chat-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #114411; }
+        #messages { flex: 1; overflow-y: auto; border: 1px solid var(--neon); padding: 10px; margin-bottom: 10px; font-size: 0.9rem; background: rgba(0,20,0,0.2); }
+        
+        /* Dropdown Styling */
+        #contact-select { background: #000; color: var(--neon); border: 1px solid var(--neon); padding: 5px; font-family: inherit; flex: 1; outline: none; }
+        
         input { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px; font-family: inherit; outline: none; width: calc(100% - 18px); margin-bottom: 5px; }
         button { background: var(--neon); color: #000; border: none; padding: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; }
         button:hover { background: #22cc22; }
-        .friend-item { padding: 4px; font-size: 0.85rem; border-bottom: 1px dotted #114411; }
-        .task-item { font-size: 0.85rem; margin-bottom: 8px; color: #ffff33; }
+        
+        .data-point { margin-bottom: 12px; font-size: 0.85rem; }
+        .data-label { color: #88ff88; font-size: 0.65rem; display: block; }
     </style>
 </head>
 <body onclick="document.getElementById('msg-input').focus()">
@@ -33,30 +39,36 @@
         <div class="data-point"><span class="data-label">NAME</span><span id="user-name">...</span></div>
         <div class="data-point"><span class="data-label">EMPLOYEE ID</span><span id="user-id">---</span></div>
         <div class="data-point"><span class="data-label">CLEARANCE</span><span id="user-clearance">LEVEL 1</span></div>
-        <div class="data-point"><span class="data-label">ASSIGNMENT</span><span id="user-project">PENDING</span></div>
 
-        <span class="section-title">SECURE CONTACTS</span>
-        <div id="friends-list" style="margin-bottom: 15px;"></div>
-        <input type="text" id="search-id" placeholder="LINK ID (Ex: J2000-123)">
-        <button onclick="addFriend()">LINK PERSONNEL</button>
+        <span class="section-title">LINK NEW CONNECTION</span>
+        <input type="text" id="search-id" placeholder="ENTER ID...">
+        <button onclick="addFriend()">ESTABLISH LINK</button>
     </div>
 
     <div class="chat-area">
-        <span class="section-title">SECURE CHANNEL: #GENERAL</span>
+        <div class="chat-header">
+            <span style="font-size: 0.8rem; white-space: nowrap;">SECURE LINE TO:</span>
+            <select id="contact-select" onchange="loadInitialMessages()">
+                <option value="GLOBAL"># GENERAL-CHANNEL</option>
+            </select>
+        </div>
+        
         <div id="messages"></div>
+        
         <div style="display:flex; gap: 5px;">
-            <input type="text" id="msg-input" placeholder="ENCRYPT MESSAGE...">
+            <input type="text" id="msg-input" placeholder="TYPE MESSAGE...">
             <button onclick="sendMessage()" style="width: 80px;">SEND</button>
         </div>
     </div>
 
     <div class="right-panel">
-        <span class="section-title">ACTIVE DIRECTIVES</span>
-        <div id="task-list">
-            <div class="task-item">[!] INITIALIZE HUB CONNECTION</div>
-            <div class="task-item">[!] SYNC PERSONNEL DATA</div>
+        <span class="section-title">SYSTEM STATUS</span>
+        <div class="data-point" style="font-size: 0.7rem;">
+            UPLINK: ACTIVE<br>
+            ENCRYPTION: AES-256<br>
+            SIGNAL: STRONG
         </div>
-        <button onclick="location.href='index.html'" style="margin-top:20px; background:transparent; color:var(--neon); border: 1px solid var(--neon);">LOGOUT</button>
+        <button onclick="location.href='index.html'" style="background:transparent; color:var(--neon); border: 1px solid var(--neon); margin-top: auto;">TERMINATE SESSION</button>
     </div>
 </div>
 
@@ -67,97 +79,103 @@ const _supabase = supabase.createClient(S_URL, S_KEY);
 
 const myID = localStorage.getItem('syntec_id') || "GUEST";
 
-// 1. FETCH PROFILE DATA
 async function loadProfile() {
-    const { data, error } = await _supabase.from('profiles').select('*').eq('employee_id', myID).maybeSingle();
+    const { data } = await _supabase.from('profiles').select('*').eq('employee_id', myID).maybeSingle();
     if (data) {
         document.getElementById('user-name').textContent = data.first_name;
         document.getElementById('user-id').textContent = data.employee_id;
-        document.getElementById('user-clearance').textContent = data.clearance_level || "LEVEL 1 - INTERN";
-        document.getElementById('user-project').textContent = data.project_assignment || "EVALUATION PENDING";
+        document.getElementById('user-clearance').textContent = data.clearance_level || "LEVEL 1";
     }
 }
 
-// 2. LOAD FRIENDS
 async function loadFriends() {
     const { data } = await _supabase.from('friends').select('*').eq('user_id', myID);
-    const list = document.getElementById('friends-list');
-    list.innerHTML = data && data.length ? "" : "NO LINKS ESTABLISHED";
+    const dropdown = document.getElementById('contact-select');
+    
+    // Clear existing options except Global
+    dropdown.innerHTML = '<option value="GLOBAL"># GENERAL-CHANNEL</option>';
+    
     if (data) {
         data.forEach(f => {
-            const div = document.createElement('div');
-            div.className = "friend-item";
-            div.textContent = `> ${f.friend_name} [${f.friend_id}]`;
-            list.appendChild(div);
+            const opt = document.createElement('option');
+            opt.value = f.friend_id;
+            opt.textContent = `${f.friend_name.toUpperCase()} [${f.friend_id}]`;
+            dropdown.appendChild(opt);
         });
     }
 }
 
-// 3. ADD FRIEND (FIXED)
 async function addFriend() {
     const targetID = document.getElementById('search-id').value.toUpperCase().trim();
-    if (!targetID || targetID === myID) return alert("INVALID ID");
-
-    // Check if employee exists
-    const { data: profile, error } = await _supabase.from('profiles').select('first_name').eq('employee_id', targetID).maybeSingle();
-
+    if (!targetID || targetID === myID) return;
+    const { data: profile } = await _supabase.from('profiles').select('first_name').eq('employee_id', targetID).maybeSingle();
     if (profile) {
-        const { error: fError } = await _supabase.from('friends').insert([{ 
-            user_id: myID, 
-            friend_id: targetID, 
-            friend_name: profile.first_name 
-        }]);
-        if (fError) alert("LINK ALREADY EXISTS OR ERROR.");
-        else {
-            document.getElementById('search-id').value = "";
-            loadFriends();
-        }
-    } else {
-        alert("PERSONNEL ID NOT FOUND IN DATABASE.");
+        await _supabase.from('friends').insert([{ user_id: myID, friend_id: targetID, friend_name: profile.first_name }]);
+        document.getElementById('search-id').value = "";
+        loadFriends();
     }
 }
 
-// 4. CHAT (FIXED TABLE NAME)
 async function sendMessage() {
     const input = document.getElementById('msg-input');
     const content = input.value.trim();
+    const receiver = document.getElementById('contact-select').value;
     if (!content) return;
 
-    const { error } = await _supabase.from('internal_messages').insert([{ 
+    // We use receiver_id to keep track of who the message is for
+    await _supabase.from('internal_messages').insert([{ 
         sender_name: myID, 
-        content: content 
+        content: content,
+        receiver_id: receiver // Make sure this column exists in your table!
     }]);
-    
-    if (error) console.error("Chat Error:", error);
     input.value = "";
 }
 
-// 5. REALTIME LISTENER (FIXED TABLE NAME)
-_supabase.channel('public:internal_messages')
-.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'internal_messages' }, payload => {
-    const msg = payload.new;
-    const div = document.createElement('p');
-    div.innerHTML = `<span style="color:#88ff88">[${msg.sender_name}]</span>: ${msg.content}`;
+function displayMessage(msg) {
     const mBox = document.getElementById('messages');
+    const div = document.createElement('p');
+    div.style.margin = "5px 0";
+    div.innerHTML = `<span style="color:#88ff88">[${msg.sender_name}]</span>: ${msg.content}`;
     mBox.appendChild(div);
     mBox.scrollTop = mBox.scrollHeight;
-}).subscribe();
-
-// Load previous messages on start
-async function loadInitialMessages() {
-    const { data } = await _supabase.from('internal_messages').select('*').order('created_at', { ascending: true }).limit(50);
-    if (data) {
-        const mBox = document.getElementById('messages');
-        data.forEach(msg => {
-            const div = document.createElement('p');
-            div.innerHTML = `<span style="color:#88ff88">[${msg.sender_name}]</span>: ${msg.content}`;
-            mBox.appendChild(div);
-        });
-        mBox.scrollTop = mBox.scrollHeight;
-    }
 }
 
-// Init
+async function loadInitialMessages() {
+    const mBox = document.getElementById('messages');
+    mBox.innerHTML = ""; // Clear screen
+    const target = document.getElementById('contact-select').value;
+
+    let query = _supabase.from('internal_messages').select('*');
+    
+    if (target === "GLOBAL") {
+        query = query.eq('receiver_id', 'GLOBAL');
+    } else {
+        // Show messages between me and the friend
+        query = query.or(`and(sender_name.eq.${myID},receiver_id.eq.${target}),and(sender_name.eq.${target},receiver_id.eq.${myID})`);
+    }
+
+    const { data } = await query.order('created_at', { ascending: true }).limit(50);
+    if (data) data.forEach(displayMessage);
+}
+
+// REALTIME LISTENER
+_supabase.channel('any')
+.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'internal_messages' }, payload => {
+    const msg = payload.new;
+    const currentTarget = document.getElementById('contact-select').value;
+    
+    // Only display if it belongs in the current view
+    if (currentTarget === "GLOBAL" && msg.receiver_id === "GLOBAL") {
+        displayMessage(msg);
+    } else if (
+        (msg.sender_name === myID && msg.receiver_id === currentTarget) || 
+        (msg.sender_name === currentTarget && msg.receiver_id === myID)
+    ) {
+        displayMessage(msg);
+    }
+}).subscribe();
+
+// INIT
 loadProfile();
 loadFriends();
 loadInitialMessages();
