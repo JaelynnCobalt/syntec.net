@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Syntec Terminal .-. Apple II</title>
+    <title>Syntec Terminal - Pegasus OS</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -39,7 +39,10 @@
             background: #050505;
             overflow-y: auto;
             position: relative;
+            cursor: text;
         }
+
+        #output p { margin: 5px 0; line-height: 1.2; }
 
         .input-area {
             display: flex;
@@ -56,15 +59,11 @@
             width: 100%;
             text-transform: uppercase;
         }
-
-        .loading-container { margin-top: 20px; width: 100%; }
-        .loading-bar { color: #33ff33; letter-spacing: 5px; font-size: 1.5rem; }
-        .cursor { display: inline-block; width: 10px; height: 1.2rem; background: #33ff33; animation: blink 0.8s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     </style>
 </head>
 
-<body>
+<body onclick="document.getElementById('command-line').focus()">
+
 <div class="crt-overlay"></div>
 
 <div class="screen">
@@ -72,31 +71,33 @@
         <p>SYNTEC(TM) PEGASUS OS v2.0.1</p>
         <p>COPYRIGHT 1986 SYNTEC LABS</p>
         <p>---------------------------</p>
-        <p>PLEASE ENTER FIRST NAME TO PROCEED...</p>
+        <p>PLEASE ENTER FIRST NAME TO BEGIN APPLICATION...</p>
     </div>
 
     <div class="input-area" id="input-zone">
-        <span id="label">IDENTITY:&nbsp;</span>
+        <span id="label">NAME:&nbsp;</span>
         <input type="text" id="command-line" autofocus autocomplete="off">
     </div>
 </div>
 
 <script>
-// --- 2. CONFIGURATION ---
+// 2. CONFIGURATION
 const S_URL = "https://ctrbkrwiwpojbzfpsxwl.supabase.co";
 const S_KEY = "sb_publishable_uK-ihohO48o6BPRW8rmDqQ_LbJnfTI7";
-const supabase = lib.createClient(S_URL, S_KEY);
+// Important: 'supabase' is the correct constructor for v2
+const _supabase = supabase.createClient(S_URL, S_KEY);
 
 const input = document.getElementById('command-line');
 const output = document.getElementById('output');
 const label = document.getElementById('label');
 const inputZone = document.getElementById('input-zone');
 
-let stage = 0; // 0: Name, 1: BirthYear, 2: Terminal Commands
+let stage = 0; // 0: Name, 1: Birth Year
 let locked = false;
 let tempName = "";
 
-function typeLine(text, speed = 25) {
+// Helper to add text to screen
+function typeLine(text, speed = 20) {
     return new Promise(resolve => {
         const p = document.createElement('p');
         output.appendChild(p);
@@ -115,71 +116,85 @@ function typeLine(text, speed = 25) {
     });
 }
 
-function normalize(str) {
-    return str.toLowerCase().replace(/[^\w\s]/g, '').trim();
-}
+// Helper for pauses
+const delay = ms => new Promise(res => setTimeout(res, ms));
 
-async function handleLogin(fname, byear) {
-    await typeLine("SEARCHING PERSONNEL DATABASE...", 40);
+// LOGIN & REGISTRATION LOGIC
+async function processAuth(fname, byear) {
+    locked = true;
+    inputZone.style.display = "none";
+    await typeLine("UPLINKING TO SYNTEC SERVERS...", 40);
     
-    // Check Supabase
-    const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('first_name', fname.toUpperCase())
-        .eq('year_of_birth', parseInt(byear))
-        .single();
-
-    if (data) {
-        await typeLine("IDENTITY VERIFIED: " + data.employee_id, 30);
-        localStorage.setItem('syntec_id', data.employee_id);
-    } else {
-        await typeLine("IDENTITY NOT FOUND. GENERATING APPLICATION...", 40);
-        const newID = `${fname[0].toUpperCase()}${byear}-${Math.floor(100 + Math.random() * 900)}`;
-        
-        const { error: insError } = await supabase
+    try {
+        // Search for existing profile
+        const { data, error } = await _supabase
             .from('profiles')
-            .insert([{ first_name: fname.toUpperCase(), year_of_birth: parseInt(byear), employee_id: newID }]);
-        
-        if(!insError) {
-            await typeLine("APPLICATION APPROVED.", 50);
-            await typeLine("WELCOME TO SYNTEC. YOUR ID IS: " + newID, 50);
+            .select('*')
+            .eq('first_name', fname.toUpperCase())
+            .eq('year_of_birth', parseInt(byear))
+            .single();
+
+        if (data) {
+            await typeLine("IDENTITY VERIFIED. ACCESS GRANTED.", 30);
+            localStorage.setItem('syntec_id', data.employee_id);
+        } else {
+            // New user registration
+            await typeLine("NO RECORD FOUND. EVALUATING APPLICATION...", 50);
+            await delay(1000);
+            
+            const newID = `${fname[0].toUpperCase()}${byear}-${Math.floor(100 + Math.random() * 900)}`;
+            
+            const { error: insError } = await _supabase
+                .from('profiles')
+                .insert([{ 
+                    first_name: fname.toUpperCase(), 
+                    year_of_birth: parseInt(byear), 
+                    employee_id: newID 
+                }]);
+
+            if (insError) throw insError;
+
+            await typeLine("STATUS: APPLICATION APPROVED.", 60);
+            await typeLine("WELCOME TO SYNTEC. YOUR ID IS: " + newID, 40);
             localStorage.setItem('syntec_id', newID);
         }
+
+        await delay(1500);
+        await typeLine("REDIRECTING TO ACCOUNT HUB...", 20);
+        await delay(1000);
+        window.location.href = "mhub.html";
+
+    } catch (err) {
+        console.error(err);
+        await typeLine("CRITICAL ERROR: CONNECTION TIMEOUT.", 10);
+        await delay(2000);
+        location.reload(); // Restart
     }
-    
-    await delay(1000);
-    await typeLine("INITIALIZING HUB INTERFACE...", 30);
-    await delay(1000);
-    window.location.href = "mhub.html"; // Redirect to your Hub/Chat page
 }
 
+// INPUT LISTENER
 input.addEventListener('keydown', async function(e) {
     if (e.key === 'Enter' && !locked) {
-        const cmd = input.value.trim();
-        if (!cmd) return;
-        
-        locked = true;
+        const val = input.value.trim();
+        if (!val) return;
+
         input.value = '';
-        await typeLine("> " + cmd, 15);
-        
+        await typeLine("> " + val, 10);
+
         if (stage === 0) {
-            tempName = cmd;
+            tempName = val;
             stage = 1;
-            label.textContent = "BIRTH YEAR (YYYY): ";
+            label.textContent = "YEAR OF BIRTH: ";
         } else if (stage === 1) {
-            if (!/^\d{4}$/.test(cmd)) {
-                await typeLine("ERROR: INVALID YEAR FORMAT.", 30);
+            if (!/^\d{4}$/.test(val)) {
+                await typeLine("ERROR: PLEASE ENTER A 4-DIGIT YEAR.", 20);
             } else {
-                inputZone.style.display = "none";
-                await handleLogin(tempName, cmd);
+                await processAuth(tempName, val);
             }
         }
-        locked = false;
     }
 });
-
-function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 </script>
+
 </body>
 </html>
