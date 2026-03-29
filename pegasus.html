@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PEGASUS DATABASE</title>
+    <title>SYNTEC PEGASUS SYSTEM</title>
     <style>
         body {
             background-color: #000;
@@ -20,177 +20,175 @@
         .crt-monitor {
             position: relative;
             width: 95vw;
-            max-width: 850px;
+            max-width: 900px;
             height: 85vh;
-            padding: 30px;
+            padding: 20px;
             border: 15px solid #2a2a2a;
             border-radius: 40px;
             background: #050505;
             box-shadow: inset 0 0 80px rgba(0,0,0,1), 0 0 30px rgba(0,0,0,1);
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .crt-monitor::before {
             content: " ";
             display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
+            position: absolute; left: 0; top: 0; right: 0; bottom: 0;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), 
                         linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
-            z-index: 5;
+            z-index: 10;
             background-size: 100% 3px, 3px 100%;
             pointer-events: none;
         }
 
-        .screen-content {
-            position: relative;
-            z-index: 1;
-            height: 100%;
-            overflow-y: auto;
-            text-shadow: 0 0 5px rgba(51, 255, 51, 0.8);
-            padding-right: 10px;
-        }
+        .header { border-bottom: 2px solid #33ff33; padding-bottom: 5px; margin-bottom: 10px; flex-shrink: 0; }
+        
+        .main-layout { display: flex; flex-grow: 1; overflow: hidden; }
 
-        h1 { font-size: 1.3rem; border-bottom: 2px solid #33ff33; padding-bottom: 8px; margin-top: 0; }
+        /* Sidebar */
+        .sidebar { width: 180px; border-right: 1px solid #1a551a; padding-right: 10px; flex-shrink: 0; }
+        .nav-item { padding: 8px; cursor: pointer; display: block; width: 100%; text-align: left; background: transparent; color: #33ff33; border: none; font-family: inherit; }
+        .nav-item:hover { background: #33ff33; color: #000; }
+        .nav-item.active { border: 1px solid #33ff33; }
 
-        .menu-item {
-            background: transparent;
-            border: none;
-            color: #33ff33;
-            font-family: inherit;
-            font-size: 1rem;
-            display: block;
-            width: 100%;
-            text-align: left;
-            padding: 8px;
-            cursor: pointer;
-        }
-
-        .menu-item:hover {
-            background: #33ff33;
-            color: #000;
-        }
-
-        .menu-item.disabled { color: #0b440b; cursor: default; }
+        /* Content Areas */
+        .content-view { flex-grow: 1; padding-left: 15px; overflow-y: auto; position: relative; }
         .hidden { display: none; }
 
-        .mail-row {
-            border-bottom: 1px solid #1a551a;
-            padding: 12px 5px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
+        .mail-row { border-bottom: 1px solid #1a551a; padding: 10px 5px; cursor: pointer; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .mail-row:hover { background: rgba(51, 255, 51, 0.1); }
 
-        .back-btn {
-            margin-top: 20px;
-            background: transparent;
-            color: #33ff33;
-            border: 1px solid #33ff33;
-            cursor: pointer;
-            padding: 8px 15px;
-            font-family: inherit;
-        }
-
+        /* Message Styles */
+        .message-head { font-size: 0.9rem; margin-bottom: 15px; }
+        .message-body { line-height: 1.4; white-space: pre-wrap; font-size: 0.9rem; border-top: 1px dashed #33ff33; padding-top: 10px; }
+        
+        .btn-row { margin-top: 20px; display: flex; gap: 10px; }
+        .dead-btn { border: 1px solid #114411; color: #114411; padding: 5px 10px; cursor: not-allowed; font-size: 0.8rem; }
+        .back-btn { border: 1px solid #33ff33; color: #33ff33; background: transparent; padding: 5px 10px; cursor: pointer; font-family: inherit; }
         .back-btn:hover { background: #33ff33; color: #000; }
 
-        .screen-content::-webkit-scrollbar { width: 12px; }
-        .screen-content::-webkit-scrollbar-track { background: #050505; border: 1px solid #33ff33; }
-        .screen-content::-webkit-scrollbar-thumb { background: #33ff33; }
+        /* Scrollbar */
+        .content-view::-webkit-scrollbar { width: 8px; }
+        .content-view::-webkit-scrollbar-track { background: #000; }
+        .content-view::-webkit-scrollbar-thumb { background: #33ff33; }
     </style>
 </head>
 <body>
 
 <div class="crt-monitor">
-    <div class="screen-content">
-        
-        <div id="main-menu">
-            <h1>SYNTEC PEGASUS OS V.2.0.1 (C) 1986</h1>
-            <p>LOGGED IN AS: USER_J13 [LEVEL 1 ACCESS]</p>
-            <p>--------------------------------------------------</p>
-            <button class="menu-item disabled">1. LAB LOGS [ENCRYPTED]</button>
-            <button class="menu-item disabled">2. PERSONNEL RECORDS [LOCKED]</button>
-            <button class="menu-item" onclick="showMail()">3. S-MAIL INBOX (18)</button>
-            <button class="menu-item disabled">4. SHARED DOCUMENTS</button>
-            <button class="menu-item disabled">5. SYSTEM DIAGNOSTICS</button>
-            <p style="margin-top: 50px;">DRIVE A: 14% CAPACITY UTILIZED</p>
+    <div class="header">
+        <h1>SYNTEC S-MAIL V4.1</h1>
+        <small>USER: JAELYNN COBALT [INT-LEVEL-3] | TERMINAL: PEGASUS-04</small>
+    </div>
+
+    <div class="main-layout">
+        <div class="sidebar" id="sidebar-nav">
+            <button class="nav-item active" onclick="filterMail('inbox')">01. INBOX</button>
+            <button class="nav-item" onclick="filterMail('starred')">02. STARRED</button>
+            <button class="nav-item" onclick="filterMail('sent')">03. SENT</button>
+            <button class="nav-item" onclick="filterMail('trash')">04. TRASH</button>
+            <button class="nav-item" style="margin-top:20px" onclick="location.reload()">[ LOGOUT ]</button>
         </div>
 
-        <div id="mail-section" class="hidden">
-            <h1>S-MAIL INBOX - 18 MESSAGES</h1>
+        <div class="content-view" id="list-view">
             <div id="mail-list"></div>
-            <button class="back-btn" onclick="showMenu()">[ESC] RETURN TO MAIN MENU</button>
         </div>
 
-        <div id="message-view" class="hidden">
-            <p id="m-from"></p>
-            <p id="m-subject"></p>
-            <p id="m-date"></p>
-            <p>--------------------------------------------------</p>
-            <p id="m-body" style="line-height: 1.6; white-space: pre-wrap;"></p>
-            <p>--------------------------------------------------</p>
-            <button class="back-btn" onclick="showMail()">[ESC] BACK TO INBOX</button>
+        <div class="content-view hidden" id="message-view">
+            <div class="message-head">
+                <p id="m-from"></p>
+                <p id="m-to">TO: j.cobalt@syntec.net</p>
+                <p id="m-subj"></p>
+                <p id="m-date"></p>
+            </div>
+            <div class="message-body" id="m-body"></div>
+            <div class="btn-row">
+                <button class="back-btn" onclick="closeMessage()">[ ESC ] BACK</button>
+                <button class="dead-btn">REPLY [LOCKED]</button>
+                <button class="dead-btn">FORWARD [LOCKED]</button>
+            </div>
         </div>
-
     </div>
 </div>
 
 <script>
     const mails = [
-        { from: "it.admin@syntec.net", date: "OCT-24-1986", subject: "URGENT: SECURITY PATCH", body: "ALL TERMINAL USERS MUST LOG OFF BY 18:00 FOR A KERNEL PATCH. DO NOT LEAVE DISKS IN DRIVES." },
-        { from: "b.cobalt@syntec.net", date: "OCT-22-1986", subject: "RE: LAB 4 SENSORS", body: "J13, I AM STILL SEEING FLUCTUATIONS IN THE TEMPERATURE LOGS. DID YOU RECALIBRATE THE UNIT AS REQUESTED?" },
-        { from: "hr.dept@syntec.net", date: "OCT-21-1986", subject: "HOLIDAY SCHEDULE", body: "SYNTEC WILL OBSERVE MODIFIED HOURS FOR THE UPCOMING MONTH. PLEASE COORDINATE WITH YOUR SUPERVISOR." },
-        { from: "facilities@syntec.net", date: "OCT-19-1986", subject: "PARKING LOT C CLOSED", body: "LOT C WILL BE REPAVED STARTING MONDAY. PLEASE UTILIZE THE MAIN DECK OR THE NORTH OVERFLOW LOT." },
-        { from: "b.cobalt@syntec.net", date: "OCT-18-1986", subject: "SUPPLY CHAIN ISSUES", body: "THE LATEST BATCH OF REAGENTS IS CONTAMINATED. DO NOT PROCEED WITH THE PEGASUS TRIALS UNTIL THE NEW SHIPMENT ARRIVES." },
-        { from: "w.nathanial@syntec.net", date: "OCT-15-1986", subject: "WEEKLY REPORT", body: "I NEED YOUR PROJECTED UPTIME STATISTICS BY FRIDAY. N.S. IS ASKING FOR THE Q4 PROJECTIONS." },
-        { from: "accounting@syntec.net", date: "OCT-14-1986", subject: "TRAVEL REIMBURSEMENT", body: "YOUR VOUCHER #9902 HAS BEEN PROCESSED. FUNDS WILL BE DISBURSED IN THE NEXT PAY CYCLE." },
-        { from: "it.admin@syntec.net", date: "OCT-12-1986", subject: "PASSWORD EXPIRATION", body: "PASSWORD CHANGE REQUIRED WITHIN 72 HOURS. MINIMUM 8 CHARACTERS." },
-        { from: "lab.coord@syntec.net", date: "OCT-10-1986", subject: "WASTE DISPOSAL", body: "BIOHAZARD BIN #4 IS OVERFLOWING. PLEASE USE THE SECONDARY DISPOSAL UNIT IN THE SOUTH HALLWAY." },
-        { from: "b.cobalt@syntec.net", date: "OCT-08-1986", subject: "LUNCH INQUIRY", body: "ARE YOU JOINING THE TEAM AT THE DINER TODAY? WE ARE DISCUSSING THE NEW FILTRATION PROTOCOLS." },
-        { from: "janitorial@syntec.net", date: "OCT-06-1986", subject: "LOST KEYS", body: "A SET OF KEYS WAS FOUND IN THE BREAKROOM. PLEASE CLAIM AT THE SECURITY DESK." },
-        { from: "w.nathanial@syntec.net", date: "OCT-04-1986", subject: "STORAGE QUOTAS", body: "YOUR LOCAL DISK IS NEARLY FULL. PLEASE MOVE ARCHIVAL LOGS TO THE CENTRAL SERVER." },
-        { from: "safety.officer@syntec.net", date: "OCT-03-1986", subject: "MANDATORY DRILL", body: "FIRE DRILL SCHEDULED FOR 10:00 AM TOMORROW. EVACUATE VIA THE NEAREST LAB EXIT." },
-        { from: "procurement@syntec.net", date: "OCT-01-1986", subject: "BADGE RENEWAL", body: "PLEASE SUBMIT YOUR CURRENT BADGE FOR PHOTO UPDATES." },
-        { from: "it.admin@syntec.net", date: "SEP-30-1986", subject: "NETWORK LAG", body: "WE ARE INVESTIGATING SLOW RESPONSE TIMES ON THE MAINFRAME. PLEASE BE PATIENT." },
-        { from: "n.syphus.office@syntec.net", date: "SEP-28-1986", subject: "CONFIDENTIALITY", body: "REMINDER: ALL DATA GENERATED ON-SITE REMAINS THE SOLE PROPERTY OF SYNTEC LABS. LEAKS WILL BE PROSECUTED." },
-        { from: "facilities@syntec.net", date: "SEP-25-1986", subject: "HVAC REPAIR", body: "THE VENTILATION IN LAB 4 WILL BE SERVICED AT NOON. WEAR APPROPRIATE GEAR IF WORKING THROUGH THE REPAIR." },
-        { from: "b.cobalt@syntec.net", date: "SEP-23-1986", subject: "CALIBRATION LOGS", body: "I AM UPLOADING THE MASTER LIST. PLEASE CROSS-REFERENCE THESE WITH THE DRIVE 1 DATA." }
+        // INBOX
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-28-1986", subject: "RE: DINNER TONIGHT", starred: true, body: "JAELYNN, I'LL BE LATE LEAVING LAB 4. DON'T WAIT UP. PLEASE FINISH YOUR FILING TASKS BEFORE YOU LEAVE THE WORKSTATION. \n\n- DAD" },
+        { folder: 'inbox', from: "it.admin@syntec.net", date: "OCT-27-1986", subject: "INTERN ACCESS LEVEL 3", body: "YOUR REQUEST FOR SECONDARY DRIVE ACCESS HAS BEEN APPROVED. DO NOT SHARE YOUR CREDENTIALS WITH OTHER INTERNS." },
+        { folder: 'inbox', from: "b.cobalt@syntec.net", date: "OCT-26-1986", subject: "STAY AWAY FROM LEVEL 4", body: "I SAW YOUR BADGE LOGGED IN THE NORTH WING STAIRWELL. THERE IS NO REASON FOR AN INTERN TO BE IN THAT SECTOR. STAY IN THE PEGASUS LABS." },
+        { folder: 'inbox', from: "hr.dept@syntec.net", date: "OCT-25-1986", subject: "QUARTERLY REVIEW", body: "PLEASE SUBMIT YOUR INTERNSHIP PROGRESS REPORT TO MR. NATHANIAL BY FRIDAY." },
+        { folder: 'inbox', from: "w.nathanial@syntec.net", date: "OCT-24-1986", subject: "LOG ENTRIES", body: "JAELYNN, YOUR LAST THREE LOG ENTRIES WERE INCOMPLETE. SYNTEC REQUIRES FULL DOCUMENTATION OF REAGENT TEMPERATURES." },
+        
+        // SENT
+        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-28-1986", subject: "RE: DINNER TONIGHT", body: "OKAY. I'M FINISHING THE PEGASUS LOGS NOW. SEE YOU AT HOME." },
+        { folder: 'sent', from: "j.cobalt@syntec.net", date: "OCT-26-1986", subject: "RE: STAIRWELL", body: "I WAS JUST TAKING THE SHORTCUT TO THE BREAKROOM. I WON'T DO IT AGAIN." },
+        
+        // STARRED
+        { folder: 'starred', from: "b.cobalt@syntec.net", date: "SEP-12-1986", subject: "HAPPY BIRTHDAY", body: "PROUD OF THE WORK YOU ARE DOING HERE. JUST KEEP YOUR HEAD DOWN AND FOLLOW PROTOCOL. \n\n- DAD" },
+        
+        // TRASH
+        { folder: 'trash', from: "newsletter@syntec.net", date: "OCT-10-1986", subject: "SYNTEC SOCIAL MIXER", body: "JOIN US FOR THE BI-ANNUAL SOCIAL. (REMOVED BY USER)" },
+        { folder: 'trash', from: "it.admin@syntec.net", date: "OCT-01-1986", subject: "DISK QUOTA EXCEEDED", body: "PLEASE CLEAR YOUR TEMP FILES IMMEDIATELY." }
     ];
 
-    function showMail() {
-        document.getElementById('main-menu').classList.add('hidden');
-        document.getElementById('message-view').classList.add('hidden');
-        document.getElementById('mail-section').classList.remove('hidden');
+    let currentFolder = 'inbox';
+
+    function filterMail(folder) {
+        currentFolder = folder;
+        closeMessage();
+        
+        // Update Sidebar UI
+        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        renderList();
+    }
+
+    function renderList() {
         const list = document.getElementById('mail-list');
         list.innerHTML = "";
-        mails.forEach((m, i) => {
-            const div = document.createElement('div');
-            div.className = "mail-row";
-            const sender = m.from.split('@')[0];
-            const displaySubject = m.subject.length > 25 ? m.subject.substring(0, 22) + "..." : m.subject;
-            div.innerHTML = `[${i+1}] ${sender} | ${displaySubject}`;
-            div.onclick = () => openMessage(i);
-            list.appendChild(div);
+        
+        const filtered = mails.filter(m => m.folder === folderMapper(currentFolder));
+
+        filtered.forEach((m, i) => {
+            const row = document.createElement('div');
+            row.className = "mail-row";
+            const prefix = m.starred ? "[*]" : "[ ]";
+            row.innerHTML = `${prefix} ${m.date} | ${m.from.split('@')[0]} | ${m.subject}`;
+            row.onclick = () => openMessage(m);
+            list.appendChild(row);
         });
+
+        if(filtered.length === 0) {
+            list.innerHTML = "<p style='color:#114411'>-- NO MESSAGES FOUND --</p>";
+        }
     }
 
-    function openMessage(i) {
-        document.getElementById('mail-section').classList.add('hidden');
+    // Maps UI buttons to data folders
+    function folderMapper(nav) {
+        if(nav === 'starred') return 'inbox'; // Starred are usually in inbox
+        return nav;
+    }
+
+    function openMessage(msg) {
+        document.getElementById('list-view').classList.add('hidden');
         document.getElementById('message-view').classList.remove('hidden');
-        document.getElementById('m-from').textContent = "FROM: " + mails[i].from;
-        document.getElementById('m-subject').textContent = "SUBJ: " + mails[i].subject;
-        document.getElementById('m-date').textContent = "DATE: " + mails[i].date;
-        document.getElementById('m-body').textContent = mails[i].body;
+        
+        document.getElementById('m-from').textContent = "FROM: " + msg.from;
+        document.getElementById('m-subj').textContent = "SUBJ: " + msg.subject;
+        document.getElementById('m-date').textContent = "DATE: " + msg.date;
+        document.getElementById('m-body').textContent = msg.body;
     }
 
-    function showMenu() {
-        document.getElementById('mail-section').classList.add('hidden');
-        document.getElementById('main-menu').classList.remove('hidden');
+    function closeMessage() {
+        document.getElementById('message-view').classList.add('hidden');
+        document.getElementById('list-view').classList.remove('hidden');
     }
+
+    // Initial Load
+    renderList();
 </script>
 </body>
 </html>
