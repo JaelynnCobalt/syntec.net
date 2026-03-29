@@ -35,7 +35,16 @@
         #compose-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; }
         .modal-content { background: var(--panel); border: 2px solid var(--neon); padding: 30px; width: 550px; }
         .modal-content input, .modal-content textarea { width: 100%; background: #000; border: 1px solid var(--dim); color: var(--neon); padding: 10px; font-family: inherit; margin-bottom: 15px; outline: none; box-sizing: border-box; }
-        #status-msg { height: 20px; font-size: 0.7rem; margin-bottom: 10px; font-weight: bold; text-align: center; }
+        
+        /* New Custom Notification Toast */
+        #terminal-notify { 
+            position: fixed; bottom: 20px; right: 20px; 
+            background: #000; border: 1px solid var(--neon); 
+            padding: 15px 25px; color: var(--neon); 
+            font-size: 0.8rem; z-index: 1000; 
+            display: none; box-shadow: 0 0 15px rgba(51, 255, 51, 0.3);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
 
         .btn-ghost { background: transparent; color: var(--neon); border: 1px solid var(--neon); padding: 8px 15px; cursor: pointer; font-family: inherit; }
         .btn-ghost:hover { background: var(--neon); color: #000; }
@@ -44,10 +53,11 @@
 </head>
 <body>
 
+<div id="terminal-notify"></div>
+
 <div id="compose-modal">
     <div class="modal-content">
         <h3 style="margin-top:0; letter-spacing: 2px;">SECURE UPLINK: COMPOSE</h3>
-        <div id="status-msg"></div>
         <label style="font-size:0.6rem; display:block; margin-bottom:5px;">TO: (EMPLOYEE_ID)</label>
         <input type="text" id="mail-to">
         <label style="font-size:0.6rem; display:block; margin-bottom:5px;">TRANSMISSION CONTENT</label>
@@ -93,10 +103,22 @@ const myID = localStorage.getItem('syntec_id') || "GUEST";
 let myName = "UNKNOWN";
 let currentFolder = 'inbox';
 
+// Generic "System" mail placeholders
 const boringMails = [
-    { id: 0, sender_display_name: "HR-BOT", sender_name: "SYS", content: "REMINDER: Wipe Level-3 disinfectant on all surfaces.", created_at: new Date(Date.now()-86400000), is_starred: false, is_deleted: false },
-    { id: 1, sender_display_name: "Facilities", sender_name: "FAC-01", content: "Coffee machine Sector 4 repair in 48h.", created_at: new Date(Date.now()-172800000), is_starred: false, is_deleted: false }
+    { id: 999, sender_display_name: "HR-BOT", sender_name: "SYS", content: "REMINDER: Wipe Level-3 disinfectant on all surfaces.", created_at: new Date(Date.now()-86400000), is_starred: false, is_deleted: false },
+    { id: 998, sender_display_name: "Facilities", sender_name: "FAC-01", content: "Coffee machine Sector 4 repair in 48h.", created_at: new Date(Date.now()-172800000), is_starred: false, is_deleted: false }
 ];
+
+// --- Custom Notification Logic ---
+function showTerminalNotify(text, isError = false) {
+    const note = document.getElementById('terminal-notify');
+    note.textContent = text;
+    note.style.borderColor = isError ? "#f33" : "var(--neon)";
+    note.style.color = isError ? "#f33" : "var(--neon)";
+    note.style.display = "block";
+    
+    setTimeout(() => { note.style.display = "none"; }, 3500);
+}
 
 async function getProfile() {
     const { data } = await _supabase.from('profiles').select('first_name').eq('employee_id', myID).maybeSingle();
@@ -104,7 +126,6 @@ async function getProfile() {
 }
 
 function openCompose(target = "") {
-    document.getElementById('status-msg').textContent = "";
     document.getElementById('mail-to').value = target;
     document.getElementById('mail-body').value = "";
     document.getElementById('compose-modal').style.display = 'flex';
@@ -115,28 +136,34 @@ function closeCompose() { document.getElementById('compose-modal').style.display
 async function sendMail() {
     const to = document.getElementById('mail-to').value.toUpperCase().trim();
     const body = document.getElementById('mail-body').value.trim();
-    const status = document.getElementById('status-msg');
-    if (!to || !body) return;
+    if (!to || !body) { showTerminalNotify("ERR: FIELDS CANNOT BE EMPTY", true); return; }
 
     const { error } = await _supabase.from('internal_messages').insert([{
         sender_name: myID, sender_display_name: myName, content: body, receiver_id: to
     }]);
 
     if (!error) {
-        status.style.color = "var(--neon)";
-        status.textContent = ">>> TRANSMISSION SUCCESSFUL <<<";
-        setTimeout(closeCompose, 1000);
+        showTerminalNotify("TRANSMISSION SUCCESSFUL");
+        closeCompose();
+        if (currentFolder === 'sent') loadMail();
+    } else {
+        showTerminalNotify("TRANSMISSION FAILED: " + error.message, true);
     }
 }
 
 async function updateStatus(msgId, field, value) {
-    if (msgId === 0 || msgId === 1) return alert("System records cannot be modified.");
+    if (msgId >= 998) { showTerminalNotify("ERR: SYSTEM RECORDS READ-ONLY", true); return; }
+    
     const updateObj = {};
     updateObj[field] = value;
     
-    await _supabase.from('internal_messages').update(updateObj).eq('id', msgId);
-    document.getElementById('mail-viewer').innerHTML = '<div style="margin: auto; text-align: center; opacity: 0.2;"><h2 style="letter-spacing: 10px;">PROCESSING...</h2></div>';
-    loadMail();
+    const { error } = await _supabase.from('internal_messages').update(updateObj).eq('id', msgId);
+    
+    if (!error) {
+        showTerminalNotify(`RECORD UPDATED: ${field.replace('is_', '').toUpperCase()}`);
+        document.getElementById('mail-viewer').innerHTML = '<div style="margin: auto; text-align: center; opacity: 0.2;"><h2 style="letter-spacing: 10px;">REFRESHING...</h2></div>';
+        loadMail();
+    }
 }
 
 function setFolder(folder, el) {
@@ -167,17 +194,21 @@ async function loadMail() {
     if (currentFolder === 'inbox') mails = [...mails, ...boringMails];
 
     list.innerHTML = "";
-    mails.forEach(msg => {
-        const div = document.createElement('div');
-        div.className = 'mail-item';
-        div.onclick = () => viewMail(msg, div);
-        div.innerHTML = `
-            <span class="mail-sender">${msg.sender_display_name}</span>
-            <div class="mail-preview">${msg.content}</div>
-            ${msg.is_starred ? '<span class="star-indicator">★</span>' : ''}
-        `;
-        list.appendChild(div);
-    });
+    if (mails.length === 0) {
+        list.innerHTML = '<div style="padding:20px; opacity:0.3;">NO RECORDS FOUND</div>';
+    } else {
+        mails.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = 'mail-item';
+            div.onclick = () => viewMail(msg, div);
+            div.innerHTML = `
+                <span class="mail-sender">${msg.sender_display_name}</span>
+                <div class="mail-preview">${msg.content}</div>
+                ${msg.is_starred ? '<span class="star-indicator">★</span>' : ''}
+            `;
+            list.appendChild(div);
+        });
+    }
 }
 
 function viewMail(msg, element) {
