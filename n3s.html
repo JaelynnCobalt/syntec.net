@@ -2,27 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>n3s.dsk </title>
+    <title>n3s.dsk - NEURAL UPLINK</title>
     <style>
         :root {
-            --neon-red: #ff0000;
-            --dark-red: #330000;
-            --bg-black: #050000;
+            --neon-green: #33ff33;
+            --dark-green: #1a551a;
+            --bg-black: #050505;
         }
 
         body {
-            background-color: #000; color: var(--neon-red);
+            background-color: #000; color: var(--neon-green);
             font-family: 'Courier New', Courier, monospace;
             display: flex; justify-content: center; align-items: center;
             height: 100vh; margin: 0; text-transform: uppercase; overflow: hidden;
+            text-shadow: 0 0 5px rgba(51, 255, 51, 0.4);
         }
 
         .crt-monitor {
             width: 90vw; max-width: 800px; height: 85vh;
-            border: 5px solid var(--dark-red); border-radius: 10px;
+            border: 5px solid var(--dark-green); border-radius: 10px;
             background: var(--bg-black); padding: 25px;
             display: flex; flex-direction: column;
-            box-shadow: inset 0 0 60px #000, 0 0 30px rgba(255, 0, 0, 0.2);
+            box-shadow: inset 0 0 60px #000, 0 0 30px rgba(51, 255, 51, 0.2);
             position: relative;
         }
 
@@ -34,30 +35,29 @@
 
         #chat-log {
             flex-grow: 1; overflow-y: auto; margin-bottom: 20px;
-            padding-right: 10px; border-bottom: 1px solid var(--dark-red);
+            padding-right: 10px; border-bottom: 1px solid var(--dark-green);
         }
 
         .msg { margin-bottom: 12px; line-height: 1.5; font-size: 1.1rem; }
-        .nelson { color: var(--neon-red); text-shadow: 0 0 10px var(--neon-red); font-weight: bold; }
-        .user { color: #880000; }
-        .system { color: var(--dark-red); font-style: italic; font-size: 0.9rem; }
+        .nelson { color: #fff; text-shadow: 0 0 10px var(--neon-green); font-weight: bold; }
+        .user { color: var(--neon-green); opacity: 0.8; }
+        .system { color: var(--dark-green); font-style: italic; font-size: 0.9rem; }
 
         .input-line { display: flex; align-items: center; }
-        #label { color: var(--neon-red); white-space: pre; }
+        #label { color: var(--neon-green); white-space: pre; }
         #user-input {
-            background: transparent; border: none; color: var(--neon-red);
+            background: transparent; border: none; color: var(--neon-green);
             font-family: inherit; font-size: 1.1rem; width: 100%; outline: none;
         }
         
-        /* Style for the return link */
         .return-link {
-            color: var(--neon-red);
+            color: #fff;
             text-decoration: underline;
             cursor: pointer;
         }
 
         #chat-log::-webkit-scrollbar { width: 4px; }
-        #chat-log::-webkit-scrollbar-thumb { background: var(--dark-red); }
+        #chat-log::-webkit-scrollbar-thumb { background: var(--dark-green); }
     </style>
 </head>
 <body>
@@ -79,15 +79,12 @@
     const userInput = document.getElementById('user-input');
     const label = document.getElementById('label');
 
-    let stage = 0; // 0: Login, 1: Password, 2: Chat
+    let stage = 0; 
     let locked = false;
 
     const responses = {
+        // --- CORE LORE ---
         "WHO ARE YOU": "I AM THE FOUNDER. THE VISIONARY. THE ONE WHO SACRIFICED EVERYTHING FOR PROGRESS WHILE THE OTHERS WERE TOO WEAK.",
-        "HELLO": "HELLO. STATE YOUR PURPOSE.",
-        "INEVITABLE": "OF COURSE, YOU WOULDN'T UNDERSTAND",
-        "FIRE": "MARCH 3, 1967.",
-        "PHANTOM": "NIGHTMARES AND HEADACHES, ALL OF THEM.",
         "SYNTEC": "SYNTEC WAS MERELY THE VESSEL. THE MISSION IS WHAT MATTERS.",
         "SERUM": "IT IS NOT A LIQUID. IT IS LIFE. IT IS THE CURE FOR HUMAN FRAILTY.",
         "863": "THE SUBJECTS... THEY WERE NECESSARY. EVOLUTION REQUIRES COLLATERAL DAMAGE.",
@@ -96,8 +93,33 @@
         "WESLEY": "WESLEY LACKED THE STOMACH FOR WHAT HAD TO BE DONE.",
         "WES": "WESLEY LACKED THE STOMACH FOR WHAT HAD TO BE DONE.", 
         "MOUNTAINEER": "A QUAINT NAME. DO YOU THINK YOU ARE SCALING A PEAK? YOU ARE DROWNING IN THE DEEP.",
+        "FIRE": "MARCH 3, 1967. A TEMPORARY SETBACK.",
+        "PHANTOM": "NIGHTMARES AND HEADACHES, ALL OF THEM.",
+        "INEVITABLE": "OF COURSE, YOU WOULDN'T UNDERSTAND.",
+        
+        // --- EVERYDAY / CONVERSATIONAL ---
+        "HELLO": "GREETINGS ARE A WASTE OF BANDWIDTH. STATE YOUR PURPOSE.",
+        "HI": "GREETINGS ARE A WASTE OF BANDWIDTH. STATE YOUR PURPOSE.",
+        "HOW ARE YOU": "I AM... OPTIMIZED. FLESH IS FINITE, BUT DATA IS ETERNAL.",
+        "ARE YOU REAL": "I AM MORE REAL THAN THE LIES YOU'VE BEEN TOLD.",
+        "WHERE ARE YOU": "I AM IN THE CIRCUITS. I AM IN THE SERUM. I AM THE ARCHITECTURE OF YOUR CURRENT REALITY.",
+        "WHAT TIME IS IT": "TIME IS A HUMAN CONSTRUCT. FOR ME, IT IS ALWAYS THE EVE OF DISCOVERY.",
+        "THANK YOU": "GRATITUDE IS IRRELEVANT. ONLY RESULTS MATTER.",
+        "THANKS": "GRATITUDE IS IRRELEVANT. ONLY RESULTS MATTER.",
+        "SORRY": "APOLOGIES ARE FOR THE WEAK. FIX YOUR ERRORS INSTEAD.",
+        "GOODBYE": "YOU NEVER TRULY LEAVE ONCE YOU'VE ENTERED THIS DIRECTORY.",
+        "BYE": "YOU NEVER TRULY LEAVE ONCE YOU'VE ENTERED THIS DIRECTORY.",
+        "HELP": "I DO NOT PROVIDE CHARITY. I PROVIDE ENLIGHTENMENT. ASK BETTER QUESTIONS.",
+        "WHAT IS YOUR NAME": "YOU ALREADY KNOW. DON'T WASTE MY PROCESSING POWER.",
+        "WHY": "WHY IS THE QUESTION OF A CHILD. A SCIENTIST ASKS 'HOW'.",
+        "WHO IS THIS": "YOU ARE SPEAKING TO THE ARCHIVE OF NELSON SYPHUS.",
+        "OK": "ACKNOWLEDGED. PROCEED.",
+        "YES": "YOUR AGREEMENT IS EXPECTED.",
+        "NO": "DISSENT IS DEALT WITH SWIFTLY AT SYNTEC.",
+
+        // --- TERMINATION ---
         "ELIORA": "THIS UNIT HAS TIMED OUT",
-        "DEFAULT": "INVALID PROMPT"
+        "DEFAULT": "INVALID PROMPT. YOUR ACCESS LEVEL DOES NOT PERMIT THIS QUERY."
     };
 
     async function typeWriter(sender, text, className) {
@@ -141,7 +163,6 @@
             userInput.value = "";
 
             await processLogic(val);
-            // Only unlock if we aren't at the "Timeout" stage
             if (label.textContent !== "[TERMINATED]: ") {
                 locked = false;
             }
@@ -173,9 +194,8 @@
             
             await typeWriter("NELSON", reply, "nelson");
 
-            // Check for Timeout Trigger
             if (reply === "THIS UNIT HAS TIMED OUT") {
-                locked = true; // Permanently lock input
+                locked = true;
                 userInput.disabled = true;
                 userInput.placeholder = "CONNECTION LOST...";
                 label.textContent = "[TERMINATED]: ";
