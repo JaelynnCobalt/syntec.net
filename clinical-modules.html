@@ -19,27 +19,34 @@
         .header { border-bottom: 2px solid #33ff33; padding-bottom: 10px; margin-bottom: 15px; }
         .module-box { border: 1px solid #33ff33; padding: 20px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
         .hidden { display: none !important; }
+        
+        /* Buttons */
         .menu-btn { 
             background: transparent; color: #33ff33; border: 1px solid #33ff33; 
             padding: 15px; margin: 10px 0; cursor: pointer; text-align: left; font-family: inherit; width: 100%;
         }
         .menu-btn:hover:not(:disabled) { background: #33ff33; color: #000; }
         .menu-btn:disabled { color: #1a551a; border-color: #1a551a; cursor: not-allowed; opacity: 0.6; }
+        
         .patient-file { background: rgba(51, 255, 51, 0.05); padding: 15px; border-left: 4px solid #33ff33; margin-bottom: 20px; line-height: 1.6; font-size: 0.9rem; border-style: dashed;}
         .scribble-title { color: #fff; text-decoration: underline; margin-bottom: 10px; display: block; }
+        
         input[type="text"], textarea {
             background: rgba(51, 255, 51, 0.1); border: 1px solid #33ff33;
             color: #33ff33; font-family: inherit; font-size: 1rem; width: 100%; outline: none; padding: 10px; box-sizing: border-box;
         }
         textarea { height: 120px; resize: none; text-transform: uppercase; }
+        
         .progress-container { width: 100%; height: 12px; border: 1px solid #33ff33; margin: 20px 0; display: none; }
         .progress-bar { width: 0%; height: 100%; background: #33ff33; }
+        
         .score-board { display: flex; justify-content: space-between; font-size: 0.9rem; color: #1a551a; }
-        .hint-btn, .submit-btn { 
+        
+        .hint-btn, .back-btn { 
             background: #1a551a; color: #33ff33; border: none; padding: 10px; 
-            margin-top: 10px; cursor: pointer; font-family: inherit;
+            margin-top: 10px; cursor: pointer; font-family: inherit; margin-right: 10px;
         }
-        .submit-btn { background: #33ff33; color: #000; font-weight: bold; width: 100%; }
+        .submit-btn { background: #33ff33; color: #000; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; border: none; padding: 10px; font-family: inherit;}
     </style>
 </head>
 <body>
@@ -66,6 +73,9 @@
         <div id="input-container"></div>
         <div class="progress-container" id="prog-cont"><div class="progress-bar" id="prog-bar"></div></div>
         <p id="feedback" style="margin-top:10px;"></p>
+        <div style="margin-top: auto;">
+            <button class="back-btn" onclick="returnToMenu()">[ BACKSPACE / EXIT ]</button>
+        </div>
     </div>
 </div>
 
@@ -116,66 +126,16 @@
             { data: "AGE: 40 | SEX: M | SYMPTOMS: FOUND UNCONSCIOUS, PINPOINT PUPILS, BRADYPNEA.", answer: "OPIOID OVERDOSE", hint: "NARCOTIC TOXICITY." }
         ],
         charting: [
-            { 
-                name: "SAMUEL_W", age: "54", sex: "M",
-                scribbles: "Eyes looking yellow. Heavy drinker—20 years. Belly is hard and big.", 
-                keywords: ["JAUNDICE", "CIRRHOSIS", "ALCOHOL"],
-                hint: "Keywords: J_______, C_______, A______"
-            },
-            { 
-                name: "MARCUS_H", age: "09", sex: "M",
-                scribbles: "Kid doesn't play with others. Lines up cars for hours. Screams if routine changes.", 
-                keywords: ["AUTISM", "REPETITIVE", "SOCIAL"],
-                hint: "Keywords: A_____, R_________, S_____"
-            },
-            { 
-                name: "JANET_P", age: "31", sex: "F",
-                scribbles: "Very thin. Erosion on teeth. Swollen parotid glands. Admits to bingeing/purging.", 
-                keywords: ["BULIMIA", "PURGING", "ENAMEL"],
-                hint: "Keywords: B______, P______, E_____"
-            },
-            { 
-                name: "THOMAS_C", age: "45", sex: "M",
-                scribbles: "Woke up with big toe on fire. Red, hot, swollen. He ate steak and port wine last night.", 
-                keywords: ["GOUT", "URIC", "ARTHRITIS"],
-                hint: "Keywords: G___, U___ ACID, A________"
-            },
-            { 
-                name: "ELEANOR_V", age: "72", sex: "F",
-                scribbles: "Fell in shower. Right leg is shorter and externally rotated. Extreme hip pain.", 
-                keywords: ["FRACTURE", "FEMUR", "OSTEOPOROSIS"],
-                hint: "Keywords: F_______, F____, O___________"
-            },
-            { 
-                name: "VICTOR_B", age: "12", sex: "M",
-                scribbles: "Sore throat for a week. Massive lymph nodes. Splenomegaly noted. Very tired.", 
-                keywords: ["MONONUCLEOSIS", "EBV", "FATIGUE"],
-                hint: "Keywords: M____________, E__, F______"
-            },
-            { 
-                name: "LINDA_S", age: "28", sex: "F",
-                scribbles: "Stabbed in chest. Distended neck veins. Muffled heart sounds. BP is dropping.", 
-                keywords: ["TAMPONADE", "CARDIAC", "TRAUMA"],
-                hint: "Keywords: T________, C______, T_____"
-            },
-            { 
-                name: "UNKNOWN_02", age: "??", sex: "M",
-                scribbles: "Found in snowbank. Shivering stopped. Skin is blue/cold. HR 40.", 
-                keywords: ["HYPOTHERMIA", "REWARMING", "EXPOSURE"],
-                hint: "Keywords: H__________, R________, E_______"
-            },
-            { 
-                name: "WALTER_D", age: "58", sex: "M",
-                scribbles: "Sudden headache—'worst of his life.' Vomiting. Losing consciousness fast.", 
-                keywords: ["SUBARACHNOID", "HEMORRHAGE", "ANEURYSM"],
-                hint: "Keywords: S___________, H_________, A_______"
-            },
-            { 
-                name: "LUCY_T", age: "05", sex: "F",
-                scribbles: "Barking cough like a seal. Worse at night. Labored breathing.", 
-                keywords: ["CROUP", "STRIDOR", "LARYNX"],
-                hint: "Keywords: C____, S______, L_____"
-            }
+            { name: "SAMUEL_W", age: "54", sex: "M", scribbles: "Eyes looking yellow. Heavy drinker—20 years. Belly is hard and big.", keywords: ["JAUNDICE", "CIRRHOSIS", "ALCOHOL"], hint: "Keywords: J_______, C_______, A______" },
+            { name: "MARCUS_H", age: "09", sex: "M", scribbles: "Kid doesn't play with others. Lines up cars for hours. Screams if routine changes.", keywords: ["AUTISM", "REPETITIVE", "SOCIAL"], hint: "Keywords: A_____, R_________, S_____" },
+            { name: "JANET_P", age: "31", sex: "F", scribbles: "Very thin. Erosion on teeth. Swollen parotid glands. Admits to bingeing/purging.", keywords: ["BULIMIA", "PURGING", "ENAMEL"], hint: "Keywords: B______, P______, E_____" },
+            { name: "THOMAS_C", age: "45", sex: "M", scribbles: "Woke up with big toe on fire. Red, hot, swollen. He ate steak and port wine last night.", keywords: ["GOUT", "URIC", "ARTHRITIS"], hint: "Keywords: G___, U___ ACID, A________" },
+            { name: "ELEANOR_V", age: "72", sex: "F", scribbles: "Fell in shower. Right leg is shorter and externally rotated. Extreme hip pain.", keywords: ["FRACTURE", "FEMUR", "OSTEOPOROSIS"], hint: "Keywords: F_______, F____, O___________" },
+            { name: "VICTOR_B", age: "12", sex: "M", scribbles: "Sore throat for a week. Massive lymph nodes. Splenomegaly noted. Very tired.", keywords: ["MONONUCLEOSIS", "EBV", "FATIGUE"], hint: "Keywords: M____________, E__, F______" },
+            { name: "LINDA_S", age: "28", sex: "F", scribbles: "Stabbed in chest. Distended neck veins. Muffled heart sounds. BP is dropping.", keywords: ["TAMPONADE", "CARDIAC", "TRAUMA"], hint: "Keywords: T________, C______, T_____" },
+            { name: "UNKNOWN_02", age: "??", sex: "M", scribbles: "Found in snowbank. Shivering stopped. Skin is blue/cold. HR 40.", keywords: ["HYPOTHERMIA", "REWARMING", "EXPOSURE"], hint: "Keywords: H__________, R________, E_______" },
+            { name: "WALTER_D", age: "58", sex: "M", scribbles: "Sudden headache—'worst of his life.' Vomiting. Losing consciousness fast.", keywords: ["SUBARACHNOID", "HEMORRHAGE", "ANEURYSM"], hint: "Keywords: S___________, H_________, A_______" },
+            { name: "LUCY_T", age: "05", sex: "F", scribbles: "Barking cough like a seal. Worse at night. Labored breathing.", keywords: ["CROUP", "STRIDOR", "LARYNX"], hint: "Keywords: C____, S______, L_____" }
         ]
     };
 
@@ -187,6 +147,13 @@
         document.getElementById('module-title').innerText = "MODULE: " + mod.toUpperCase();
         updateScoreDisplay();
         loadNewCase();
+    }
+
+    function returnToMenu() {
+        document.getElementById('work-view').classList.add('hidden');
+        document.getElementById('menu-view').classList.remove('hidden');
+        document.getElementById('module-title').innerText = "SYSTEM SELECTION MENU";
+        document.getElementById('feedback').innerText = "";
     }
 
     function loadNewCase() {
@@ -216,8 +183,9 @@
         } else {
             display.innerHTML = `<div class="patient-file"><strong>[DATA_FILE]</strong><br><br>${c.data}</div>`;
             inputArea.innerHTML = `
-                <p id="prompt-text">${c.prompt || "TYPE DIAGNOSIS AND PRESS ENTER:"}</p>
+                <p id="prompt-text">TYPE DIAGNOSIS AND PRESS ENTER:</p>
                 <input type="text" id="user-input" autocomplete="off">
+                <button class="submit-btn" onclick="processInput()">SUBMIT DIAGNOSIS</button>
                 <button class="hint-btn" onclick="showHint()">[ HINT ]</button>`;
             const input = document.getElementById('user-input');
             input.focus();
@@ -297,9 +265,7 @@
                 document.getElementById('feedback').innerText = "CURRICULUM COMPLETE. RETURNING...";
                 setTimeout(() => window.location.href = "index.html", 2000);
             } else {
-                document.getElementById('work-view').classList.add('hidden');
-                document.getElementById('menu-view').classList.remove('hidden');
-                document.getElementById('module-title').innerText = "SYSTEM SELECTION MENU";
+                returnToMenu();
             }
         }, 1500);
     }
