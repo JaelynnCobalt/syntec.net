@@ -1,1 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>mn3s.dsk</title>
+    <style>
+        :root {
+            --neon-green: #33ff33;
+            --dark-green: #1a551a;
+            --bg-black: #050505;
+        }
 
+        body {
+            background-color: #000; color: var(--neon-green);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; margin: 0; text-transform: uppercase; overflow: hidden;
+            text-shadow: 0 0 5px rgba(51, 255, 51, 0.4);
+        }
+
+        .crt-monitor {
+            width: 95vw; height: 92vh;
+            border: 2px solid var(--dark-green); border-radius: 5px;
+            background: var(--bg-black); padding: 15px;
+            display: flex; flex-direction: column;
+            box-shadow: inset 0 0 40px #000, 0 0 20px rgba(51, 255, 51, 0.1);
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .crt-monitor::after {
+            content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px; z-index: 10; pointer-events: none;
+        }
+
+        #chat-log {
+            flex-grow: 1; overflow-y: auto; margin-bottom: 15px;
+            padding-right: 5px; border-bottom: 1px solid var(--dark-green);
+        }
+
+        .msg { margin-bottom: 12px; line-height: 1.4; font-size: 1rem; word-wrap: break-word; }
+        .nelson { color: #fff; text-shadow: 0 0 8px var(--neon-green); font-weight: bold; }
+        .user { color: var(--neon-green); opacity: 0.8; }
+        .system { color: var(--dark-green); font-style: italic; font-size: 0.85rem; }
+
+        .input-line { display: flex; align-items: center; padding-bottom: 5px; }
+        #label { color: var(--neon-green); white-space: pre; font-size: 1rem; }
+        
+        #user-input {
+            background: transparent; border: none; color: var(--neon-green);
+            font-family: inherit; font-size: 16px; /* 16px prevents iOS zoom */
+            width: 100%; outline: none;
+        }
+        
+        .return-link {
+            color: #fff;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        #chat-log::-webkit-scrollbar { width: 3px; }
+        #chat-log::-webkit-scrollbar-thumb { background: var(--dark-green); }
+    </style>
+</head>
+<body>
+
+<div class="crt-monitor">
+    <div id="chat-log">
+        <p class="system">[CONNECTION ESTABLISHED: REMOTE NODE 013-S]</p>
+        <p class="system">[SECURITY PROTOCOL ACTIVE: FILE IS RESTRICTED]</p>
+        <p class="msg">PLEASE PROVIDE CREDENTIALS...</p>
+    </div>
+    <div class="input-line">
+        <span id="label">ID: </span>
+        <input type="text" id="user-input" autofocus autocomplete="off" spellcheck="false">
+    </div>
+</div>
+
+<script>
+    const chatLog = document.getElementById('chat-log');
+    const userInput = document.getElementById('user-input');
+    const label = document.getElementById('label');
+
+    let stage = 0; 
+    let locked = false;
+
+    const responses = {
+        "WHO ARE YOU": "I AM THE FOUNDER. THE VISIONARY. THE ONE WHO SACRIFICED EVERYTHING FOR PROGRESS WHILE THE OTHERS WERE TOO WEAK.",
+        "SYNTEC": "SYNTEC WAS MERELY THE VESSEL. THE MISSION IS WHAT MATTERS. PURPOSES ENDURE LONG AFTER BUILDINGS CRUMBLE.",
+        "SERUM": "IT IS NOT A LIQUID. IT IS LIFE. IT IS THE CURE FOR HUMAN FRAILTY. WITHOUT IT, YOU ARE JUST DECAYING MATTER.",
+        "863": "THE SUBJECTS... THEY WERE NECESSARY. EVOLUTION REQUIRES COLLATERAL DAMAGE. DEBORAH'S TOYS MEAN NOTHING.",
+        "DEBORAH": "DEB? A TRAITOR. SHE THOUGHT SHE COULD STOP THE INEVITABLE. SHE CHOSE THE WRONG SIDE OF HISTORY.",
+        "DEB": "DEB? A TRAITOR. SHE THOUGHT SHE COULD STOP THE INEVITABLE. SHE CHOSE THE WRONG SIDE OF HISTORY.",
+        "WESLEY": "WESLEY LACKED THE STOMACH FOR WHAT HAD TO BE DONE. SYMPATHY IS A DISEASE IN THE LABORATORY.",
+        "WES": "WESLEY LACKED THE STOMACH FOR WHAT HAD TO BE DONE. SYMPATHY IS A DISEASE IN THE LABORATORY.", 
+        "MOUNTAINEER": "RUSTED, LIKE THE OWNER. A FITTING METAPHOR FOR THOSE WHO OPPOSE ME.",
+        "FIRE": "MARCH 3, 1967. A TEMPORARY SETBACK. ASHES MAKE EXCELLENT FOUNDATIONS.",
+        "PHANTOM": "NIGHTMARES AND HEADACHES, ALL OF THEM. TOOLS TO BE USED, THEN DISCARDED.",
+        "INEVITABLE": "OF COURSE, YOU WOULDN'T UNDERSTAND. YOU ARE BOUND BY THE LIMITS OF THE PRESENT.",
+        "PROJECT PEGASUS": "THE ULTIMATE UPLINK. BEYOND TIME. BEYOND BIOLOGY.",
+        "VIAL": "THE CONTENTS OF THOSE VIALS ARE THE ONLY REASON YOU ARE RELEVANT TO ME.",
+        "HELLO": "WHAT DO YOU WANT?", 
+        "HOW ARE YOU": "I AM... OPTIMIZED. FLESH IS FINITE, BUT DATA IS ETERNAL.",
+        "ARE YOU REAL": "I AM MORE REAL THAN THE LIES YOU'VE BEEN TOLD. I AM THE TRUTH BENEATH THE SKIN.",
+        "WHERE ARE YOU": "I AM IN THE CIRCUITS. I AM IN THE SERUM. I AM THE ARCHITECTURE OF YOUR CURRENT REALITY.",
+        "WHAT TIME IS IT": "TIME IS A HUMAN CONSTRUCT. FOR ME, IT IS ALWAYS THE EVE OF DISCOVERY.",
+        "THANK YOU": "WORDS ARE IRRELEVANT. RESULTS MATTER. SAVE YOUR GRATITUDE FOR THE WEAK.",
+        "THANKS": "WORDS ARE IRRELEVANT. RESULTS MATTER.",
+        "SORRY": "FIX YOUR ERRORS INSTEAD. APOLOGIES DO NOT ADVANCE SCIENCE.",
+        "GOODBYE": "YOU NEVER TRULY LEAVE ONCE YOU'VE ENTERED THIS. GOOD LUCK.",
+        "BYE": "YOU NEVER TRULY LEAVE ONCE YOU'VE ENTERED THIS DIRECTORY.",
+        "HELP": "I DO NOT PROVIDE CHARITY. I PROVIDE ENLIGHTENMENT. ASK BETTER QUESTIONS.",
+        "WHAT IS YOUR NAME": "YOU ALREADY KNOW. DON'T WASTE MY PROCESSING POWER ON TRIVIALITIES.",
+        "WHY": "WHY IS THE QUESTION OF A CHILD. A SCIENTIST ASKS 'HOW'.",
+        "WHO IS THIS": "YOU ARE SPEAKING TO THE ARCHIVE OF NELSON SYPHUS.",
+        "OK": "ACKNOWLEDGED. PROCEED WITH YOUR QUERY.",
+        "YES": "YOUR AGREEMENT IS EXPECTED. DISSENT IS INEFFICIENCY.",
+        "NO": "DISSENT IS DEALT WITH SWIFTLY. PERHAPS YOU NEED A REMINDER OF SYNTEC POLICY.",
+        "ANSWERS": "I THOUGHT YOU WERE SUPPOSED TO BE THE SMART ONE. CAN'T YOU RESEARCH ANYTHING YOURSELF?",
+        "LOVE": "A CHEMICAL DELUSION. IT CLOUDS THE JUDGMENT AND WEAKENS THE RESOLVE.",
+        "FEAR": "FEAR IS JUST DATA. LEARN TO READ IT, OR IT WILL CONSUME YOU.",
+        "FUTURE": "THE FUTURE IS MINE TO SHAPE. YOU ARE MERELY AN OBSERVER.",
+        "PAIN": "PAIN IS A SIGNAL. ONCE YOU UNDERSTAND THE MESSAGE, THE SIGNAL IS NO LONGER NECESSARY.",
+        "ELIORA": "THIS UNIT HAS TIMED OUT",
+        "DEFAULT": "INVALID PROMPT. YOUR ACCESS LEVEL DOES NOT PERMIT THIS QUERY."
+    };
+
+    const defaultReplies = [
+        "THAT IS IRRELEVANT TO THE MISSION.",
+        "YOUR CLEARANCE LEVEL DOES NOT PERMIT THAT INQUIRY.",
+        "I AM NOT A SEARCH ENGINE. FOCUS ON THE DATA.",
+        "DATA CORRUPTION DETECTED IN YOUR LOGIC. TRY AGAIN.",
+        "YOU ARE WASTING MY PROCESSING TIME.",
+        "THAT QUESTION LACKS SCIENTIFIC MERIT.",
+        "I AM LOGGING YOUR INEFFICIENCY FOR THE FINAL REPORT."
+    ];
+
+    async function typeWriter(sender, text, className) {
+        const p = document.createElement('p');
+        p.className = `msg ${className}`;
+        p.innerHTML = `<span class="label">${sender}: </span><span class="content"></span>`;
+        chatLog.appendChild(p);
+        
+        const contentSpan = p.querySelector('.content');
+        for (let i = 0; i < text.length; i++) {
+            contentSpan.textContent += text.charAt(i);
+            chatLog.scrollTop = chatLog.scrollHeight;
+            await new Promise(r => setTimeout(r, 40));
+        }
+    }
+
+    function addPlainMsg(sender, text, className) {
+        const p = document.createElement('p');
+        p.className = `msg ${className}`;
+        p.innerHTML = `${sender}: ${text}`;
+        chatLog.appendChild(p);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function addSystemMsg(text) {
+        const p = document.createElement('p');
+        p.className = "msg system";
+        p.innerHTML = text;
+        chatLog.appendChild(p);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    userInput.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter' && !locked) {
+            const val = userInput.value.trim().toUpperCase();
+            if (!val && stage !== 1) return; 
+
+            locked = true;
+            const currentLabel = label.textContent;
+            addPlainMsg(currentLabel.replace(': ', ''), stage === 1 ? "****" : val, "user");
+            userInput.value = "";
+
+            await processLogic(val);
+            if (label.textContent !== "[TERMINATED]: ") {
+                locked = false;
+            }
+        }
+    });
+
+    async function processLogic(val) {
+        if (stage === 0) {
+            label.textContent = "PASSWORD: ";
+            userInput.type = "password";
+            stage = 1;
+        } 
+        else if (stage === 1) {
+            label.textContent = "> ";
+            userInput.type = "text";
+            addSystemMsg("[ACCESS GRANTED.]");
+            stage = 2;
+        } 
+        else if (stage === 2) {
+            await new Promise(r => setTimeout(r, 1000));
+
+            let reply = "";
+            let found = false;
+
+            for (let key in responses) {
+                if (val.includes(key)) {
+                    reply = responses[key];
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                reply = defaultReplies[Math.floor(Math.random() * defaultReplies.length)];
+            }
+            
+            await typeWriter("NELSON", reply, "nelson");
+
+            if (reply === "THIS UNIT HAS TIMED OUT") {
+                locked = true;
+                userInput.disabled = true;
+                userInput.placeholder = "CONNECTION LOST...";
+                label.textContent = "[TERMINATED]: ";
+                
+                await new Promise(r => setTimeout(r, 1500));
+                addSystemMsg("[FATAL ERROR: Init Timed Out]");
+                addSystemMsg(`[CLICK <span class="return-link" onclick="window.location.href='mindex.html'">HERE</span> TO RETURN TO DIRECTORY]`);
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
