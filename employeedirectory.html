@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SYNTEC EMPLOYEE DIRECTORY & TASKS</title>
+    <title>SYNTEC TERMINAL - TASK UPLOAD</title>
     <style>
         body {
             background-color: #000;
@@ -31,7 +31,6 @@
             flex-direction: column;
         }
 
-        /* Scanlines */
         .crt-monitor::before {
             content: " ";
             display: block;
@@ -42,49 +41,51 @@
             pointer-events: none;
         }
 
-        .header { border-bottom: 2px solid #33ff33; padding-bottom: 10px; margin-bottom: 20px; }
+        .header { border-bottom: 2px solid #33ff33; padding-bottom: 10px; margin-bottom: 20px; flex-shrink: 0; }
         
-        .stat-bar { display: flex; justify-content: space-between; margin-bottom: 20px; color: #1a551a; font-size: 0.9rem; }
+        .stat-bar { display: flex; justify-content: space-between; margin-bottom: 15px; color: #1a551a; font-size: 0.8rem; }
         .stars { color: #33ff33; font-weight: bold; }
 
-        .task-box {
-            border: 1px solid #33ff33;
-            padding: 20px;
+        .task-container {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            text-align: center;
+            border: 1px solid #1a551a;
+            padding: 30px;
+            background: rgba(0, 20, 0, 0.2);
         }
 
-        #task-description { margin-bottom: 30px; line-height: 1.5; min-height: 60px; }
+        .instruction { color: #1a551a; font-size: 0.8rem; margin-bottom: 5px; }
+        #prompt-text { font-size: 1.1rem; margin-bottom: 20px; color: #33ff33; }
 
-        .btn {
+        .input-area { display: flex; align-items: center; gap: 10px; }
+        #user-input {
             background: transparent;
+            border: none;
+            border-bottom: 2px solid #33ff33;
             color: #33ff33;
-            border: 1px solid #33ff33;
-            padding: 10px 20px;
-            cursor: pointer;
             font-family: inherit;
+            font-size: 1.2rem;
+            width: 100%;
+            outline: none;
             text-transform: uppercase;
-            align-self: center;
         }
 
-        .btn:hover { background: #33ff33; color: #000; }
-        .btn:disabled { border-color: #1a551a; color: #1a551a; cursor: not-allowed; }
+        /* Progress UI */
+        .progress-box { margin-top: 30px; display: none; }
+        .progress-bar-container { width: 100%; height: 15px; border: 1px solid #33ff33; margin-top: 10px; }
+        .progress-bar-fill { width: 0%; height: 100%; background: #33ff33; }
 
-        .progress-container { width: 100%; height: 10px; border: 1px solid #33ff33; margin-top: 20px; display: none; }
-        .progress-bar { width: 0%; height: 100%; background: #33ff33; }
-
-        .footer { margin-top: 20px; font-size: 0.7rem; color: #1a551a; }
+        #status-msg { margin-top: 10px; font-size: 0.8rem; height: 1.2rem; }
     </style>
 </head>
 <body>
 
 <div class="crt-monitor">
     <div class="header">
-        <h1>SYNTEC DIRECTORY & PRODUCTIVITY</h1>
-        <p>ACTIVE INTERN: [REDACTED] | ID: J13</p>
+        <h1>SYNTEC WORKSTATION J13</h1>
+        <p>TASK TERMINAL V.2.1 | LEVEL 3 INTERN ACCESS</p>
     </div>
 
     <div class="stat-bar">
@@ -92,87 +93,106 @@
         <span>CREDIT STARS: <span id="star-count" class="stars">0</span> / 5</span>
     </div>
 
-    <div class="task-box">
-        <div id="task-display">
-            <p id="task-description">INITIALIZING TASK DATABASE...</p>
-            <button class="btn" id="work-btn" onclick="processTask()">START TASK</button>
+    <div class="task-container">
+        <div id="active-task-ui">
+            <p class="instruction">PLEASE TYPE THE FOLLOWING STRING TO COMMENCE FILING:</p>
+            <p id="prompt-text">LOADING...</p>
             
-            <div class="progress-container" id="prog-cont">
-                <div class="progress-bar" id="prog-bar"></div>
+            <div class="input-area">
+                <span>></span>
+                <input type="text" id="user-input" autocomplete="off" autofocus>
             </div>
-            <p id="status-text" style="margin-top: 10px;"></p>
+
+            <div class="progress-box" id="progress-box">
+                <p id="status-msg">UPLOADING TO CENTRAL CORE...</p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="footer">
-        * NOTICE: STAR CREDITS ARE REQUIRED FOR ACCESS TO THE EMPLOYEE COMMISSARY.
-    </div>
+    <p style="font-size: 0.6rem; color: #1a551a; margin-top: 10px;">
+        WARNING: IMPROPER DATA ENTRY MAY RESULT IN TERMINAL LOCKOUT.
+    </p>
 </div>
 
 <script>
     let stars = 0;
-    const tasks = [
-        "ARCHIVE REAGENT BATCH #4409 DATA INTO CENTRAL CORE.",
-        "FILE WEEKLY RADIANCE VARIANCE REPORT FOR B. COBALT.",
-        "MANUALLY RE-INDEX THE PEGASUS-04 DIRECTORY FOLDERS.",
-        "LOG TEMPERATURE FLUCTUATIONS IN THE SOUTH CRY-CHAMBER.",
-        "TRANSCRIBE WESLEY NATHANIAL'S AUDIO MEMO #09-B.",
-        "CROSS-REFERENCE THE SEPTEMBER PSYCH-EVALS FOR INCONSISTENCIES.",
-        "INPUT STABILIZER DECAY RATES INTO SPREADSHEET 402.",
-        "CLEAN THE BUFFER LOGS FROM THE PREVIOUS 24-HOUR SCAN."
+    const taskData = [
+        { label: "LOG: RADIANCE_VAR_1986", code: "RV-86-4409" },
+        { label: "ARCHIVE: STABILIZER_DECAY", code: "STAB-C-DECAY" },
+        { label: "FILE: B_COBALT_INTERNAL", code: "COBALT-PR-33" },
+        { label: "ENTRY: PEGASUS_BUFFER_CLR", code: "BUFF-CLR-004" },
+        { label: "REPORT: LAB_4_TEMP_SYNC", code: "L4-TEMP-LOG-A" },
+        { label: "TRANSCRIPTION: W_N_MEMO_9", code: "WN-MEMO-402" },
+        { label: "PURGE: EXPIRED_SAMPLES", code: "PURGE-B-99" },
+        { label: "RE-INDEX: USER_DIRECTORY", code: "INDEX-J13-SYN" }
     ];
 
-    const taskDesc = document.getElementById('task-description');
-    const statusText = document.getElementById('status-text');
-    const workBtn = document.getElementById('work-btn');
-    const progCont = document.getElementById('prog-cont');
-    const progBar = document.getElementById('prog-bar');
+    let currentTask = null;
+    const userInput = document.getElementById('user-input');
+    const promptText = document.getElementById('prompt-text');
+    const progressBox = document.getElementById('progress-box');
+    const progressFill = document.getElementById('progress-fill');
     const starCount = document.getElementById('star-count');
+    const statusMsg = document.getElementById('status-msg');
 
-    function getRandomTask() {
-        const index = Math.floor(Math.random() * tasks.length);
-        taskDesc.innerText = "CURRENT ASSIGNMENT: " + tasks[index];
-        workBtn.style.display = "inline-block";
-        workBtn.innerText = "EXECUTE TASK";
-        statusText.innerText = "";
+    function loadNewTask() {
+        currentTask = taskData[Math.floor(Math.random() * taskData.length)];
+        promptText.innerText = `${currentTask.label} [${currentTask.code}]`;
+        userInput.value = "";
+        userInput.disabled = false;
+        userInput.focus();
+        progressBox.style.display = "none";
+        progressFill.style.width = "0%";
     }
 
-    function processTask() {
-        workBtn.style.display = "none";
-        progCont.style.display = "block";
-        statusText.innerText = "PROCESSING...";
+    userInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            if (userInput.value.toUpperCase() === currentTask.code) {
+                startUpload();
+            } else {
+                statusMsg.innerText = "ERROR: STRING MISMATCH. RE-ENTRY REQUIRED.";
+                userInput.value = "";
+            }
+        }
+    });
+
+    function startUpload() {
+        userInput.disabled = true;
+        progressBox.style.display = "block";
+        statusMsg.innerText = "UPLOADING TO CENTRAL CORE...";
         
         let width = 0;
         const interval = setInterval(() => {
             if (width >= 100) {
                 clearInterval(interval);
-                completeTask();
+                finishTask();
             } else {
-                width += 2; // Speed of task
-                progBar.style.width = width + '%';
+                width += 2;
+                progressFill.style.width = width + '%';
             }
-        }, 50);
+        }, 40);
     }
 
-    function completeTask() {
+    function finishTask() {
         stars++;
         starCount.innerText = stars;
-        progCont.style.display = "none";
-        progBar.style.width = "0%";
-        statusText.innerText = "TASK COMPLETE. +1 STAR EARNED.";
+        statusMsg.innerText = "DATA VERIFIED. +1 STAR GRANTED.";
 
         if (stars >= 5) {
-            statusText.innerText = "ACCESS GRANTED. REDIRECTING TO COMMISSARY...";
+            statusMsg.innerText = "QUOTA MET. ACCESSING COMMISSARY...";
             setTimeout(() => {
                 window.location.href = "syntecstore.html";
             }, 2000);
         } else {
-            setTimeout(getRandomTask, 1500);
+            setTimeout(loadNewTask, 1500);
         }
     }
 
-    // Initial Start
-    window.onload = getRandomTask;
+    // Initialize
+    window.onload = loadNewTask;
 </script>
 </body>
 </html>
