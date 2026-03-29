@@ -1,1 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TERMINAL - n3s.dsk</title>
+    <style>
+        body {
+            background-color: #000; color: #33ff33;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; margin: 0; text-transform: uppercase; overflow: hidden;
+        }
+        .crt-monitor {
+            width: 90vw; max-width: 800px; height: 85vh;
+            border: 10px solid #2a2a2a; border-radius: 20px;
+            background: #050505; padding: 20px;
+            display: flex; flex-direction: column;
+            box-shadow: inset 0 0 50px #000, 0 0 20px rgba(51, 255, 51, 0.2);
+        }
+        #chat-log {
+            flex-grow: 1; overflow-y: auto; margin-bottom: 20px;
+            padding-right: 10px; border-bottom: 1px solid #1a551a;
+        }
+        .msg { margin-bottom: 10px; line-height: 1.4; }
+        .nelson { color: #fff; text-shadow: 0 0 8px #fff; }
+        .user { color: #33ff33; }
+        .system { color: #1a551a; font-style: italic; }
+        .input-line { display: flex; align-items: center; }
+        #user-input {
+            background: transparent; border: none; color: #33ff33;
+            font-family: inherit; font-size: 1.1rem; width: 100%; outline: none;
+        }
+        /* Scrollbar Styling */
+        #chat-log::-webkit-scrollbar { width: 5px; }
+        #chat-log::-webkit-scrollbar-thumb { background: #1a551a; }
+    </style>
+</head>
+<body>
 
+<div class="crt-monitor">
+    <div id="chat-log">
+        <p class="system">[UPLINK ESTABLISHED: REMOTE NODE 013-S]</p>
+        <p class="system">[USER IDENTIFIED AS: GUEST_MOUNTAINEER]</p>
+        <p class="nelson">NELSON: WHO IS THIS? WHY ARE YOU ACCESSING MY PRIVATE DIRECTORY?</p>
+    </div>
+    <div class="input-line">
+        <span>>&nbsp;</span>
+        <input type="text" id="user-input" autofocus autocomplete="off">
+    </div>
+</div>
+
+<script>
+    const chatLog = document.getElementById('chat-log');
+    const userInput = document.getElementById('user-input');
+
+    // Brain bank for Nelson Syphus
+    const responses = {
+        "WHO": "I AM THE FOUNDER. THE VISIONARY. THE ONE WHO SACRIFICED EVERYTHING FOR PROGRESS.",
+        "SYNTEC": "SYNTEC WAS MERELY THE VESSEL. THE MISSION IS WHAT MATTERS.",
+        "SERUM": "IT IS NOT A LIQUID. IT IS LIFE. IT IS THE CURE FOR HUMAN FRAILTY.",
+        "LIFE": "LIFE IS BLOOD. BLOOD IS BIOLOGY. BIOLOGY IS TECHNOLOGY.",
+        "863": "THE SUBJECTS... THEY WERE NECESSARY. EVOLUTION REQUIRES COLLATERAL DAMAGE.",
+        "DEBORAH": "D3B? A TRAITOR. SHE THOUGHT SHE COULD STOP THE INEVITABLE.",
+        "WES": "WESLEY LACKED THE STOMACH FOR WHAT HAD TO BE DONE.",
+        "MOUNTAINEER": "A QUAINT NAME. DO YOU THINK YOU ARE SCALING A PEAK? YOU ARE DROWNING IN THE DEEP.",
+        "HELP": "I DO NOT OFFER HELP. I OFFER PURPOSE.",
+        "DIE": "DEATH IS A LIMITATION I HAVE LONG SINCE SURPASSED.",
+        "WHERE": "I AM EVERYWHERE. IN THE DATA. IN THE WALLS. IN THE BLOOD.",
+        "HELLO": "GREETINGS ARE FOR THE WEAK. STATE YOUR INTENT.",
+        "SMAIL": "SMAIL... A RELIC. OLD CORRESPONDENCE FROM A TIME BEFORE TOTAL CLARITY.",
+        "J13": "A LOYAL INTERN. OR AT LEAST, THEY WERE SUPPOSED TO BE.",
+        "PEGASUS": "PROJECT PEGASUS WAS ONLY THE BEGINNING. THE HORIZON IS MUCH DARKER.",
+        "N3S": "YOU ARE SPEAKING TO THE CORE ARCHIVE. I AM NELSON.",
+        "FAIL": "FAILURE IS FOR THOSE WHO STOP. I NEVER STOP.",
+        "FUTURE": "THE FUTURE BELONGS TO THOSE WHO CAN ENDURE THE PAIN OF CHANGE.",
+        "PAIN": "PAIN IS JUST DATA. LEARN TO READ IT.",
+        "DEFAULT": "THAT IS IRRELEVANT. FOCUS ON THE MISSION OR LEAVE MY TERMINAL."
+    };
+
+    function addMessage(sender, text, className) {
+        const p = document.createElement('p');
+        p.className = `msg ${className}`;
+        p.innerHTML = `${sender}: ${text}`;
+        chatLog.appendChild(p);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const val = userInput.value.trim().toUpperCase();
+            if (!val) return;
+
+            // User message
+            addMessage("YOU", val, "user");
+            userInput.value = "";
+
+            // System lag simulation
+            setTimeout(() => {
+                let reply = responses["DEFAULT"];
+                
+                // Keyword matching
+                for (let key in responses) {
+                    if (val.includes(key)) {
+                        reply = responses[key];
+                        break;
+                    }
+                }
+
+                addMessage("NELSON", reply, "nelson");
+            }, 600 + Math.random() * 1000);
+        }
+    });
+</script>
+
+</body>
+</html>
