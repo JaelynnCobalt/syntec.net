@@ -5,67 +5,32 @@
 <title>Syntec Terminal - Apple II</title>
 
 <style>
+/* CSS remains the same as your provided code */
 body {
-background-color: #0a0a0a;
-color: #33ff33;
+background-color: #0a0a0a; color: #33ff33;
 font-family: 'Courier New', Courier, monospace;
-display: flex;
-justify-content: center;
-align-items: center;
-height: 100vh;
-margin: 0;
-overflow: hidden;
+display: flex; justify-content: center; align-items: center;
+height: 100vh; margin: 0; overflow: hidden;
 text-shadow: 0 0 5px #33ff33;
 }
-
 .crt-overlay {
-position: fixed;
-top: 0; left: 0; width: 100%; height: 100%;
+position: fixed; top: 0; left: 0; width: 100%; height: 100%;
 background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
 linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-background-size: 100% 4px, 3px 100%;
-pointer-events: none;
-z-index: 10;
+background-size: 100% 4px, 3px 100%; pointer-events: none; z-index: 10;
 }
-
 .screen {
-width: 80%;
-max-width: 800px;
-height: 600px;
-padding: 20px;
-border: 2px solid #33ff33;
-box-shadow: 0 0 20px rgba(51, 255, 51, 0.2);
-background: #050505;
-overflow-y: auto;
+width: 80%; max-width: 800px; height: 600px; padding: 20px;
+border: 2px solid #33ff33; box-shadow: 0 0 20px rgba(51, 255, 51, 0.2);
+background: #050505; overflow-y: auto;
 }
-
-.input-area {
-display: flex;
-margin-top: 20px;
-}
-
+.input-area { display: flex; margin-top: 20px; }
 #command-line {
-background: transparent;
-border: none;
-color: #33ff33;
-font-family: inherit;
-font-size: 1.2rem;
-outline: none;
-width: 100%;
+background: transparent; border: none; color: #33ff33;
+font-family: inherit; font-size: 1.2rem; outline: none; width: 100%;
 }
-
-.cursor {
-display: inline-block;
-width: 10px;
-height: 1.2rem;
-background: #33ff33;
-animation: blink 0.8s infinite;
-}
-
-@keyframes blink {
-0%, 100% { opacity: 1; }
-50% { opacity: 0; }
-}
+.cursor { display: inline-block; width: 10px; height: 1.2rem; background: #33ff33; animation: blink 0.8s infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 </style>
 </head>
 
@@ -95,117 +60,120 @@ const label = document.getElementById('label');
 let stage = 0;
 let locked = false;
 
-// TYPEWRITER EFFECT
 function typeLine(text, speed = 25) {
-return new Promise(resolve => {
-const p = document.createElement('p');
-output.appendChild(p);
+    return new Promise(resolve => {
+        const p = document.createElement('p');
+        output.appendChild(p);
+        let i = 0;
+        function type() {
+            if (i < text.length) {
+                p.textContent += text.charAt(i);
+                i++;
+                setTimeout(type, speed);
+            } else {
+                output.scrollTop = output.scrollHeight;
+                resolve();
+            }
+        }
+        type();
+    });
+}
 
-let i = 0;
-function type() {
-if (i < text.length) {
-p.textContent += text.charAt(i);
-i++;
-setTimeout(type, speed);
-} else {
-output.scrollTop = output.scrollHeight;
-resolve();
-}
-}
-type();
-});
-}
-
-// NORMALIZE INPUT
 function normalize(str) {
-return str
-.toLowerCase()
-.replace(/[^\w\s]/g, '')
-.trim();
+    return str.toLowerCase().replace(/[^\w\s]/g, '').trim();
 }
 
-// HANDLE INPUT
 input.addEventListener('keydown', async function(e) {
-if (e.key === 'Enter' && !locked) {
-locked = true;
-
-const raw = input.value;
-const cmd = raw.trim();
-const norm = normalize(raw);
-
-await typeLine("> " + cmd, 15);
-
-input.value = '';
-
-await processInput(cmd, norm);
-
-locked = false;
-}
+    if (e.key === 'Enter' && !locked) {
+        locked = true;
+        const cmd = input.value.trim();
+        const norm = normalize(input.value);
+        await typeLine("> " + cmd, 15);
+        input.value = '';
+        await processInput(cmd, norm);
+        locked = false;
+    }
 });
 
 async function processInput(cmd, norm) {
+    switch(stage) {
+        // LOGIN
+        case 0:
+            if (cmd.toUpperCase() === 'W015' || cmd.toUpperCase() === 'J13') {
+                await typeLine("ACCESS GRANTED...", 30);
+                await delay(400);
+                await typeLine("INITIALIZING USER INTERFACE...", 30);
+                await delay(500);
+                stage = 1;
+                label.textContent = "COMMAND: ";
+                await typeLine("WELCOME, " + cmd.toUpperCase(), 30);
+                await typeLine("TYPE 'DIR' TO VIEW ACCESSIBLE MODULES.", 30);
+            } else {
+                await typeLine("ERROR: INVALID CREDENTIALS", 30);
+            }
+            break;
 
-switch(stage) {
+        // MAIN COMMAND LINE
+        case 1:
+            if (norm === "dir" || norm === "directory") {
+                await typeLine("--- SYSTEM DIRECTORY ---", 20);
+                await typeLine("> [CLINICAL] - INTERN EVALUATION TRACK", 20);
+                await typeLine("> [STATUS]   - FACILITY STATUS REPORT", 20);
+                await typeLine("------------------------", 20);
+            } 
+            else if (norm === "clinical") {
+                await typeLine("LOADING CLINICAL EVALUATION ENVIRONMENT...", 40);
+                await typeLine("ACCESSING DATABASE J13-V8.4...", 60);
+                await delay(1000);
+                window.location.href = "clinical-modules.html";
+            }
+            else if (norm === "status") {
+                await typeLine("ACCESSING STATUS REPORTS...", 30);
+                await typeLine("LOG: THEYRE OUT OF CREAM IN THE BREAKROOM", 30);
+                stage = 2;
+                label.textContent = "QUERY: ";
+            }
+            else {
+                await typeLine("ERROR: COMMAND NOT RECOGNIZED", 30);
+            }
+            break;
 
-// LOGIN
-case 0:
-if (cmd.toUpperCase() === 'W015' || cmd.toUpperCase() === 'J13') {
-await typeLine("ACCESS GRANTED...", 30);
-await delay(400);
-await typeLine("INITIALIZING...", 30);
-await delay(500);
+        // STATUS REPORT (BREAKROOM FLOW)
+        case 2:
+            if (norm === "regular or vanilla") {
+                await typeLine("VANILLA UNAVAILABLE. SELECT ALTERNATE:", 30);
+                await typeLine("> HAZELNUT", 30);
+                await typeLine("> PEPPERMINT", 30);
+                stage = 3;
+                label.textContent = "SELECT: ";
+            } else {
+                await typeLine("INVALID STATUS QUERY.", 30);
+            }
+            break;
 
-stage = 1;
-label.textContent = "";
-await typeLine("Status report", 30);
-
-} else {
-await typeLine("ERROR: INVALID CREDENTIALS", 30);
+        // BREAKROOM FINAL CHOICE
+        case 3:
+            if (norm === "hazelnut") {
+                await typeLine("ORDER CONFIRMED. REDIRECTING...", 30);
+                await delay(700);
+                window.location.href = "pegasus.html";
+            }
+            else if (norm === "peppermint") {
+                await typeLine("ORDER CONFIRMED. REDIRECTING...", 30);
+                await delay(700);
+                window.location.href = "863.html";
+            }
+            else {
+                await typeLine("FLAVOR PROFILE NOT FOUND.", 30);
+            }
+            break;
+    }
 }
-break;
 
-// STATUS REPORT
-case 1:
-if (norm === "theyre out of cream in the breakroom") {
-await delay(300);
-await typeLine("Regular or vanilla?", 30);
-stage = 2;
-} else {
-await typeLine("invalid prompt", 30);
-}
-break;
-
-// FINAL CHOICE
-case 2:
-const choice = norm;
-
-if (choice === "hazelnut") {
-await typeLine("order confirmed", 30);
-await delay(700);
-window.location.href = "pegasus.html";
-}
-else if (choice === "peppermint") {
-await typeLine("order confirmed", 30);
-await delay(700);
-window.location.href = "863.html";
-}
-else if (choice === "vanilla") {
-await typeLine("invalid prompt", 30);
-}
-else {
-await typeLine("invalid prompt", 30);
-}
-break;
-
-}
-}
-
-// SIMPLE DELAY
 function delay(ms) {
-return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 </script>
 
 </body>
 </html>
-
