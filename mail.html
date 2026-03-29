@@ -5,72 +5,80 @@
     <title>Syntec Mail - Encrypted Communication</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --neon: #33ff33; --bg: #050505; --panel: #0d0d0d; --border: #1a3a1a; }
+        :root { --neon: #33ff33; --bg: #050505; --panel: #0d0d0d; --border: #1a3a1a; --dim: #1a5a1a; }
         body { background-color: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        .top-bar { padding: 10px 20px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; background: #000; font-weight: bold; }
+        .top-bar { padding: 10px 20px; border-bottom: 2px solid var(--neon); display: flex; justify-content: space-between; align-items: center; background: #000; }
         .main { display: flex; flex: 1; overflow: hidden; }
 
+        /* Folders Sidebar */
+        .folder-sidebar { width: 180px; border-right: 1px solid var(--border); background: #000; padding-top: 20px; }
+        .folder-item { padding: 12px 20px; font-size: 0.8rem; cursor: pointer; opacity: 0.6; transition: 0.2s; }
+        .folder-item:hover { opacity: 1; background: rgba(51, 255, 51, 0.05); }
+        .folder-item.active { opacity: 1; color: #fff; border-left: 3px solid var(--neon); background: rgba(51, 255, 51, 0.1); }
+
         /* Inbox List */
-        .inbox-sidebar { width: 350px; border-right: 1px solid var(--border); overflow-y: auto; background: var(--panel); }
-        .mail-item { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; position: relative; }
+        .inbox-sidebar { width: 320px; border-right: 1px solid var(--border); overflow-y: auto; background: var(--panel); }
+        .mail-item { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; position: relative; }
         .mail-item:hover { background: rgba(51, 255, 51, 0.05); }
-        .mail-item.active { background: rgba(51, 255, 51, 0.1); border-left: 4px solid var(--neon); }
-        .mail-sender { font-weight: bold; font-size: 0.9rem; margin-bottom: 4px; display: block; }
-        .mail-preview { font-size: 0.75rem; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .mail-date { font-size: 0.6rem; position: absolute; top: 15px; right: 10px; opacity: 0.5; }
+        .mail-item.active { background: rgba(51, 255, 51, 0.1); }
+        .mail-sender { font-weight: bold; font-size: 0.85rem; display: block; color: #fff; }
+        .mail-preview { font-size: 0.7rem; opacity: 0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 4px; }
 
         /* Message Viewer */
-        .content-area { flex: 1; display: flex; flex-direction: column; padding: 40px; background: #080808; overflow-y: auto; }
+        .content-area { flex: 1; display: flex; flex-direction: column; padding: 40px; background: #080808; overflow-y: auto; border-left: 1px solid var(--border); }
         .email-header { border-bottom: 1px solid var(--border); margin-bottom: 20px; padding-bottom: 20px; }
-        .email-meta { font-size: 0.85rem; margin-bottom: 5px; }
-        .email-body { line-height: 1.6; font-size: 0.95rem; white-space: pre-wrap; }
+        .email-body { line-height: 1.6; font-size: 0.9rem; white-space: pre-wrap; color: #ccc; }
 
         /* Compose Modal */
-        #compose-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; }
-        .modal-content { background: var(--panel); border: 2px solid var(--neon); padding: 30px; width: 500px; box-shadow: 0 0 20px var(--neon); }
-        .modal-content label { display: block; font-size: 0.7rem; margin-bottom: 5px; color: #88ff88; }
-        .modal-content input, .modal-content textarea { width: 100%; background: #000; border: 1px solid var(--neon); color: var(--neon); padding: 10px; font-family: inherit; margin-bottom: 15px; outline: none; box-sizing: border-box; }
-        .modal-content textarea { height: 150px; resize: none; }
+        #compose-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background: var(--panel); border: 2px solid var(--neon); padding: 30px; width: 550px; }
+        .modal-content input, .modal-content textarea { width: 100%; background: #000; border: 1px solid var(--dim); color: var(--neon); padding: 10px; font-family: inherit; margin-bottom: 15px; outline: none; box-sizing: border-box; }
+        #status-msg { height: 20px; font-size: 0.7rem; margin-bottom: 10px; font-weight: bold; text-align: center; }
 
-        #compose-btn { background: var(--neon); color: #000; border: none; padding: 10px 20px; font-family: inherit; font-weight: bold; cursor: pointer; margin-right: 20px; }
-        .btn-ghost { background: transparent; color: var(--neon); border: 1px solid var(--neon); padding: 5px 15px; cursor: pointer; font-family: inherit; transition: 0.2s; }
+        .btn-ghost { background: transparent; color: var(--neon); border: 1px solid var(--neon); padding: 8px 15px; cursor: pointer; font-family: inherit; }
         .btn-ghost:hover { background: var(--neon); color: #000; }
+        #compose-btn { background: var(--neon); color: #000; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; margin-right: 20px; }
     </style>
 </head>
 <body>
 
 <div id="compose-modal">
     <div class="modal-content">
-        <h3 style="margin-top:0;">NEW ENCRYPTED TRANSMISSION</h3>
-        <label>RECIPIENT ID</label>
-        <input type="text" id="mail-to" placeholder="e.g. B27">
-        <label>MESSAGE BODY</label>
-        <textarea id="mail-body" placeholder="Enter encrypted text..."></textarea>
+        <h3 style="margin-top:0; letter-spacing: 2px;">SECURE UPLINK: COMPOSE</h3>
+        <div id="status-msg"></div>
+        <label style="font-size:0.6rem; display:block; margin-bottom:5px;">TO: (EMPLOYEE_ID)</label>
+        <input type="text" id="mail-to">
+        <label style="font-size:0.6rem; display:block; margin-bottom:5px;">TRANSMISSION CONTENT</label>
+        <textarea id="mail-body"></textarea>
         <div style="display:flex; gap:10px;">
             <button class="btn-ghost" style="flex:1" onclick="sendMail()">TRANSMIT</button>
-            <button class="btn-ghost" style="flex:1; border-color: #ff3333; color: #ff3333;" onclick="closeCompose()">ABORT</button>
+            <button class="btn-ghost" style="flex:1; border-color: #555; color: #555;" onclick="closeCompose()">ABORT</button>
         </div>
     </div>
 </div>
 
 <div class="top-bar">
-    <span>SYNTEC ENCRYPTED MAIL v4.0</span>
+    <span style="letter-spacing: 3px;">PEGASUS MAIL // SECURE_NODE</span>
     <div>
         <button id="compose-btn" onclick="openCompose()">NEW MESSAGE</button>
-        <button class="btn-ghost" onclick="location.href='mhub.html'">RETURN TO HUB</button>
+        <button class="btn-ghost" onclick="location.href='mhub.html'">EXIT</button>
     </div>
 </div>
 
 <div class="main">
-    <div class="inbox-sidebar" id="inbox-list">
-        <div style="padding: 20px; text-align: center; opacity: 0.5;">DECRYPTING INBOX...</div>
+    <div class="folder-sidebar">
+        <div class="folder-item active" onclick="setFolder('inbox', this)">INBOX</div>
+        <div class="folder-item" onclick="setFolder('starred', this)">STARRED</div>
+        <div class="folder-item" onclick="setFolder('sent', this)">SENT</div>
+        <div class="folder-item" onclick="setFolder('deleted', this)">DELETED</div>
     </div>
 
+    <div class="inbox-sidebar" id="inbox-list"></div>
+
     <div class="content-area" id="mail-viewer">
-        <div style="margin: auto; text-align: center; opacity: 0.3;">
-            <h2 style="letter-spacing: 5px;">SELECT A COMMUNICATION</h2>
-            <p>End-to-end encryption active</p>
+        <div style="margin: auto; text-align: center; opacity: 0.2;">
+            <h2 style="letter-spacing: 10px;">NO SELECTION</h2>
         </div>
     </div>
 </div>
@@ -82,97 +90,110 @@ const _supabase = supabase.createClient(S_URL, S_KEY);
 
 const myID = localStorage.getItem('syntec_id') || "GUEST";
 let myName = "UNKNOWN";
+let currentFolder = 'inbox';
 
-// Load user name for the sender field
+// --- Boring Office Emails (Mock Data) ---
+const boringMails = [
+    { sender_display_name: "HR-BOT", sender_name: "SYS", content: "REMINDER: Please ensure all breakroom surfaces are wiped with Level-3 disinfectant after use. Failure to comply will result in a deduction of your bio-credits.", created_at: new Date(Date.now()-86400000) },
+    { sender_display_name: "Facilities", sender_name: "FAC-01", content: "The coffee machine in Sector 4 is currently dispensing decaf only. A technician has been summoned. Estimated repair: 48 hours.", created_at: new Date(Date.now()-172800000) },
+    { sender_display_name: "Payroll", sender_name: "ACC-9", content: "Quarterly tax forms are now available for download. Please ignore the 'Hazardous Environment' surcharge on line 14.", created_at: new Date(Date.now()-259200000) }
+];
+
 async function getProfile() {
     const { data } = await _supabase.from('profiles').select('first_name').eq('employee_id', myID).maybeSingle();
     if (data) myName = data.first_name;
 }
 
-function openCompose(targetID = "") {
-    document.getElementById('mail-to').value = targetID;
+function openCompose(target = "") {
+    document.getElementById('status-msg').textContent = "";
+    document.getElementById('mail-to').value = target;
     document.getElementById('mail-body').value = "";
     document.getElementById('compose-modal').style.display = 'flex';
 }
 
-function closeCompose() {
-    document.getElementById('compose-modal').style.display = 'none';
-}
+function closeCompose() { document.getElementById('compose-modal').style.display = 'none'; }
 
 async function sendMail() {
     const to = document.getElementById('mail-to').value.toUpperCase().trim();
     const body = document.getElementById('mail-body').value.trim();
+    const status = document.getElementById('status-msg');
 
-    if (!to || !body) return alert("FIELDS CANNOT BE EMPTY");
+    if (!to || !body) return alert("FIELDS EMPTY");
 
     const { error } = await _supabase.from('internal_messages').insert([{
-        sender_name: myID,
-        sender_display_name: myName,
-        content: body,
-        receiver_id: to
+        sender_name: myID, sender_display_name: myName,
+        content: body, receiver_id: to
     }]);
 
     if (error) {
-        alert("TRANSMISSION FAILED: " + error.message);
+        status.style.color = "red";
+        status.textContent = "TRANSMISSION ERROR: " + error.message;
     } else {
-        alert("TRANSMISSION SUCCESSFUL");
-        closeCompose();
+        status.style.color = "var(--neon)";
+        status.textContent = ">>> TRANSMISSION SUCCESSFUL <<<";
+        setTimeout(closeCompose, 1500);
     }
 }
 
-async function loadInbox() {
-    const { data, error } = await _supabase
-        .from('internal_messages')
-        .select('*')
-        .eq('receiver_id', myID)
-        .order('created_at', { ascending: false });
+function setFolder(folder, el) {
+    document.querySelectorAll('.folder-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    currentFolder = folder;
+    loadMail();
+}
 
+async function loadMail() {
     const list = document.getElementById('inbox-list');
-    list.innerHTML = "";
-
-    if (data && data.length > 0) {
-        data.forEach(msg => {
-            const date = new Date(msg.created_at).toLocaleDateString();
-            const div = document.createElement('div');
-            div.className = 'mail-item';
-            div.onclick = () => viewMail(msg, div);
-            div.innerHTML = `
-                <span class="mail-date">${date}</span>
-                <span class="mail-sender">${msg.sender_display_name || msg.sender_name}</span>
-                <div class="mail-preview">${msg.content}</div>
-            `;
-            list.appendChild(div);
-        });
+    list.innerHTML = '<div style="padding:20px; opacity:0.5;">DECRYPTING...</div>';
+    
+    let mails = [];
+    if (currentFolder === 'inbox') {
+        const { data } = await _supabase.from('internal_messages').select('*').eq('receiver_id', myID).order('created_at', { ascending: false });
+        mails = [...(data || []), ...boringMails];
+    } else if (currentFolder === 'sent') {
+        const { data } = await _supabase.from('internal_messages').select('*').eq('sender_name', myID).order('created_at', { ascending: false });
+        mails = data || [];
     } else {
-        list.innerHTML = '<div style="padding:20px; opacity:0.5;">NO INCOMING TRANSMISSIONS</div>';
+        // Starred/Deleted are empty for now (UI Mockup)
+        list.innerHTML = '<div style="padding:20px; opacity:0.3;">NO RECORDS IN THIS DIRECTORY</div>';
+        return;
     }
+
+    list.innerHTML = "";
+    mails.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = 'mail-item';
+        div.onclick = () => viewMail(msg, div);
+        div.innerHTML = `
+            <span class="mail-sender">${msg.sender_display_name}</span>
+            <div class="mail-preview">${msg.content}</div>
+        `;
+        list.appendChild(div);
+    });
 }
 
 function viewMail(msg, element) {
     document.querySelectorAll('.mail-item').forEach(i => i.classList.remove('active'));
     element.classList.add('active');
-
     const viewer = document.getElementById('mail-viewer');
-    const dateStr = new Date(msg.created_at).toLocaleString();
-    
     viewer.innerHTML = `
         <div class="email-header">
-            <div class="email-meta"><strong>FROM:</strong> ${msg.sender_display_name} (${msg.sender_name})</div>
-            <div class="email-meta"><strong>TO:</strong> Intern Profile ${myID}</div>
-            <div class="email-meta"><strong>DATE:</strong> ${dateStr}</div>
-            <div class="email-meta"><strong>SUBJECT:</strong> SECURE TRANSMISSION</div>
+            <div style="font-size:0.7rem; opacity:0.5; margin-bottom:10px;">SYNTEC ENCRYPTED HEADER // RE: SECURE_COMM</div>
+            <div><strong>FROM:</strong> ${msg.sender_display_name} (${msg.sender_name})</div>
+            <div><strong>TO:</strong> ${myID}</div>
+            <div><strong>DATE:</strong> ${new Date(msg.created_at).toLocaleString()}</div>
         </div>
         <div class="email-body">${msg.content}</div>
-        <div style="margin-top: 50px; border-top: 1px solid #222; padding-top: 20px;">
-            <button class="btn-ghost" style="font-size: 0.7rem;" onclick="alert('Encryption restricted: Forwarding disabled.')">FORWARD</button>
-            <button class="btn-ghost" style="font-size: 0.7rem; margin-left: 10px;" onclick="openCompose('${msg.sender_name}')">REPLY</button>
+        <div style="margin-top:40px; border-top:1px solid #222; padding-top:20px; display:flex; gap:10px;">
+            <button class="btn-ghost" style="font-size:0.6rem;" onclick="openCompose('${msg.sender_name}')">REPLY</button>
+            <button class="btn-ghost" style="font-size:0.6rem; border-color:#555; color:#555;">STAR</button>
+            <button class="btn-ghost" style="font-size:0.6rem; border-color:#555; color:#555;">DELETE</button>
         </div>
     `;
 }
 
-// Initialize
 getProfile();
-loadInbox();
+loadMail();
 </script>
 </body>
 </html>
