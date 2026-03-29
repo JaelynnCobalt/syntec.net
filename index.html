@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Syntec(TM) Terminal _ Pegasus OS</title>
+    <title>Syntec(TM) Terminal - Pegasus OS</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background-color: #0a0a0a; color: #33ff33; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; text-shadow: 0 0 5px #33ff33; }
@@ -10,8 +10,6 @@
         .screen { width: 80%; max-width: 800px; height: 600px; padding: 20px; border: 2px solid #33ff33; background: #050505; overflow-y: auto; position: relative; }
         .input-area { display: flex; margin-top: 20px; }
         #command-line { background: transparent; border: none; color: #33ff33; font-family: inherit; font-size: 1.2rem; outline: none; width: 100%; text-transform: uppercase; }
-        
-        /* Loading Bar Styling */
         .loading-container { margin: 15px 0; width: 100%; }
         .loading-bar { color: #33ff33; letter-spacing: 2px; font-size: 1.2rem; font-weight: bold; }
     </style>
@@ -32,6 +30,7 @@
 </div>
 
 <script>
+// Project Credentials
 const S_URL = "https://zefaapnmutxgnabpxoog.supabase.co";
 const S_KEY = "sb_publishable_zI-xgDNT8kQciUQ-j_EFsw_89a_CyGM";
 const _supabase = supabase.createClient(S_URL, S_KEY);
@@ -65,7 +64,6 @@ async function showLoadingBar(targetPage, moduleName) {
     inputZone.style.display = "none";
     await typeLine(`INITIALIZING ${moduleName} INTERFACE...`, 40);
     await typeLine("ESTABLISHING SECURE UPLINK...", 60);
-    
     const container = document.createElement('div');
     container.className = "loading-container";
     const bar = document.createElement('div');
@@ -73,18 +71,15 @@ async function showLoadingBar(targetPage, moduleName) {
     bar.textContent = "[";
     container.appendChild(bar);
     output.appendChild(container);
-
-    const segments = 20;
-    for (let i = 0; i < segments; i++) {
-        await delay(150); 
+    for (let i = 0; i < 20; i++) {
+        await delay(100); 
         bar.textContent += "■";
         output.scrollTop = output.scrollHeight;
     }
     bar.textContent += "]";
-    
     await delay(500);
     await typeLine("CONNECTION ESTABLISHED. REDIRECTING...", 30);
-    await delay(1000);
+    await delay(800);
     window.location.href = targetPage;
 }
 
@@ -93,7 +88,18 @@ async function handleAuth(fname, byear) {
     await typeLine("VERIFYING CREDENTIALS...", 40);
     
     try {
-        const { data, error } = await _supabase.from('profiles').select('*').eq('first_name', fname.toUpperCase()).eq('year_of_birth', parseInt(byear)).maybeSingle();
+        // Search using uppercase to match the insert format
+        const { data, error } = await _supabase
+            .from('profiles')
+            .select('*')
+            .eq('first_name', fname.toUpperCase().trim())
+            .eq('year_of_birth', parseInt(byear))
+            .maybeSingle();
+
+        if (error) {
+            await typeLine("DB ERROR: " + error.message, 10);
+            throw error;
+        }
 
         if (data) {
             await typeLine("IDENTITY VERIFIED. WELCOME BACK, " + data.employee_id, 30);
@@ -102,10 +108,17 @@ async function handleAuth(fname, byear) {
             await typeLine("RECORD NOT FOUND. RETRIEVING APPLICATION DATA...", 50);
             await delay(1000);
             const newID = `${fname[0].toUpperCase()}${byear}-${Math.floor(100 + Math.random() * 900)}`;
-            const { error: insError } = await _supabase.from('profiles').insert([{ first_name: fname.toUpperCase(), year_of_birth: parseInt(byear), employee_id: newID }]);
+            const { error: insError } = await _supabase
+                .from('profiles')
+                .insert([{ 
+                    first_name: fname.toUpperCase().trim(), 
+                    year_of_birth: parseInt(byear), 
+                    employee_id: newID 
+                }]);
+            
             if (insError) throw insError;
-            await typeLine("YOUR APPLICATION WAS APPROVED BY _NELSON SYPHUS_. WELCOME TO SYNTEC.", 60);
-            await typeLine("ASSIGNED ID: " + newID, 40);
+            await typeLine("YOUR APPLICATION WAS APPROVED BY _NELSON SYPHUS_.", 50);
+            await typeLine("WELCOME TO SYNTEC. ASSIGNED ID: " + newID, 40);
             sessionUser.empID = newID;
         }
 
@@ -116,7 +129,8 @@ async function handleAuth(fname, byear) {
         localStorage.setItem('syntec_id', sessionUser.empID);
 
     } catch (err) {
-        await typeLine("CRITICAL ERROR: CONNECTION REFUSED.", 10);
+        console.error(err);
+        await typeLine("CRITICAL ERROR: ACCESS DENIED.", 10);
         await delay(2000);
         location.reload();
     }
@@ -151,7 +165,7 @@ input.addEventListener('keydown', async function(e) {
             } else if (cmd === "clinical") {
                 await showLoadingBar("clinical-practice.html", "CLINICAL");
             } else if (cmd === "mail") {
-                await showLoadingBar("smail.html", "SMAIL TERMINAL");
+                await showLoadingBar("smail.html", "SMAIL");
             } else {
                 await typeLine("INVALID PROMPT", 20);
             }
