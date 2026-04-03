@@ -168,6 +168,8 @@ input.addEventListener('keydown', async function(e) {
                 await showLoadingBar("mail.html", "INBOX");
             } else if (cmd === "simulator") {
                 await showLoadingBar("compound-synthesis-simulator.html", "SIMULATOR");
+                   } else if (cmd === "mountaineer") {
+                await showLoadingBar("n3s.html", "N3S.DSK");
             } else {
                 await typeLine("INVALID PROMPT", 20);
             }
