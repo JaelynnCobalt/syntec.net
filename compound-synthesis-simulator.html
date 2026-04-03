@@ -52,7 +52,7 @@ AVAILABLE: WATER, FIRE, EARTH, AIR
     const popupImg = document.getElementById('popup-image');
 
     // Game State - Included BULLET and NECK for testing the combo
-    let inventory = ["WATER", "FIRE", "EARTH", "AIR", "BULLET", "NECK"];
+    let inventory = ["WATER", "FIRE", "EARTH", "AIR"];
     
     // Synthesis Recipes
     const recipes = {
@@ -66,9 +66,34 @@ AVAILABLE: WATER, FIRE, EARTH, AIR
         "STEAM+EARTH": "GEYSER",
         "MIST+EARTH": "CLAY",
         "CLAY+FIRE": "BRICK",
+        "BRICK+BRICK": "BUILDING",
         "LAVA+WATER": "OBSIDIAN",
-        "ENERGY+WATER": "ELECTROLYTE", // Fixed missing comma
-        "BULLET+NECK": "CHARLIE KIRK" 
+        "ENERGY+WATER": "ELECTROLYTE", 
+        "EARTH+ENERGY": "PLANT", 
+        "PLANT+EARTH": "TREE", 
+        "TREE+WATER": "FOREST", 
+        "FIRE+STONE": "METAL",
+        "METAL+FIRE": "STEEL", 
+        "STEEL+ENERGY": "KNIFE", 
+        "ENERGY+ENERGY": "GOD", 
+        "GOD+EARTH": "CREATION", 
+        "CREATION+ENERGY": "LIFE", 
+        "LIFE+CREATION": "ADAM", 
+        "ADAM+CREATION": "EVE",
+        "ADAM+EVE": "GARDEN",
+        "ADAM+ENERGY":"MAN",
+        "GARDEN+ENERGY": "SNAKE",
+        "SNAKE+TREE": "SIN",
+        "GOD+ENERGY": "LIFE", 
+        "GOD+EVE": "GOOD", 
+        "GOOD+SIN": "MORALITY", 
+        "MORALITY+SIN": "CRIME", 
+        "FOREST+FIRE": "ARSON", 
+        "ARSON+ENERGY": "CRIME", 
+        "CRIME+ENERGY": "CRIMINAL", 
+        "CRIMINAL+BUILDING": "PRISON", 
+        "FOREST+FIRE": "ARSON", 
+        "BULLET+NECK": "CHARLIE KIRK", 
     };
 
     function print(text, className = "") {
