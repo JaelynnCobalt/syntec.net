@@ -32,7 +32,7 @@
     
     <div id="output">
 [PEGAUS OS v2.1 - CHEMICAL SYNTHESIS SIMULATOR]
-AUTHORIZED USER: J04 (INTERN)
+AUTHORIZED USER: J13 (INTERN)
 --------------------------------------------------
 TYPE 'LIST' TO SEE ELEMENTS.
 TYPE 'COMBINE [EL1] [EL2]' TO SYNTHESIZE.
@@ -51,7 +51,6 @@ AVAILABLE: WATER, FIRE, EARTH, AIR
     const input = document.getElementById('cmd');
     const popupImg = document.getElementById('popup-image');
 
-    // Game State - Included BULLET and NECK for testing the combo
     let inventory = ["WATER", "FIRE", "EARTH", "AIR"];
     
     // Synthesis Recipes
@@ -89,10 +88,19 @@ AVAILABLE: WATER, FIRE, EARTH, AIR
         "GOOD+SIN": "MORALITY", 
         "MORALITY+SIN": "CRIME", 
         "FOREST+FIRE": "ARSON", 
-        "ARSON+ENERGY": "CRIME", 
-        "CRIME+ENERGY": "CRIMINAL", 
+        "CRIME+MAN": "CRIMINAL", 
         "CRIMINAL+BUILDING": "PRISON", 
         "FOREST+FIRE": "ARSON", 
+        "MUD+AIR": "DRY SLAB", 
+        "TREE+KNIFE": "PAPER", 
+        "METAL+AIR": "WIRE", 
+        "WIRE+KNIFE": "NEEDLE", 
+        "NEEDLE+WATER": "SEWING", 
+        "PAPER+SEWING": "BOOK", 
+        "BOOK+MORALITY": "LAW", 
+        "LAW+PERSON": "LAWYER", 
+        "GRASS+GRASS": "MEADOW", 
+        "MEADOW+LAW+ADAM": "GABRIEL SIMPSON", 
         "BULLET+NECK": "CHARLIE KIRK", 
     };
 
